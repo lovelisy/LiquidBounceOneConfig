@@ -24,8 +24,8 @@ import org.polyfrost.compose.render.PolyFont
  * Hands out [PolyFont] instances for the native LiquidBounce HUD elements.
  *
  * The native HUD draws every line with Inter, so the four weights of PolyCompose's own Inter family are used directly;
- * they are always present because PolyCompose registers them on startup. Strings that contain glyphs outside of Inter,
- * which is every CJK ideograph, fall back to OneConfig's bundled unifont.
+ * they are always present because PolyCompose registers them on startup. No glyph level fallback is applied, matching
+ * OneConfig's own rendering where the stb font engine simply paints whatever the selected face carries.
  */
 object LbHudFonts {
 
@@ -40,30 +40,8 @@ object LbHudFonts {
         BOLD("inter-bold"),
     }
 
-    /**
-     * Font engine key of OneConfig's bundled unifont, used whenever a string contains glyphs that Inter does not
-     * carry, which is every CJK ideograph. The stb font engine has no glyph level fallback, so callers have to
-     * switch fonts themselves.
-     */
-    private const val UNIFONT_KEY = "unifont"
-
     /** Inter at [size] logical pixels, in [weight]. */
     fun font(size: Float, weight: Weight = Weight.REGULAR): PolyFont = PolyFont(weight.key, size)
-
-    /**
-     * Picks the font for [text]: Inter whenever the string is fully covered by it, otherwise OneConfig's unifont,
-     * which carries every CJK glyph. The choice is per string, matching how the native HUD components pass whole
-     * lines of text.
-     */
-    fun fontFor(text: String, size: Float, weight: Weight = Weight.REGULAR): PolyFont =
-        if (needsCjkFallback(text)) PolyFont(UNIFONT_KEY, size) else font(size, weight)
-
-    /** Width of [text] in the font that [fontFor] would pick, at [size]. */
-    fun measureFor(text: String, size: Float, weight: Weight = Weight.REGULAR): Float =
-        if (text.isEmpty()) 0f else fontFor(text, size, weight).measureTextWidth(text)
-
-    /** Whether [text] contains at least one glyph outside the Latin, punctuation and symbol ranges of Inter. */
-    fun needsCjkFallback(text: String): Boolean = text.any { it.code >= 0x2E80 }
 
     /** Width of [text] in [weight] at [size], without needing a render context. */
     fun measure(text: String, size: Float, weight: Weight = Weight.REGULAR): Float =
