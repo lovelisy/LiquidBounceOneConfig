@@ -23,6 +23,7 @@ public final class net/ccbluex/liquidbounce/api/models/marketplace/MarketplaceIt
 }
 
 public class net/ccbluex/liquidbounce/config/types/Config : net/ccbluex/liquidbounce/config/types/group/ValueGroup {
+	public static final field $stable I
 	public fun <init> (Ljava/lang/String;Ljava/util/Collection;)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/util/Collection;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getJsonFile ()Ljava/io/File;
@@ -32,6 +33,7 @@ public class net/ccbluex/liquidbounce/config/types/Config : net/ccbluex/liquidbo
 }
 
 public class net/ccbluex/liquidbounce/config/types/Value {
+	public static final field $stable I
 	public fun <init> (Ljava/lang/String;Ljava/util/List;Ljava/lang/Object;Lnet/ccbluex/liquidbounce/config/types/ValueType;Z)V
 	public synthetic fun <init> (Ljava/lang/String;Ljava/util/List;Ljava/lang/Object;Lnet/ccbluex/liquidbounce/config/types/ValueType;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun asStateFlow ()Lkotlinx/coroutines/flow/StateFlow;
@@ -92,6 +94,7 @@ public final class net/ccbluex/liquidbounce/config/types/group/ModeValueGroup : 
 }
 
 public abstract class net/ccbluex/liquidbounce/config/types/group/ToggleableValueGroup : net/ccbluex/liquidbounce/config/types/group/ValueGroup, net/ccbluex/liquidbounce/event/EventListener, net/ccbluex/liquidbounce/features/misc/Toggleable, net/ccbluex/liquidbounce/features/module/MinecraftShortcuts {
+	public static final field $stable I
 	public fun <init> (Ljava/lang/String;Z)V
 	public fun <init> (Lnet/ccbluex/liquidbounce/event/EventListener;Ljava/lang/String;Z)V
 	public fun <init> (Lnet/ccbluex/liquidbounce/event/EventListener;Ljava/lang/String;ZLjava/util/List;)V
@@ -130,6 +133,7 @@ public abstract class net/ccbluex/liquidbounce/config/types/group/ToggleableValu
 }
 
 public class net/ccbluex/liquidbounce/config/types/group/ValueGroup : net/ccbluex/liquidbounce/config/types/Value {
+	public static final field $stable I
 	public fun <init> (Ljava/lang/String;)V
 	public fun <init> (Ljava/lang/String;Ljava/util/Collection;)V
 	public fun <init> (Ljava/lang/String;Ljava/util/Collection;Lnet/ccbluex/liquidbounce/config/types/ValueType;)V
@@ -247,12 +251,14 @@ public final class net/ccbluex/liquidbounce/config/types/list/ChoiceListValue : 
 }
 
 public abstract class net/ccbluex/liquidbounce/event/CancellableEvent : net/ccbluex/liquidbounce/event/Event {
+	public static final field $stable I
 	public fun <init> ()V
 	public final fun cancelEvent ()V
 	public final fun isCancelled ()Z
 }
 
 public abstract class net/ccbluex/liquidbounce/event/Event {
+	public static final field $stable I
 	public fun <init> ()V
 	public final fun isCompleted ()Z
 }
@@ -286,6 +292,7 @@ public final class net/ccbluex/liquidbounce/event/EventListener$DefaultImpls {
 }
 
 public final class net/ccbluex/liquidbounce/event/EventManager {
+	public static final field $stable I
 	public static final field INSTANCE Lnet/ccbluex/liquidbounce/event/EventManager;
 	public final fun callEvent (Lnet/ccbluex/liquidbounce/event/Event;)Lnet/ccbluex/liquidbounce/event/Event;
 	public final fun eventClassByName (Ljava/lang/String;)Ljava/lang/Class;
@@ -308,17 +315,20 @@ public final class net/ccbluex/liquidbounce/event/EventState : java/lang/Enum {
 }
 
 public final class net/ccbluex/liquidbounce/event/events/AttackEntityEvent : net/ccbluex/liquidbounce/event/CancellableEvent {
+	public static final field $stable I
 	public fun <init> (Lnet/minecraft/world/entity/Entity;)V
 	public final fun getEntity ()Lnet/minecraft/world/entity/Entity;
 }
 
 public final class net/ccbluex/liquidbounce/event/events/BlockChangeEvent : net/ccbluex/liquidbounce/event/Event {
+	public static final field $stable I
 	public fun <init> (Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)V
 	public final fun getBlockPos ()Lnet/minecraft/core/BlockPos;
 	public final fun getNewState ()Lnet/minecraft/world/level/block/state/BlockState;
 }
 
 public final class net/ccbluex/liquidbounce/event/events/ChatReceiveEvent : net/ccbluex/liquidbounce/event/CancellableEvent {
+	public static final field $stable I
 	public fun <init> (Ljava/lang/String;Lnet/minecraft/network/chat/Component;Lnet/ccbluex/liquidbounce/event/events/ChatReceiveEvent$ChatType;Ljava/util/function/UnaryOperator;)V
 	public final fun getApplyChatDecoration ()Ljava/util/function/UnaryOperator;
 	public final fun getMessage ()Ljava/lang/String;
@@ -338,31 +348,37 @@ public final class net/ccbluex/liquidbounce/event/events/ChatReceiveEvent$ChatTy
 }
 
 public final class net/ccbluex/liquidbounce/event/events/ChatSendEvent : net/ccbluex/liquidbounce/event/CancellableEvent {
+	public static final field $stable I
 	public fun <init> (Ljava/lang/String;)V
 	public final fun getMessage ()Ljava/lang/String;
 }
 
 public final class net/ccbluex/liquidbounce/event/events/ChunkLoadEvent : net/ccbluex/liquidbounce/event/Event {
+	public static final field $stable I
 	public fun <init> (II)V
 	public final fun getX ()I
 	public final fun getZ ()I
 }
 
 public final class net/ccbluex/liquidbounce/event/events/DisconnectEvent : net/ccbluex/liquidbounce/event/Event {
+	public static final field $stable I
 	public static final field INSTANCE Lnet/ccbluex/liquidbounce/event/events/DisconnectEvent;
 }
 
 public final class net/ccbluex/liquidbounce/event/events/FriendChangeEvent : net/ccbluex/liquidbounce/event/Event {
+	public static final field $stable I
 	public fun <init> (Ljava/lang/String;Z)V
 	public final fun getAdded ()Z
 	public final fun getName ()Ljava/lang/String;
 }
 
 public final class net/ccbluex/liquidbounce/event/events/GameTickEvent : net/ccbluex/liquidbounce/event/Event {
+	public static final field $stable I
 	public static final field INSTANCE Lnet/ccbluex/liquidbounce/event/events/GameTickEvent;
 }
 
 public final class net/ccbluex/liquidbounce/event/events/KeyboardKeyEvent : net/ccbluex/liquidbounce/event/Event {
+	public static final field $stable I
 	public fun <init> (Lcom/mojang/blaze3d/platform/InputConstants$Key;IIIILnet/minecraft/client/gui/screens/Screen;)V
 	public synthetic fun <init> (Lcom/mojang/blaze3d/platform/InputConstants$Key;IIIILnet/minecraft/client/gui/screens/Screen;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getAction ()I
@@ -377,6 +393,7 @@ public final class net/ccbluex/liquidbounce/event/events/KeyboardKeyEvent : net/
 }
 
 public final class net/ccbluex/liquidbounce/event/events/ModuleToggleEvent : net/ccbluex/liquidbounce/event/Event {
+	public static final field $stable I
 	public fun <init> (Ljava/lang/String;ZZ)V
 	public final fun getEnabled ()Z
 	public final fun getHidden ()Z
@@ -384,6 +401,7 @@ public final class net/ccbluex/liquidbounce/event/events/ModuleToggleEvent : net
 }
 
 public final class net/ccbluex/liquidbounce/event/events/MouseButtonEvent : net/ccbluex/liquidbounce/event/Event {
+	public static final field $stable I
 	public fun <init> (Lcom/mojang/blaze3d/platform/InputConstants$Key;IIILnet/minecraft/client/gui/screens/Screen;)V
 	public synthetic fun <init> (Lcom/mojang/blaze3d/platform/InputConstants$Key;IIILnet/minecraft/client/gui/screens/Screen;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getAction ()I
@@ -402,6 +420,7 @@ public final class net/ccbluex/liquidbounce/event/events/MouseButtonEvent : net/
 }
 
 public final class net/ccbluex/liquidbounce/event/events/MovementInputEvent : net/ccbluex/liquidbounce/event/Event {
+	public static final field $stable I
 	public fun <init> (Lnet/ccbluex/liquidbounce/utils/movement/DirectionalInput;ZZ)V
 	public final fun getDirectionalInput ()Lnet/ccbluex/liquidbounce/utils/movement/DirectionalInput;
 	public final fun getJump ()Z
@@ -412,6 +431,7 @@ public final class net/ccbluex/liquidbounce/event/events/MovementInputEvent : ne
 }
 
 public final class net/ccbluex/liquidbounce/event/events/NotificationEvent : net/ccbluex/liquidbounce/event/Event {
+	public static final field $stable I
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lnet/ccbluex/liquidbounce/event/events/NotificationEvent$Severity;)V
 	public final fun getMessage ()Ljava/lang/String;
 	public final fun getSeverity ()Lnet/ccbluex/liquidbounce/event/events/NotificationEvent$Severity;
@@ -430,12 +450,14 @@ public final class net/ccbluex/liquidbounce/event/events/NotificationEvent$Sever
 }
 
 public final class net/ccbluex/liquidbounce/event/events/OverlayRenderEvent : net/ccbluex/liquidbounce/event/Event {
+	public static final field $stable I
 	public fun <init> (Lnet/minecraft/client/gui/GuiGraphicsExtractor;F)V
 	public final fun getContext ()Lnet/minecraft/client/gui/GuiGraphicsExtractor;
 	public final fun getTickDelta ()F
 }
 
 public final class net/ccbluex/liquidbounce/event/events/PacketEvent : net/ccbluex/liquidbounce/event/CancellableEvent {
+	public static final field $stable I
 	public fun <init> (Lnet/ccbluex/liquidbounce/event/events/TransferOrigin;Lnet/minecraft/network/protocol/Packet;Z)V
 	public synthetic fun <init> (Lnet/ccbluex/liquidbounce/event/events/TransferOrigin;Lnet/minecraft/network/protocol/Packet;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getOrigin ()Lnet/ccbluex/liquidbounce/event/events/TransferOrigin;
@@ -444,6 +466,7 @@ public final class net/ccbluex/liquidbounce/event/events/PacketEvent : net/ccblu
 }
 
 public final class net/ccbluex/liquidbounce/event/events/PlayerJumpEvent : net/ccbluex/liquidbounce/event/CancellableEvent {
+	public static final field $stable I
 	public fun <init> (FF)V
 	public final fun getMotion ()F
 	public final fun getYaw ()F
@@ -452,6 +475,7 @@ public final class net/ccbluex/liquidbounce/event/events/PlayerJumpEvent : net/c
 }
 
 public final class net/ccbluex/liquidbounce/event/events/PlayerMoveEvent : net/ccbluex/liquidbounce/event/Event {
+	public static final field $stable I
 	public fun <init> (Lnet/minecraft/world/entity/MoverType;Lnet/minecraft/world/phys/Vec3;)V
 	public final fun getMovement ()Lnet/minecraft/world/phys/Vec3;
 	public final fun getType ()Lnet/minecraft/world/entity/MoverType;
@@ -459,6 +483,7 @@ public final class net/ccbluex/liquidbounce/event/events/PlayerMoveEvent : net/c
 }
 
 public final class net/ccbluex/liquidbounce/event/events/PlayerNetworkMovementTickEvent : net/ccbluex/liquidbounce/event/CancellableEvent {
+	public static final field $stable I
 	public fun <init> (Lnet/ccbluex/liquidbounce/event/EventState;DDDZ)V
 	public final fun getGround ()Z
 	public final fun getState ()Lnet/ccbluex/liquidbounce/event/EventState;
@@ -472,23 +497,28 @@ public final class net/ccbluex/liquidbounce/event/events/PlayerNetworkMovementTi
 }
 
 public final class net/ccbluex/liquidbounce/event/events/PlayerPostTickEvent : net/ccbluex/liquidbounce/event/Event {
+	public static final field $stable I
 	public static final field INSTANCE Lnet/ccbluex/liquidbounce/event/events/PlayerPostTickEvent;
 }
 
 public final class net/ccbluex/liquidbounce/event/events/PlayerTickEvent : net/ccbluex/liquidbounce/event/CancellableEvent {
+	public static final field $stable I
 	public fun <init> ()V
 }
 
 public final class net/ccbluex/liquidbounce/event/events/RefreshArrayListEvent : net/ccbluex/liquidbounce/event/Event {
+	public static final field $stable I
 	public static final field INSTANCE Lnet/ccbluex/liquidbounce/event/events/RefreshArrayListEvent;
 }
 
 public final class net/ccbluex/liquidbounce/event/events/ScreenEvent : net/ccbluex/liquidbounce/event/CancellableEvent {
+	public static final field $stable I
 	public fun <init> (Lnet/minecraft/client/gui/screens/Screen;)V
 	public final fun getScreen ()Lnet/minecraft/client/gui/screens/Screen;
 }
 
 public final class net/ccbluex/liquidbounce/event/events/TagEntityEvent : net/ccbluex/liquidbounce/event/Event {
+	public static final field $stable I
 	public fun <init> (Lnet/minecraft/world/entity/Entity;Lnet/ccbluex/liquidbounce/utils/combat/EntityTargetingInfo;)V
 	public final fun assumeFriend ()V
 	public final fun color (Lnet/ccbluex/liquidbounce/render/engine/type/Color4b;Lnet/ccbluex/liquidbounce/utils/kotlin/Priority;)V
@@ -511,22 +541,26 @@ public final class net/ccbluex/liquidbounce/event/events/TransferOrigin : java/l
 }
 
 public final class net/ccbluex/liquidbounce/event/events/WindowTitleEvent : net/ccbluex/liquidbounce/event/Event {
+	public static final field $stable I
 	public fun <init> (Ljava/lang/StringBuilder;)V
 	public final fun getTitle ()Ljava/lang/StringBuilder;
 }
 
 public final class net/ccbluex/liquidbounce/event/events/WorldChangeEvent : net/ccbluex/liquidbounce/event/Event {
+	public static final field $stable I
 	public fun <init> (Lnet/minecraft/client/multiplayer/ClientLevel;)V
 	public final fun getWorld ()Lnet/minecraft/client/multiplayer/ClientLevel;
 }
 
 public final class net/ccbluex/liquidbounce/event/events/WorldEntityRemoveEvent : net/ccbluex/liquidbounce/event/Event {
+	public static final field $stable I
 	public fun <init> (Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/entity/Entity$RemovalReason;)V
 	public final fun getEntity ()Lnet/minecraft/world/entity/Entity;
 	public final fun getReason ()Lnet/minecraft/world/entity/Entity$RemovalReason;
 }
 
 public final class net/ccbluex/liquidbounce/event/events/WorldRenderEvent : net/ccbluex/liquidbounce/event/Event, java/lang/AutoCloseable {
+	public static final field $stable I
 	public fun <init> (Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/Camera;FLcom/mojang/blaze3d/pipeline/RenderTarget;)V
 	public fun close ()V
 	public final fun getCamera ()Lnet/minecraft/client/Camera;
@@ -546,6 +580,7 @@ public final class net/ccbluex/liquidbounce/features/account/AccountManager : ne
 }
 
 public final class net/ccbluex/liquidbounce/features/addon/AddonMetadata {
+	public static final field $stable I
 	public fun <init> (Lnet/fabricmc/loader/api/ModContainer;)V
 	public final fun findPath (Ljava/lang/String;)Ljava/nio/file/Path;
 	public final fun getAuthors ()Ljava/util/List;
@@ -571,6 +606,7 @@ public final class net/ccbluex/liquidbounce/features/addon/AddonState : java/lan
 }
 
 public abstract class net/ccbluex/liquidbounce/features/addon/LiquidBounceAddon : net/ccbluex/liquidbounce/event/EventListener, net/ccbluex/liquidbounce/features/module/MinecraftShortcuts {
+	public static final field $stable I
 	public fun <init> ()V
 	public fun after (ILjava/lang/Runnable;)Ljava/lang/AutoCloseable;
 	public fun children ()Ljava/util/List;
@@ -646,6 +682,7 @@ public final class net/ccbluex/liquidbounce/features/command/CommandManager : ne
 }
 
 public final class net/ccbluex/liquidbounce/features/command/CommandManager$GlobalSettings : net/ccbluex/liquidbounce/config/types/group/ValueGroup {
+	public static final field $stable I
 	public static final field INSTANCE Lnet/ccbluex/liquidbounce/features/command/CommandManager$GlobalSettings;
 	public final fun getHintCount ()I
 	public final fun getPrefix ()Ljava/lang/String;
@@ -657,6 +694,7 @@ public abstract interface class net/ccbluex/liquidbounce/features/command/Comman
 }
 
 public final class net/ccbluex/liquidbounce/features/command/brigadier/ClientCommandSource : net/minecraft/commands/SharedSuggestionProvider {
+	public static final field $stable I
 	public static final field INSTANCE Lnet/ccbluex/liquidbounce/features/command/brigadier/ClientCommandSource;
 	public fun customSuggestion (Lcom/mojang/brigadier/context/CommandContext;)Ljava/util/concurrent/CompletableFuture;
 	public fun enabledFeatures ()Lnet/minecraft/world/flag/FeatureFlagSet;
@@ -737,6 +775,7 @@ public final class net/ccbluex/liquidbounce/features/marketplace/MarketplaceMana
 }
 
 public final class net/ccbluex/liquidbounce/features/marketplace/SubscribedItem {
+	public static final field $stable I
 	public fun <init> (Ljava/lang/String;ILnet/ccbluex/liquidbounce/api/models/marketplace/MarketplaceItemType;)V
 	public fun <init> (Lnet/ccbluex/liquidbounce/api/models/marketplace/MarketplaceItem;)V
 	public final fun checkUpdate (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
@@ -787,6 +826,7 @@ public final class net/ccbluex/liquidbounce/features/misc/proxy/ProxyManager : n
 }
 
 public class net/ccbluex/liquidbounce/features/module/ClientModule : net/ccbluex/liquidbounce/config/types/group/ToggleableValueGroup, net/ccbluex/liquidbounce/event/EventListener, net/ccbluex/liquidbounce/features/module/MinecraftShortcuts {
+	public static final field $stable I
 	public fun <init> (Ljava/lang/String;Lnet/ccbluex/liquidbounce/features/module/ModuleCategory;)V
 	public fun <init> (Ljava/lang/String;Lnet/ccbluex/liquidbounce/features/module/ModuleCategory;I)V
 	public fun <init> (Ljava/lang/String;Lnet/ccbluex/liquidbounce/features/module/ModuleCategory;ILnet/ccbluex/liquidbounce/utils/input/InputBind$BindAction;)V
@@ -844,6 +884,7 @@ public final class net/ccbluex/liquidbounce/features/module/MinecraftShortcuts$D
 }
 
 public final class net/ccbluex/liquidbounce/features/module/ModuleCategories {
+	public static final field $stable I
 	public static final field COMBAT Lnet/ccbluex/liquidbounce/features/module/ModuleCategory;
 	public static final field EXPLOIT Lnet/ccbluex/liquidbounce/features/module/ModuleCategory;
 	public static final field FUN Lnet/ccbluex/liquidbounce/features/module/ModuleCategory;
@@ -860,6 +901,7 @@ public final class net/ccbluex/liquidbounce/features/module/ModuleCategories {
 }
 
 public final class net/ccbluex/liquidbounce/features/module/ModuleCategory : net/ccbluex/liquidbounce/config/types/list/Tagged {
+	public static final field $stable I
 	public fun <init> (Ljava/lang/String;)V
 	public fun <init> (Ljava/lang/String;Lnet/ccbluex/liquidbounce/config/OptionalInclusion;)V
 	public fun <init> (Ljava/lang/String;Lnet/ccbluex/liquidbounce/config/OptionalInclusion;Lnet/minecraft/resources/Identifier;)V
@@ -914,6 +956,7 @@ public final class net/ccbluex/liquidbounce/features/module/modules/player/autos
 }
 
 public final class net/ccbluex/liquidbounce/features/module/modules/render/ModuleClickGui : net/ccbluex/liquidbounce/features/module/ClientModule {
+	public static final field $stable I
 	public static final field INSTANCE Lnet/ccbluex/liquidbounce/features/module/modules/render/ModuleClickGui;
 	public fun getRunning ()Z
 	public fun onEnabled ()V
@@ -924,6 +967,7 @@ public final class net/ccbluex/liquidbounce/lang/LanguageKt {
 }
 
 public abstract class net/ccbluex/liquidbounce/render/AbstractFontRenderer {
+	public static final field $stable I
 	public fun <init> ()V
 	public final fun draw (Lnet/ccbluex/liquidbounce/render/WorldRenderEnvironment;Lnet/minecraft/network/chat/Component;Lkotlin/jvm/functions/Function1;)F
 	public final fun draw (Lnet/ccbluex/liquidbounce/render/WorldRenderEnvironment;Lnet/minecraft/util/FormattedCharSequence;Lkotlin/jvm/functions/Function1;)F
@@ -954,6 +998,7 @@ public abstract class net/ccbluex/liquidbounce/render/AbstractFontRenderer {
 }
 
 public final class net/ccbluex/liquidbounce/render/FontManager {
+	public static final field $stable I
 	public static final field DEFAULT_FONT_SIZE F
 	public static final field INSTANCE Lnet/ccbluex/liquidbounce/render/FontManager;
 	public final fun fontFace (Ljava/lang/String;)Lnet/ccbluex/liquidbounce/render/FontFace;
@@ -992,6 +1037,7 @@ public final class net/ccbluex/liquidbounce/render/RenderShortcutsKt {
 }
 
 public final class net/ccbluex/liquidbounce/render/WorldRenderEnvironment {
+	public static final field $stable I
 	public final fun getCamera ()Lnet/minecraft/client/Camera;
 	public final fun getPoseStack ()Lcom/mojang/blaze3d/vertex/PoseStack;
 	public final fun getRenderTarget ()Lcom/mojang/blaze3d/pipeline/RenderTarget;
@@ -1040,6 +1086,7 @@ public abstract class net/ccbluex/liquidbounce/render/engine/font/VerticalAnchor
 }
 
 public final class net/ccbluex/liquidbounce/render/engine/type/Color4b : java/lang/Record {
+	public static final field $stable I
 	public static final field BLACK Lnet/ccbluex/liquidbounce/render/engine/type/Color4b;
 	public static final field BLUE Lnet/ccbluex/liquidbounce/render/engine/type/Color4b;
 	public static final field CYAN Lnet/ccbluex/liquidbounce/render/engine/type/Color4b;
@@ -1132,6 +1179,7 @@ public final class net/ccbluex/liquidbounce/utils/aiming/RotationManager : net/c
 }
 
 public final class net/ccbluex/liquidbounce/utils/aiming/RotationTarget {
+	public static final field $stable I
 	public fun <init> (Lnet/ccbluex/liquidbounce/utils/aiming/data/Rotation;)V
 	public fun <init> (Lnet/ccbluex/liquidbounce/utils/aiming/data/Rotation;Lnet/minecraft/world/entity/Entity;)V
 	public fun <init> (Lnet/ccbluex/liquidbounce/utils/aiming/data/Rotation;Lnet/minecraft/world/entity/Entity;Ljava/util/List;)V
@@ -1154,6 +1202,7 @@ public final class net/ccbluex/liquidbounce/utils/aiming/RotationTarget {
 }
 
 public class net/ccbluex/liquidbounce/utils/aiming/RotationsValueGroup : net/ccbluex/liquidbounce/config/types/group/ValueGroup {
+	public static final field $stable I
 	public fun <init> (Lnet/ccbluex/liquidbounce/event/EventListener;Lnet/ccbluex/liquidbounce/utils/aiming/features/MovementCorrection;Z)V
 	public synthetic fun <init> (Lnet/ccbluex/liquidbounce/event/EventListener;Lnet/ccbluex/liquidbounce/utils/aiming/features/MovementCorrection;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun calculateTicks (Lnet/ccbluex/liquidbounce/utils/aiming/data/Rotation;)I
@@ -1162,6 +1211,7 @@ public class net/ccbluex/liquidbounce/utils/aiming/RotationsValueGroup : net/ccb
 }
 
 public final class net/ccbluex/liquidbounce/utils/aiming/data/Rotation : java/lang/Record {
+	public static final field $stable I
 	public static final field Companion Lnet/ccbluex/liquidbounce/utils/aiming/data/Rotation$Companion;
 	public static final field ZERO Lnet/ccbluex/liquidbounce/utils/aiming/data/Rotation;
 	public fun <init> (FF)V
@@ -1298,6 +1348,7 @@ public class net/ccbluex/liquidbounce/utils/clicking/Clicker : net/ccbluex/liqui
 }
 
 public final class net/ccbluex/liquidbounce/utils/client/Chronometer {
+	public static final field $stable I
 	public fun <init> ()V
 	public fun <init> (J)V
 	public synthetic fun <init> (JILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -1354,6 +1405,7 @@ public final class net/ccbluex/liquidbounce/utils/client/InteractionTracker : ne
 }
 
 public final class net/ccbluex/liquidbounce/utils/client/MessageMetadata : java/lang/Record {
+	public static final field $stable I
 	public static final field Companion Lnet/ccbluex/liquidbounce/utils/client/MessageMetadata$Companion;
 	public fun <init> ()V
 	public fun <init> (ZLjava/lang/String;ZI)V
@@ -1383,6 +1435,7 @@ public final class net/ccbluex/liquidbounce/utils/client/ServerObserver : net/cc
 }
 
 public final class net/ccbluex/liquidbounce/utils/client/SilentHotbar : net/ccbluex/liquidbounce/event/EventListener {
+	public static final field $stable I
 	public static final field INSTANCE Lnet/ccbluex/liquidbounce/utils/client/SilentHotbar;
 	public fun after (ILjava/lang/Runnable;)Ljava/lang/AutoCloseable;
 	public fun children ()Ljava/util/List;
@@ -1405,6 +1458,7 @@ public final class net/ccbluex/liquidbounce/utils/client/SilentHotbar : net/ccbl
 }
 
 public final class net/ccbluex/liquidbounce/utils/client/Timer : net/ccbluex/liquidbounce/event/EventListener {
+	public static final field $stable I
 	public static final field INSTANCE Lnet/ccbluex/liquidbounce/utils/client/Timer;
 	public fun after (ILjava/lang/Runnable;)Ljava/lang/AutoCloseable;
 	public fun children ()Ljava/util/List;
@@ -1424,12 +1478,14 @@ public final class net/ccbluex/liquidbounce/utils/client/Timer : net/ccbluex/liq
 }
 
 public final class net/ccbluex/liquidbounce/utils/client/error/Instructions {
+	public static final field $stable I
 	public fun <init> (ZLkotlin/jvm/functions/Function1;)V
 	public final fun getShowStepIndex ()Z
 	public final fun getSteps ()Lkotlin/jvm/functions/Function1;
 }
 
 public final class net/ccbluex/liquidbounce/utils/client/error/QuickFix {
+	public static final field $stable I
 	public fun <init> (Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lnet/ccbluex/liquidbounce/utils/client/error/Instructions;Lnet/ccbluex/liquidbounce/utils/client/error/Instructions;)V
 	public synthetic fun <init> (Ljava/lang/String;Lkotlin/jvm/functions/Function1;Lnet/ccbluex/liquidbounce/utils/client/error/Instructions;Lnet/ccbluex/liquidbounce/utils/client/error/Instructions;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getDescription ()Ljava/lang/String;
@@ -1440,6 +1496,7 @@ public final class net/ccbluex/liquidbounce/utils/client/error/QuickFix {
 }
 
 public final class net/ccbluex/liquidbounce/utils/client/error/QuickFixes {
+	public static final field $stable I
 	public static final field INSTANCE Lnet/ccbluex/liquidbounce/utils/client/error/QuickFixes;
 	public final fun getBROWSER_FAILED_TO_LOAD_UI ()Lnet/ccbluex/liquidbounce/utils/client/error/QuickFix;
 	public final fun getBROWSER_IS_NOT_RESPONDING ()Lnet/ccbluex/liquidbounce/utils/client/error/QuickFix;
@@ -1450,6 +1507,7 @@ public final class net/ccbluex/liquidbounce/utils/client/error/QuickFixes {
 }
 
 public class net/ccbluex/liquidbounce/utils/client/error/errors/ClientError : java/lang/RuntimeException {
+	public static final field $stable I
 	public fun <init> ()V
 	public fun <init> (Ljava/lang/String;Z)V
 	public synthetic fun <init> (Ljava/lang/String;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -1506,6 +1564,7 @@ public final class net/ccbluex/liquidbounce/utils/combat/EntityTargetClassificat
 }
 
 public final class net/ccbluex/liquidbounce/utils/combat/EntityTargetingInfo {
+	public static final field $stable I
 	public static final field Companion Lnet/ccbluex/liquidbounce/utils/combat/EntityTargetingInfo$Companion;
 	public static final field DEFAULT Lnet/ccbluex/liquidbounce/utils/combat/EntityTargetingInfo;
 	public fun <init> (Lnet/ccbluex/liquidbounce/utils/combat/EntityTargetClassification;Z)V
@@ -1548,6 +1607,7 @@ public final class net/ccbluex/liquidbounce/utils/entity/RenderedEntities : java
 }
 
 public final class net/ccbluex/liquidbounce/utils/input/InputBind : java/lang/Record {
+	public static final field $stable I
 	public static final field Companion Lnet/ccbluex/liquidbounce/utils/input/InputBind$Companion;
 	public static final field UNBOUND Lnet/ccbluex/liquidbounce/utils/input/InputBind;
 	public fun <init> (Lcom/mojang/blaze3d/platform/InputConstants$Key;Lnet/ccbluex/liquidbounce/utils/input/InputBind$BindAction;Ljava/util/Set;)V
@@ -1658,6 +1718,7 @@ public final class net/ccbluex/liquidbounce/utils/inventory/ItemSlot$DefaultImpl
 }
 
 public final class net/ccbluex/liquidbounce/utils/inventory/Slots : java/util/List, kotlin/jvm/internal/markers/KMappedMarker {
+	public static final field $stable I
 	public static final field All Lnet/ccbluex/liquidbounce/utils/inventory/Slots;
 	public static final field Armor Lnet/ccbluex/liquidbounce/utils/inventory/Slots;
 	public static final field Companion Lnet/ccbluex/liquidbounce/utils/inventory/Slots$Companion;
@@ -1718,6 +1779,7 @@ public final class net/ccbluex/liquidbounce/utils/inventory/Slots : java/util/Li
 }
 
 public final class net/ccbluex/liquidbounce/utils/kotlin/EventPriorityConvention {
+	public static final field $stable I
 	public static final field CRITICAL_MODIFICATION S
 	public static final field FINAL_DECISION S
 	public static final field FIRST_PRIORITY S
@@ -1743,6 +1805,7 @@ public final class net/ccbluex/liquidbounce/utils/kotlin/Priority : java/lang/En
 }
 
 public final class net/ccbluex/liquidbounce/utils/movement/DirectionalInput {
+	public static final field $stable I
 	public static final field BACKWARDS Lnet/ccbluex/liquidbounce/utils/movement/DirectionalInput;
 	public static final field BACKWARDS_LEFT Lnet/ccbluex/liquidbounce/utils/movement/DirectionalInput;
 	public static final field BACKWARDS_RIGHT Lnet/ccbluex/liquidbounce/utils/movement/DirectionalInput;
@@ -1792,6 +1855,7 @@ public final class net/ccbluex/liquidbounce/utils/network/NetworkUtilsKt {
 }
 
 public final class net/ccbluex/liquidbounce/utils/render/Alignment : net/ccbluex/liquidbounce/config/types/group/ValueGroup {
+	public static final field $stable I
 	public fun <init> (Lnet/ccbluex/liquidbounce/utils/render/Alignment$ScreenAxisX;ILnet/ccbluex/liquidbounce/utils/render/Alignment$ScreenAxisY;I)V
 	public static final fun center ()Lnet/ccbluex/liquidbounce/utils/render/Alignment;
 	public final fun getBounds (FF)Lnet/ccbluex/liquidbounce/render/engine/type/BoundingBox2f;
