@@ -26,7 +26,6 @@ import net.minecraft.client.gui.screens.TitleScreen
 import org.apache.commons.lang3.function.FailableConsumer
 import org.apache.commons.lang3.function.FailableFunction
 
-// LiquidBounce holds a TaskProgressScreen until its startup tasks (e.g. the DJL natives) finish
 private const val STARTUP_TIMEOUT_TICKS = 5 * 60 * 20
 
 /**

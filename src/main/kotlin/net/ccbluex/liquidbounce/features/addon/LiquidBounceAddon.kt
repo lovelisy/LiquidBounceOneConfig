@@ -39,7 +39,6 @@ import net.ccbluex.liquidbounce.features.module.MinecraftShortcuts
 import net.ccbluex.liquidbounce.features.module.ModuleCategories
 import net.ccbluex.liquidbounce.features.module.ModuleCategory
 import net.ccbluex.liquidbounce.features.module.ModuleManager
-import net.ccbluex.liquidbounce.features.module.modules.render.ModuleClickGui
 import net.ccbluex.liquidbounce.utils.client.clientLogger
 import net.ccbluex.liquidbounce.utils.client.error.QuickFix
 import net.ccbluex.liquidbounce.utils.client.error.QuickFixes
@@ -160,7 +159,6 @@ abstract class LiquidBounceAddon : EventListener, MinecraftShortcuts {
 
     private fun refreshModuleList() {
         EventManager.callEvent(RefreshArrayListEvent)
-        ModuleClickGui.sync()
     }
 
     fun registerCommand(registrar: CommandRegistrar) {

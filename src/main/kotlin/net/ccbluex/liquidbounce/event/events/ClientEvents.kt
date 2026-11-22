@@ -22,16 +22,12 @@ package net.ccbluex.liquidbounce.event.events
 import com.google.gson.annotations.SerializedName
 import net.ccbluex.liquidbounce.annotations.Tag
 import net.ccbluex.liquidbounce.config.types.Value
-import net.ccbluex.liquidbounce.config.types.group.ValueGroup
 import net.ccbluex.liquidbounce.config.types.list.Tagged
 import net.ccbluex.liquidbounce.event.CancellableEvent
 import net.ccbluex.liquidbounce.event.Event
 import net.ccbluex.liquidbounce.features.addon.AddonApi
 import net.ccbluex.liquidbounce.features.chat.packet.AxoUser
 import net.ccbluex.liquidbounce.features.misc.proxy.Proxy
-import net.ccbluex.liquidbounce.event.WebSocketEvent
-import net.ccbluex.liquidbounce.utils.data.PlayerData
-import net.ccbluex.liquidbounce.render.engine.type.Color4b
 import net.ccbluex.liquidbounce.utils.block.bed.BedState
 import net.ccbluex.liquidbounce.utils.inventory.InventoryAction
 import net.ccbluex.liquidbounce.utils.inventory.InventoryConstraints
@@ -41,25 +37,6 @@ import net.minecraft.client.multiplayer.ServerData
 import net.minecraft.world.level.GameType
 import net.minecraft.world.level.block.Block
 
-@Tag("themeColorChange")
-class ThemeColorChangeEvent(val themeId: String, val name: String, val value: Color4b) : Event(), WebSocketEvent
-
-@Deprecated(
-    "The `clickGuiScaleChange` event has been deprecated.",
-    ReplaceWith("ClickGuiScaleChangeEvent"),
-    DeprecationLevel.WARNING
-)
-@Tag("clickGuiScaleChange")
-class ClickGuiScaleChangeEvent(val value: Float) : Event(), WebSocketEvent
-
-@Tag("clickGuiValueChange")
-class ClickGuiValueChangeEvent(val configurable: ValueGroup) : Event(), WebSocketEvent {
-    override val serializeAsync get() = false
-}
-
-@Tag("spaceSeperatedNamesChange")
-class SpaceSeperatedNamesChangeEvent(val value: Boolean) : Event(), WebSocketEvent
-
 @Tag("clientStart")
 object ClientStartEvent : Event()
 
@@ -67,21 +44,21 @@ object ClientStartEvent : Event()
 object ClientShutdownEvent : Event()
 
 @Tag("clientLanguageChanged")
-class ClientLanguageChangedEvent : Event(), WebSocketEvent
+class ClientLanguageChangedEvent : Event()
 
 @Tag("valueChanged")
-class ValueChangedEvent(val value: Value<*>) : Event(), WebSocketEvent
+class ValueChangedEvent(val value: Value<*>) : Event()
 
 @Tag("moduleActivation")
-class ModuleActivationEvent(val moduleName: String) : Event(), WebSocketEvent
+class ModuleActivationEvent(val moduleName: String) : Event()
 
 @AddonApi
 @Tag("moduleToggle")
-class ModuleToggleEvent(val moduleName: String, val hidden: Boolean, val enabled: Boolean) : Event(), WebSocketEvent
+class ModuleToggleEvent(val moduleName: String, val hidden: Boolean, val enabled: Boolean) : Event()
 
 @AddonApi
 @Tag("refreshArrayList")
-object RefreshArrayListEvent : Event(), WebSocketEvent
+object RefreshArrayListEvent : Event()
 
 @AddonApi
 @Tag("friendChange")
@@ -89,7 +66,7 @@ class FriendChangeEvent(val name: String, val added: Boolean) : Event()
 
 @AddonApi
 @Tag("notification")
-class NotificationEvent(val title: String, val message: String, val severity: Severity) : Event(), WebSocketEvent {
+class NotificationEvent(val title: String, val message: String, val severity: Severity) : Event() {
     @AddonApi
     enum class Severity {
         INFO, SUCCESS, ERROR, ENABLED, DISABLED
@@ -97,19 +74,16 @@ class NotificationEvent(val title: String, val message: String, val severity: Se
 }
 
 @Tag("gameModeChange")
-class GameModeChangeEvent(val gameMode: GameType) : Event(), WebSocketEvent
-
-@Tag("targetChange")
-class TargetChangeEvent(val target: PlayerData?) : Event(), WebSocketEvent
+class GameModeChangeEvent(val gameMode: GameType) : Event()
 
 @Tag("blockCountChange")
-class BlockCountChangeEvent(val nextBlock: Block?, val count: Int?) : Event(), WebSocketEvent
+class BlockCountChangeEvent(val nextBlock: Block?, val count: Int?) : Event()
 
 @Tag("bedStateChange")
-class BedStateChangeEvent(val bedStates: Collection<BedState>) : Event(), WebSocketEvent
+class BedStateChangeEvent(val bedStates: Collection<BedState>) : Event()
 
 @Tag("clientChatStateChange")
-class ClientChatStateChange(val state: State) : Event(), WebSocketEvent {
+class ClientChatStateChange(val state: State) : Event() {
     enum class State {
         @SerializedName("connecting")
         CONNECTING,
@@ -136,7 +110,7 @@ class ClientChatMessageEvent(
     val user: AxoUser,
     val message: String,
     val chatGroup: ChatGroup,
-) : Event(), WebSocketEvent {
+) : Event() {
     enum class ChatGroup(override val tag: String) : Tagged {
         @SerializedName("public")
         PUBLIC_CHAT("PublicChat"),
@@ -147,40 +121,37 @@ class ClientChatMessageEvent(
 }
 
 @Tag("clientChatError")
-class ClientChatErrorEvent(val error: String) : Event(), WebSocketEvent
+class ClientChatErrorEvent(val error: String) : Event()
 
 @Tag("clientChatJwtToken")
 // Do not define as WebSocket event, because it contains sensitive data
 class ClientChatJwtTokenEvent(val jwt: String) : Event()
 
 @Tag("accountManagerMessage")
-class AccountManagerMessageEvent(val message: String) : Event(), WebSocketEvent
+class AccountManagerMessageEvent(val message: String) : Event()
 
 @Tag("accountManagerLogin")
-class AccountManagerLoginResultEvent(val username: String? = null, val error: String? = null) : Event(), WebSocketEvent
+class AccountManagerLoginResultEvent(val username: String? = null, val error: String? = null) : Event()
 
 @Tag("accountManagerAddition")
 class AccountManagerAdditionResultEvent(
     val username: String? = null, val error: String? = null
-) : Event(), WebSocketEvent
+) : Event()
 
 @Tag("accountManagerRemoval")
-class AccountManagerRemovalResultEvent(val username: String?) : Event(), WebSocketEvent
+class AccountManagerRemovalResultEvent(val username: String?) : Event()
 
 @Tag("proxyCheckResult")
-class ProxyCheckResultEvent(val proxy: Proxy? = null, val error: String? = null) : Event(), WebSocketEvent
+class ProxyCheckResultEvent(val proxy: Proxy? = null, val error: String? = null) : Event()
 
 @Tag("serverPinged")
-class ServerPingedEvent(val server: ServerData) : Event(), WebSocketEvent
+class ServerPingedEvent(val server: ServerData) : Event()
 
 @Tag("rotationUpdate")
 object RotationUpdateEvent : Event()
 
 @Tag("resourceReload")
 object ResourceReloadEvent : Event()
-
-@Tag("scaleFactorChange")
-class ScaleFactorChangeEvent(val scaleFactor: Int) : Event(), WebSocketEvent
 
 @Tag("scheduleInventoryAction")
 class ScheduleInventoryActionEvent(val schedule: MutableList<InventoryAction.Chain> = mutableListOf()) : Event() {
@@ -214,7 +185,7 @@ class ScheduleInventoryActionEvent(val schedule: MutableList<InventoryAction.Cha
 class SelectHotbarSlotSilentlyEvent(val requester: Any?, val slot: Int): CancellableEvent()
 
 @Tag("userLoggedIn")
-object UserLoggedInEvent : Event(), WebSocketEvent
+object UserLoggedInEvent : Event()
 
 @Tag("userLoggedOut")
-object UserLoggedOutEvent : Event(), WebSocketEvent
+object UserLoggedOutEvent : Event()

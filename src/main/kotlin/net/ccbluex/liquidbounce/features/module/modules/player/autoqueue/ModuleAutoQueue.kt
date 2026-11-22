@@ -44,7 +44,7 @@ object ModuleAutoQueue : ClientModule("AutoQueue", ModuleCategories.PLAYER, alia
     private enum class PauseCondition(override val tag: String) : Tagged, BooleanSupplier {
         CLICK_GUI_OPEN("ClickGuiOpen") {
             override fun getAsBoolean(): Boolean {
-                // ClickGUI was removed together with the WebUI; no such screen exists anymore.
+                // The LiquidBounce ClickGUI no longer exists, so there is nothing to pause for.
                 return false
             }
         },

@@ -46,7 +46,7 @@ enum class MarketplaceItemType(
     OTHER("Other", false, false);
 
     suspend fun reload() = when (this) {
-        THEME -> Unit // Theme engine removed with WebUI
+        THEME -> Unit // Themes are not supported anymore
         ADDON -> AddonInstaller.stageSubscribedAddons()
         else -> MarketplaceManager.reloadHandled(this)
     }

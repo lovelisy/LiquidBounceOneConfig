@@ -83,12 +83,6 @@ sealed class ClientShaders(val type: ShaderType) : ShaderSource {
         val Blend = "blend"("shaders/blend.frag")
 
         @JvmField
-        val GuiBlurH = "blur_h"("shaders/blur/ui_blur_h.frag")
-
-        @JvmField
-        val GuiBlurV = "blur_v"("shaders/blur/ui_blur_v.frag")
-
-        @JvmField
         val Glow = "glow"("shaders/glow/glow.frag")
 
         @JvmField

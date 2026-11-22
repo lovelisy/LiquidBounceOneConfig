@@ -25,7 +25,6 @@ import com.mojang.blaze3d.platform.Window;
 import net.ccbluex.liquidbounce.LiquidBounce;
 import net.ccbluex.liquidbounce.event.EventManager;
 import net.ccbluex.liquidbounce.event.events.FramebufferResizeEvent;
-import net.ccbluex.liquidbounce.event.events.ScaleFactorChangeEvent;
 import net.ccbluex.liquidbounce.event.events.WindowResizeEvent;
 import net.ccbluex.liquidbounce.features.misc.SelfDestruct;
 import net.minecraft.server.packs.PackMetadataResources;
@@ -80,11 +79,6 @@ public abstract class MixinWindow {
     @Inject(method = "onFramebufferResize", at = @At("RETURN"))
     public void hookFramebufferResize(int newWidth, int newHeight, CallbackInfo ci) {
         EventManager.INSTANCE.callEvent(new FramebufferResizeEvent(newWidth, newHeight));
-    }
-
-    @Inject(method = "setGuiScale", at = @At("RETURN"))
-    public void hookScaleFactor(int scaleFactor, CallbackInfo ci) {
-        EventManager.INSTANCE.callEvent(new ScaleFactorChangeEvent(scaleFactor));
     }
 
 }

@@ -38,8 +38,6 @@ import net.ccbluex.liquidbounce.features.module.modules.render.DoRender;
 import net.ccbluex.liquidbounce.features.module.modules.render.ModuleAntiBlind;
 import net.ccbluex.liquidbounce.features.module.modules.render.ModuleFreeCam;
 import net.ccbluex.liquidbounce.features.module.modules.world.ModuleLiquidPlace;
-import net.ccbluex.liquidbounce.utils.data.PlayerData;
-import net.ccbluex.liquidbounce.utils.data.PlayerInventoryData;
 import net.ccbluex.liquidbounce.interfaces.LocalPlayerAddition;
 import net.ccbluex.liquidbounce.utils.aiming.RotationManager;
 import net.ccbluex.liquidbounce.utils.aiming.data.Rotation;
@@ -85,12 +83,6 @@ public abstract class MixinLocalPlayer extends MixinPlayer implements LocalPlaye
     public abstract boolean isUnderWater();
 
     @Unique
-    private PlayerData lastKnownStatistics = null;
-
-    @Unique
-    private PlayerInventoryData lastKnownInventory = null;
-
-    @Unique
     private PlayerNetworkMovementTickEvent eventMotion;
 
     @Unique
@@ -128,20 +120,6 @@ public abstract class MixinLocalPlayer extends MixinPlayer implements LocalPlaye
             ordinal = 0))
     private void hookPostTickEvent(CallbackInfo ci) {
         EventManager.INSTANCE.callEvent(PlayerPostTickEvent.INSTANCE);
-
-        // Call player statistics change event when statistics change
-        var statistics = PlayerData.Companion.fromPlayer((LocalPlayer) (Object) this);
-        if (lastKnownStatistics == null || !lastKnownStatistics.equals(statistics)) {
-            EventManager.INSTANCE.callEvent(new ClientPlayerDataEvent(statistics));
-        }
-        this.lastKnownStatistics = statistics;
-
-        // Call player inventory event when inventory changes
-        var playerInventory = PlayerInventoryData.Companion.fromPlayer((LocalPlayer) (Object) this);
-        if (lastKnownInventory == null || !lastKnownInventory.equals(playerInventory)) {
-            EventManager.INSTANCE.callEvent(new ClientPlayerInventoryEvent(playerInventory));
-        }
-        this.lastKnownInventory = playerInventory;
     }
 
     /**

@@ -22,33 +22,13 @@ package net.ccbluex.liquidbounce.event.events
 import net.ccbluex.liquidbounce.annotations.Tag
 import net.ccbluex.liquidbounce.event.CancellableEvent
 import net.ccbluex.liquidbounce.event.Event
-import net.ccbluex.liquidbounce.event.WebSocketEvent
-import net.ccbluex.liquidbounce.utils.data.PlayerData
-import net.ccbluex.liquidbounce.utils.data.PlayerInventoryData
 import net.minecraft.network.chat.Component
-import net.minecraft.world.effect.MobEffectInstance
-
-@Tag("fps")
-@Suppress("unused")
-class FpsChangeEvent(val fps: Int) : Event(), WebSocketEvent
 
 @Tag("fpsLimit")
 @Suppress("unused")
 class FpsLimitEvent(var fps: Int) : Event()
 
-@Tag("clientPlayerData")
-@Suppress("unused")
-class ClientPlayerDataEvent(val playerData: PlayerData) : Event(), WebSocketEvent
-
-@Tag("clientPlayerEffect")
-@Suppress("unused")
-class ClientPlayerEffectEvent(val effects: List<MobEffectInstance>) : Event(), WebSocketEvent
-
-@Tag("clientPlayerInventory")
-@Suppress("unused")
-class ClientPlayerInventoryEvent(val inventory: PlayerInventoryData) : Event(), WebSocketEvent
-
-sealed class TitleEvent : CancellableEvent(), WebSocketEvent {
+sealed class TitleEvent : CancellableEvent() {
     sealed class TextContent : TitleEvent() {
         abstract var text: Component?
     }
@@ -65,17 +45,3 @@ sealed class TitleEvent : CancellableEvent(), WebSocketEvent {
     @Tag("clearTitle")
     class Clear(var reset: Boolean) : TitleEvent()
 }
-
-@Tag("closedCaptions")
-class ClosedCaptionsEvent(val entries: Array<ClosedCaptionEntry>) : Event(), WebSocketEvent {
-    override val serializeAsync: Boolean = false
-}
-
-enum class ClosedCaptionDirection { NONE, LEFT, RIGHT }
-
-data class ClosedCaptionEntry(
-    val text: Component,
-    val direction: ClosedCaptionDirection,
-    val textColor: Int,
-    val backgroundColor: Int,
-)

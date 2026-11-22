@@ -24,7 +24,6 @@ import net.ccbluex.liquidbounce.event.CancellableEvent
 import net.ccbluex.liquidbounce.event.Event
 import net.ccbluex.liquidbounce.event.EventState
 import net.ccbluex.liquidbounce.features.addon.AddonApi
-import net.ccbluex.liquidbounce.event.WebSocketEvent
 import net.minecraft.tags.TagKey
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.InteractionResult
@@ -39,7 +38,7 @@ import net.minecraft.world.phys.Vec3
 class HealthUpdateEvent(val health: Float, val food: Int, val saturation: Float, val previousHealth: Float) : Event()
 
 @Tag("death")
-object DeathEvent : Event(), WebSocketEvent
+object DeathEvent : Event()
 
 @AddonApi
 @Tag("playerTick")

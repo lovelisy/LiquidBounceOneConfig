@@ -26,7 +26,6 @@ import net.ccbluex.liquidbounce.features.command.CommandManager
 import net.ccbluex.liquidbounce.features.marketplace.MarketplaceManager
 import net.ccbluex.liquidbounce.features.module.ModuleCategories
 import net.ccbluex.liquidbounce.features.module.ModuleManager
-import net.ccbluex.liquidbounce.features.module.modules.render.ModuleClickGui
 import net.ccbluex.liquidbounce.lang.LanguageManager
 import net.ccbluex.liquidbounce.utils.client.clientLogger
 import net.ccbluex.liquidbounce.utils.client.error.QuickFixes
@@ -206,7 +205,6 @@ object AddonManager {
         step("event hooks") { addon.unregister() }
 
         EventManager.callEvent(RefreshArrayListEvent)
-        ModuleClickGui.sync()
     }
 
 }

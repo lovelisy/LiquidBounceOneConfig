@@ -68,7 +68,6 @@ import net.ccbluex.liquidbounce.lang.LanguageManager
 import net.ccbluex.liquidbounce.render.FontManager
 import net.ccbluex.liquidbounce.render.HAS_AMD_VEGA_APU
 import net.ccbluex.liquidbounce.render.atlas.ItemImageAtlas
-import net.ccbluex.liquidbounce.render.engine.BlurEffectRenderer
 import net.ccbluex.liquidbounce.utils.aiming.PostRotationExecutor
 import net.ccbluex.liquidbounce.utils.aiming.RotationManager
 import net.ccbluex.liquidbounce.utils.block.ChunkScanner
@@ -81,7 +80,6 @@ import net.ccbluex.liquidbounce.utils.client.mc
 import net.ccbluex.liquidbounce.utils.combat.CombatManager
 import net.ccbluex.liquidbounce.utils.entity.RenderedEntities
 import net.ccbluex.liquidbounce.utils.input.InputTracker
-import net.ccbluex.liquidbounce.utils.inventory.EnderChestInventoryTracker
 import net.ccbluex.liquidbounce.utils.inventory.InventoryManager
 import net.ccbluex.liquidbounce.utils.io.readText
 import net.ccbluex.liquidbounce.utils.kotlin.EventPriorityConvention.FIRST_PRIORITY
@@ -272,7 +270,6 @@ object LiquidBounce : EventListener {
         CombatManager
         FriendManager
         InventoryManager
-        EnderChestInventoryTracker
         ConfigSystem.root(ClientAccountManager)
         ConfigSystem.root(SpooferManager)
         ConfigSystem.root(GlobalManager)
@@ -381,8 +378,6 @@ object LiquidBounce : EventListener {
         MarketplaceManager.subscribedItems.forEach(SubscribedItem::restoreRetired)
         AddonInstaller.stageSubscribedAddons()
         MarketplaceManager.reloadHandlers()
-
-        BlurEffectRenderer
 
         // Hand the module list and the player information HUD over to OneConfig.
         OneConfigIntegration.init()

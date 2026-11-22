@@ -530,52 +530,6 @@ object ClientRenderPipelines {
     }
 
     @JvmField
-    val GuiBlurH = newPipeline("blur_h") {
-        screenQuadSnippet()
-        withFragmentShader(ClientShaders.Fragment.GuiBlurH)
-        withBindGroupLayout {
-            withSampler("texture0")
-            withUniformBuffer(ClientUniformDefine.GUI_BLUR_KERNEL)
-        }
-        withCull(false)
-        withColorTargetState(ColorTargetState.DEFAULT)
-        withDepthStencilState(optional())
-    }
-
-    @JvmField
-    val GuiBlurV = newPipeline("blur_v") {
-        screenQuadSnippet()
-        withFragmentShader(ClientShaders.Fragment.GuiBlurV)
-        withBindGroupLayout {
-            withSampler("texture0")
-            withSampler("overlay")
-            withUniformBuffer(ClientUniformDefine.GUI_BLUR)
-            withUniformBuffer(ClientUniformDefine.GUI_BLUR_KERNEL)
-        }
-        withCull(false)
-        withColorTargetState(ColorTargetState(BlendFunction.TRANSLUCENT))
-        withDepthStencilState(optional())
-    }
-
-    /**
-     * @see RenderPipelines.ENTITY_OUTLINE_BLIT
-     */
-    @JvmField
-    val GuiBlurBlit = newPipeline("blur_blit") {
-        screenQuadSnippet()
-        withFragmentShader("core/blit_screen")
-        withBindGroupLayout(BindGroupLayouts.IN_SAMPLER)
-        withColorTargetState(
-            ColorTargetState(
-                optional(BlendFunction.TRANSLUCENT_PREMULTIPLIED_ALPHA),
-                GpuFormat.RGBA8_UNORM,
-                ColorTargetState.WRITE_COLOR,
-            )
-        )
-        withDepthStencilState(optional())
-    }
-
-    @JvmField
     val Blend = newPipeline("blend") {
         withVertexShader(ClientShaders.Vertex.PlainPosTex)
         withFragmentShader(ClientShaders.Fragment.Blend)

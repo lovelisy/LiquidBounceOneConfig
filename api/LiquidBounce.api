@@ -318,12 +318,10 @@ public final class net/ccbluex/liquidbounce/event/events/BlockChangeEvent : net/
 	public final fun getNewState ()Lnet/minecraft/world/level/block/state/BlockState;
 }
 
-public final class net/ccbluex/liquidbounce/event/events/ChatReceiveEvent : net/ccbluex/liquidbounce/event/CancellableEvent, net/ccbluex/liquidbounce/event/WebSocketEvent {
+public final class net/ccbluex/liquidbounce/event/events/ChatReceiveEvent : net/ccbluex/liquidbounce/event/CancellableEvent {
 	public fun <init> (Ljava/lang/String;Lnet/minecraft/network/chat/Component;Lnet/ccbluex/liquidbounce/event/events/ChatReceiveEvent$ChatType;Ljava/util/function/UnaryOperator;)V
 	public final fun getApplyChatDecoration ()Ljava/util/function/UnaryOperator;
 	public final fun getMessage ()Ljava/lang/String;
-	public fun getSerializeAsync ()Z
-	public fun getSerializer ()Lcom/google/gson/Gson;
 	public final fun getTextData ()Lnet/minecraft/network/chat/Component;
 	public final fun getType ()Lnet/ccbluex/liquidbounce/event/events/ChatReceiveEvent$ChatType;
 }
@@ -339,11 +337,9 @@ public final class net/ccbluex/liquidbounce/event/events/ChatReceiveEvent$ChatTy
 	public static fun values ()[Lnet/ccbluex/liquidbounce/event/events/ChatReceiveEvent$ChatType;
 }
 
-public final class net/ccbluex/liquidbounce/event/events/ChatSendEvent : net/ccbluex/liquidbounce/event/CancellableEvent, net/ccbluex/liquidbounce/event/WebSocketEvent {
+public final class net/ccbluex/liquidbounce/event/events/ChatSendEvent : net/ccbluex/liquidbounce/event/CancellableEvent {
 	public fun <init> (Ljava/lang/String;)V
 	public final fun getMessage ()Ljava/lang/String;
-	public fun getSerializeAsync ()Z
-	public fun getSerializer ()Lcom/google/gson/Gson;
 }
 
 public final class net/ccbluex/liquidbounce/event/events/ChunkLoadEvent : net/ccbluex/liquidbounce/event/Event {
@@ -352,10 +348,8 @@ public final class net/ccbluex/liquidbounce/event/events/ChunkLoadEvent : net/cc
 	public final fun getZ ()I
 }
 
-public final class net/ccbluex/liquidbounce/event/events/DisconnectEvent : net/ccbluex/liquidbounce/event/Event, net/ccbluex/liquidbounce/event/WebSocketEvent {
+public final class net/ccbluex/liquidbounce/event/events/DisconnectEvent : net/ccbluex/liquidbounce/event/Event {
 	public static final field INSTANCE Lnet/ccbluex/liquidbounce/event/events/DisconnectEvent;
-	public fun getSerializeAsync ()Z
-	public fun getSerializer ()Lcom/google/gson/Gson;
 }
 
 public final class net/ccbluex/liquidbounce/event/events/FriendChangeEvent : net/ccbluex/liquidbounce/event/Event {
@@ -368,7 +362,7 @@ public final class net/ccbluex/liquidbounce/event/events/GameTickEvent : net/ccb
 	public static final field INSTANCE Lnet/ccbluex/liquidbounce/event/events/GameTickEvent;
 }
 
-public final class net/ccbluex/liquidbounce/event/events/KeyboardKeyEvent : net/ccbluex/liquidbounce/event/Event, net/ccbluex/liquidbounce/event/WebSocketEvent {
+public final class net/ccbluex/liquidbounce/event/events/KeyboardKeyEvent : net/ccbluex/liquidbounce/event/Event {
 	public fun <init> (Lcom/mojang/blaze3d/platform/InputConstants$Key;IIIILnet/minecraft/client/gui/screens/Screen;)V
 	public synthetic fun <init> (Lcom/mojang/blaze3d/platform/InputConstants$Key;IIIILnet/minecraft/client/gui/screens/Screen;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getAction ()I
@@ -377,23 +371,19 @@ public final class net/ccbluex/liquidbounce/event/events/KeyboardKeyEvent : net/
 	public final fun getMods ()I
 	public final fun getScanCode ()I
 	public final fun getScreen ()Lnet/minecraft/client/gui/screens/Screen;
-	public fun getSerializeAsync ()Z
-	public fun getSerializer ()Lcom/google/gson/Gson;
 	public final fun isPressed ()Z
 	public final fun isReleased ()Z
 	public final fun isRepeat ()Z
 }
 
-public final class net/ccbluex/liquidbounce/event/events/ModuleToggleEvent : net/ccbluex/liquidbounce/event/Event, net/ccbluex/liquidbounce/event/WebSocketEvent {
+public final class net/ccbluex/liquidbounce/event/events/ModuleToggleEvent : net/ccbluex/liquidbounce/event/Event {
 	public fun <init> (Ljava/lang/String;ZZ)V
 	public final fun getEnabled ()Z
 	public final fun getHidden ()Z
 	public final fun getModuleName ()Ljava/lang/String;
-	public fun getSerializeAsync ()Z
-	public fun getSerializer ()Lcom/google/gson/Gson;
 }
 
-public final class net/ccbluex/liquidbounce/event/events/MouseButtonEvent : net/ccbluex/liquidbounce/event/Event, net/ccbluex/liquidbounce/event/WebSocketEvent {
+public final class net/ccbluex/liquidbounce/event/events/MouseButtonEvent : net/ccbluex/liquidbounce/event/Event {
 	public fun <init> (Lcom/mojang/blaze3d/platform/InputConstants$Key;IIILnet/minecraft/client/gui/screens/Screen;)V
 	public synthetic fun <init> (Lcom/mojang/blaze3d/platform/InputConstants$Key;IIILnet/minecraft/client/gui/screens/Screen;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun getAction ()I
@@ -401,8 +391,6 @@ public final class net/ccbluex/liquidbounce/event/events/MouseButtonEvent : net/
 	public final fun getKey ()Lcom/mojang/blaze3d/platform/InputConstants$Key;
 	public final fun getMods ()I
 	public final fun getScreen ()Lnet/minecraft/client/gui/screens/Screen;
-	public fun getSerializeAsync ()Z
-	public fun getSerializer ()Lcom/google/gson/Gson;
 	public final fun isLeftButton ()Z
 	public final fun isLeftClick ()Z
 	public final fun isMiddleButton ()Z
@@ -423,11 +411,9 @@ public final class net/ccbluex/liquidbounce/event/events/MovementInputEvent : ne
 	public final fun setSneak (Z)V
 }
 
-public final class net/ccbluex/liquidbounce/event/events/NotificationEvent : net/ccbluex/liquidbounce/event/Event, net/ccbluex/liquidbounce/event/WebSocketEvent {
+public final class net/ccbluex/liquidbounce/event/events/NotificationEvent : net/ccbluex/liquidbounce/event/Event {
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lnet/ccbluex/liquidbounce/event/events/NotificationEvent$Severity;)V
 	public final fun getMessage ()Ljava/lang/String;
-	public fun getSerializeAsync ()Z
-	public fun getSerializer ()Lcom/google/gson/Gson;
 	public final fun getSeverity ()Lnet/ccbluex/liquidbounce/event/events/NotificationEvent$Severity;
 	public final fun getTitle ()Ljava/lang/String;
 }
@@ -493,10 +479,8 @@ public final class net/ccbluex/liquidbounce/event/events/PlayerTickEvent : net/c
 	public fun <init> ()V
 }
 
-public final class net/ccbluex/liquidbounce/event/events/RefreshArrayListEvent : net/ccbluex/liquidbounce/event/Event, net/ccbluex/liquidbounce/event/WebSocketEvent {
+public final class net/ccbluex/liquidbounce/event/events/RefreshArrayListEvent : net/ccbluex/liquidbounce/event/Event {
 	public static final field INSTANCE Lnet/ccbluex/liquidbounce/event/events/RefreshArrayListEvent;
-	public fun getSerializeAsync ()Z
-	public fun getSerializer ()Lcom/google/gson/Gson;
 }
 
 public final class net/ccbluex/liquidbounce/event/events/ScreenEvent : net/ccbluex/liquidbounce/event/CancellableEvent {

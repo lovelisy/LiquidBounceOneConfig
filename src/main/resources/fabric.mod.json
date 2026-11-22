@@ -3,7 +3,7 @@
   "id": "liquidbounce",
   "version": "${version}",
   "name": "LiquidBounce",
-  "description": "A free mixin-based injection hacked-client for Minecraft using the Fabric modding toolchain.",
+  "description": "LiquidBounce with its interface rendered by OneConfig - no embedded browser, no web server.",
   "authors": [
     "CCBlueX"
   ],
@@ -17,9 +17,6 @@
   "license": "GNU General Public License v3.0",
   "icon": "resources/liquidbounce/icon_64x64.png",
   "environment": "client",
-  "entrypoints": {
-    "main": []
-  },
   "custom": {
     "modmenu": {
       "links": {

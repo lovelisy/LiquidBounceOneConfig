@@ -44,7 +44,7 @@ private val LB_HUD_CATEGORY: Hud.Category =
 object LbPlayerInfoHud : TextHud(PLAYER_INFO_HUD_ID, "Player Info", LB_HUD_CATEGORY, "") {
 
     override fun update(): Boolean {
-        if (!ModuleHud.enabled) {
+        if (!ModuleHud.running) {
             return false
         }
         return super.update()

@@ -24,7 +24,6 @@ import net.ccbluex.liquidbounce.annotations.Tag
 import net.ccbluex.liquidbounce.event.CancellableEvent
 import net.ccbluex.liquidbounce.event.Event
 import net.ccbluex.liquidbounce.features.addon.AddonApi
-import net.ccbluex.liquidbounce.event.WebSocketEvent
 import net.minecraft.client.gui.screens.Screen
 
 @Tag("windowResize")
@@ -45,7 +44,7 @@ class MouseButtonEvent(
     val action: Int,
     val mods: Int,
     val screen: Screen? = null
-) : Event(), WebSocketEvent {
+) : Event() {
     val isPressed: Boolean get() = action == InputConstants.PRESS
     val isReleased: Boolean get() = action == InputConstants.RELEASE
 
@@ -76,11 +75,11 @@ class KeyboardKeyEvent(
     val action: Int,
     val mods: Int,
     val screen: Screen? = null
-) : Event(), WebSocketEvent {
+) : Event() {
     val isPressed: Boolean get() = action == InputConstants.PRESS
     val isReleased: Boolean get() = action == InputConstants.RELEASE
     val isRepeat: Boolean get() = action == InputConstants.REPEAT
 }
 
 @Tag("keyboardChar")
-class KeyboardCharEvent(val codePoint: Int) : Event(), WebSocketEvent
+class KeyboardCharEvent(val codePoint: Int) : Event()

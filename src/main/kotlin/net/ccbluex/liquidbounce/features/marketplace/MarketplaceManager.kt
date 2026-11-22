@@ -212,7 +212,7 @@ object MarketplaceManager : Config("marketplace"), EventListener {
         subscribedItems.remove(item)
         ConfigSystem.store(this)
 
-        // Reload the item type's manager. Also reached from Ktor workers, hence the render thread.
+        // Reload the item type's manager on the render thread.
         withContext(Dispatchers.Main) {
             item.type.reload()
         }

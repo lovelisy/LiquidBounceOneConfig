@@ -26,7 +26,6 @@ import net.ccbluex.liquidbounce.config.types.list.Tagged
 import net.ccbluex.liquidbounce.event.CancellableEvent
 import net.ccbluex.liquidbounce.event.Event
 import net.ccbluex.liquidbounce.features.addon.AddonApi
-import net.ccbluex.liquidbounce.event.WebSocketEvent
 import net.ccbluex.liquidbounce.utils.entity.cameraDistance
 import net.ccbluex.liquidbounce.utils.movement.DirectionalInput
 import net.minecraft.client.CameraType
@@ -62,7 +61,7 @@ object TickPacketProcessEvent : Event()
 class KeyEvent(
     val key: InputConstants.Key,
     val action: Int,
-) : Event(), WebSocketEvent
+) : Event()
 
 // Input events
 @Tag("inputHandle")
@@ -96,7 +95,7 @@ class MouseRotationEvent(
 ) : CancellableEvent()
 
 @Tag("keybindChange")
-object KeybindChangeEvent : Event(), WebSocketEvent
+object KeybindChangeEvent : Event()
 
 @Tag("keybindIsPressed")
 class KeybindIsPressedEvent(
@@ -124,7 +123,7 @@ class AllowAutoJumpEvent(
 @Tag("session")
 class SessionEvent(
     val session: User,
-) : Event(), WebSocketEvent
+) : Event()
 
 @AddonApi
 @Tag("screen")
@@ -136,7 +135,7 @@ class ScreenEvent(
 @Tag("chatSend")
 class ChatSendEvent(
     val message: String,
-) : CancellableEvent(), WebSocketEvent
+) : CancellableEvent()
 
 @AddonApi
 @Tag("chatReceive")
@@ -146,7 +145,7 @@ class ChatReceiveEvent(
     val type: ChatType,
     @ProtocolExclude
     val applyChatDecoration: UnaryOperator<Component>,
-) : CancellableEvent(), WebSocketEvent {
+) : CancellableEvent() {
     @AddonApi
     enum class ChatType(override val tag: String) : Tagged {
         CHAT_MESSAGE("ChatMessage"),
@@ -165,13 +164,13 @@ class ServerConnectEvent(
 
 @AddonApi
 @Tag("disconnect")
-object DisconnectEvent : Event(), WebSocketEvent
+object DisconnectEvent : Event()
 
 @Tag("overlayMessage")
 class OverlayMessageEvent(
     val text: Component,
     val tinted: Boolean,
-) : Event(), WebSocketEvent
+) : Event()
 
 @Tag("perspective")
 object PerspectiveEvent : Event() {

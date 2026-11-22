@@ -33,7 +33,6 @@ import net.ccbluex.liquidbounce.features.module.modules.movement.inventorymove.f
 import net.ccbluex.liquidbounce.features.module.modules.movement.inventorymove.features.InventoryMoveSneakControlFeature
 import net.ccbluex.liquidbounce.features.module.modules.movement.inventorymove.features.InventoryMoveSprintControlFeature
 import net.ccbluex.liquidbounce.features.module.modules.movement.inventorymove.features.InventoryMoveTimerFeature
-import net.ccbluex.liquidbounce.features.module.modules.render.ModuleClickGui
 import net.ccbluex.liquidbounce.utils.inventory.InventoryManager
 import net.ccbluex.liquidbounce.utils.inventory.isInInventoryScreen
 import net.ccbluex.liquidbounce.utils.kotlin.EventPriorityConvention.FINAL_DECISION
@@ -69,7 +68,7 @@ object ModuleInventoryMove : ClientModule("InventoryMove", ModuleCategories.MOVE
         override val tag: String,
         private val handleScreens: Predicate<Screen>,
     ) : Tagged {
-        NORMAL("Normal", { !it.isInEditBox() && !ModuleClickGui.isInSearchBar }),
+        NORMAL("Normal", { !it.isInEditBox() }),
         // disable clicks while moving
         SAFE("Safe", NORMAL.handleScreens.and { (it !is AbstractContainerScreen<*> || it is InventoryScreen) }),
         // stop in inventory

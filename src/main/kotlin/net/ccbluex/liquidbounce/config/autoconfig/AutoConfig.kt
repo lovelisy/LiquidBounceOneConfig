@@ -32,7 +32,6 @@ import net.ccbluex.liquidbounce.config.gson.util.string
 import net.ccbluex.liquidbounce.config.types.group.ValueGroup
 import net.ccbluex.liquidbounce.event.events.NotificationEvent
 import net.ccbluex.liquidbounce.features.module.ModuleManager
-import net.ccbluex.liquidbounce.features.module.modules.render.ModuleClickGui
 import net.ccbluex.liquidbounce.features.spoofer.SpooferManager
 import net.ccbluex.liquidbounce.utils.client.MessageMetadata
 import net.ccbluex.liquidbounce.utils.client.chat
@@ -62,11 +61,6 @@ object AutoConfig {
     var loadingNow = false
         set(value) {
             field = value
-
-            // After completion of loading, sync ClickGUI
-            if (!value) {
-                ModuleClickGui.sync()
-            }
         }
 
     var includeConfiguration = IncludeConfiguration.DEFAULT
