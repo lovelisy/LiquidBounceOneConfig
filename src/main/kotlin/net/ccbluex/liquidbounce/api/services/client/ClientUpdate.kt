@@ -37,7 +37,8 @@ object ClientUpdate {
                     release = !LiquidBounce.IN_DEVELOPMENT
                 )
             }.onFailure { exception ->
-                logger.error("Unable to receive update information", exception)
+                // This build is not published on the official API, so "build not found" is expected.
+                logger.warn("Unable to receive update information: ${exception.message}")
             }.getOrNull() ?: return@async null
 
             val newestSemVersion = Semver(newestBuild.lbVersion, Semver.SemverType.LOOSE)

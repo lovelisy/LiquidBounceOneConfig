@@ -42,6 +42,8 @@ class LiquidBounceConfig : Config(ID, TITLE, Config.Category.QOL) {
     }
 
     override fun makeTree(): Tree {
+        // The tree gets its id from the constructor. Calling `setID` again throws
+        // "ID is already set" from `Node.setID`, which crashes the client during startup.
         val root = Tree(ID, TITLE, null, null)
 
         // Categories in their registered order, so the OneConfig list mirrors the old ClickGUI tabs.
@@ -58,7 +60,6 @@ class LiquidBounceConfig : Config(ID, TITLE, Config.Category.QOL) {
             .sortedBy { it.name }
             .forEach { module -> root.put(moduleSwitch(module.category.tag, module)) }
 
-        root.setID(ID)
         return root
     }
 
