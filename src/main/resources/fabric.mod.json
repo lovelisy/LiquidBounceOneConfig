@@ -5,14 +5,14 @@
   "name": "LiquidBounce",
   "description": "LiquidBounce with its interface rendered by OneConfig - no embedded browser, no web server. Modules, settings and every HUD element live in OneConfig's own UI, while the configuration stays in LiquidBounce's folders.",
   "authors": [
-    "CCBlueX"
+    "CCBlueX",
+    "lovelisy"
   ],
   "contributors": $contributors,
   "contact": {
     "homepage": "https://liquidbounce.net/",
-    "sources": "https://github.com/CCBlueX/LiquidBounce/",
-    "issues": "https://github.com/CCBlueX/LiquidBounce/issues",
-    "email": "support@liquidbounce.net"
+    "sources": "https://github.com/lovelisy/LiquidBounceOneConfig/",
+    "issues": "https://github.com/lovelisy/LiquidBounceOneConfig/issues"
   },
   "license": "GNU General Public License v3.0",
   "icon": "assets/liquidbounce/icon_64x64.png",

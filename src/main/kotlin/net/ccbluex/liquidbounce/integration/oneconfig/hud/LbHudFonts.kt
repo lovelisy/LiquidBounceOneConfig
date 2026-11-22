@@ -18,25 +18,26 @@
  */
 package net.ccbluex.liquidbounce.integration.oneconfig.hud
 
-import net.ccbluex.liquidbounce.utils.client.logger
-import org.polyfrost.compose.render.FontManager
 import org.polyfrost.compose.render.PolyFont
 
 /**
- * Registers the Inter family used by the native LiquidBounce HUD elements and hands out [PolyFont] instances.
+ * Hands out [PolyFont] instances for the native LiquidBounce HUD elements.
  *
- * The native HUD draws every line with Inter, so the four weights bundled with the client are registered into
- * OneConfig's font engine under LiquidBounce owned keys. The registration is lazy: the font engine is only ready once
- * the client booted, which is after this object is created.
+ * The native HUD draws every line with Inter, so the four weights of PolyCompose's own Inter family are used directly;
+ * they are always present because PolyCompose registers them on startup. Strings that contain glyphs outside of Inter,
+ * which is every CJK ideograph, fall back to OneConfig's bundled unifont.
  */
 object LbHudFonts {
 
-    /** One bundled Inter weight, its font engine key and the classpath resource it is read from. */
-    enum class Weight(val key: String, val resource: String) {
-        REGULAR("lb-inter-regular", "assets/liquidbounce/fonts/Inter-Regular.ttf"),
-        MEDIUM("lb-inter-medium", "assets/liquidbounce/fonts/Inter-Medium.ttf"),
-        SEMIBOLD("lb-inter-semibold", "assets/liquidbounce/fonts/Inter-SemiBold.ttf"),
-        BOLD("lb-inter-bold", "assets/liquidbounce/fonts/Inter-Bold.ttf"),
+    /**
+     * Font engine keys of PolyCompose's own Inter family. The mod ships the same four TTF files and registers them
+     * on startup, so they are always present and the client does not have to bundle them again.
+     */
+    enum class Weight(val key: String) {
+        REGULAR("inter"),
+        MEDIUM("inter-medium"),
+        SEMIBOLD("inter-semibold"),
+        BOLD("inter-bold"),
     }
 
     /**
@@ -46,37 +47,8 @@ object LbHudFonts {
      */
     private const val UNIFONT_KEY = "unifont"
 
-    @Volatile
-    private var registered: Boolean = false
-
-    @Synchronized
-    private fun ensureRegistered() {
-        if (registered) {
-            return
-        }
-
-        val classLoader = LbHudFonts::class.java.classLoader
-        val loaded = Weight.entries.count { weight ->
-            runCatching {
-                FontManager.loadFromResource(weight.resource, weight.key, classLoader, false)
-            }.getOrDefault(false)
-        }
-
-        registered = loaded == Weight.entries.size
-        if (!registered) {
-            logger.warn(
-                "Unable to register all LiquidBounce HUD fonts, only {} of {} Inter weights are available",
-                loaded,
-                Weight.entries.size,
-            )
-        }
-    }
-
     /** Inter at [size] logical pixels, in [weight]. */
-    fun font(size: Float, weight: Weight = Weight.REGULAR): PolyFont {
-        ensureRegistered()
-        return PolyFont(weight.key, size)
-    }
+    fun font(size: Float, weight: Weight = Weight.REGULAR): PolyFont = PolyFont(weight.key, size)
 
     /**
      * Picks the font for [text]: Inter whenever the string is fully covered by it, otherwise OneConfig's unifont,
