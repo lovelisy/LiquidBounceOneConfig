@@ -30,14 +30,14 @@ import org.polyfrost.compose.render.RenderContext
 /**
  * Drawing surface handed to a LiquidBounce HUD element.
  *
- * Wraps OneConfig's immediate mode [RenderContext] so HUD code never touches a font loader, a glyph atlas or a
- * shader of its own: text is laid out by OneConfig's [PolyFont], shapes by its renderer.
+ * Wraps OneConfig's immediate mode [RenderContext] so HUD code never touches a font loader, a glyph atlas or a shader
+ * of its own: text is laid out by OneConfig's [PolyFont], shapes by its renderer.
  *
- * @param context OneConfig render context, already translated and scaled to the HUD origin.
- * @param width logical width the HUD was measured with, in the same units as the drawing calls.
- * @param height logical height the HUD was measured with.
+ * @param context OneConfig render context, already translated to the origin of the content area.
+ * @param width width of the content area, in the same units as the drawing calls.
+ * @param height height of the content area.
  * @param deltaSeconds seconds elapsed since the previous frame.
- * @param inEditor whether the OneConfig HUD editor is open.
+ * @param inEditor whether the OneConfig HUD editor is currently open.
  */
 class LbHudCanvas internal constructor(
     @JvmField internal val context: RenderContext,
@@ -117,12 +117,12 @@ class LbHudCanvas internal constructor(
 
     fun image(
         bitmap: PolyBitmap,
-        srcX: Float, srcY: Float, srcW: Float, srcH: Float,
+        u0: Float, v0: Float, u1: Float, v1: Float,
         x: Float, y: Float, w: Float, h: Float,
         tint: PolyColor = PolyColor(0xFFFFFFFF.toInt()),
     ) {
-        if (w <= 0f || h <= 0f || srcW <= 0f || srcH <= 0f) return
-        context.image(bitmap, srcX, srcY, srcW, srcH, x, y, w, h, tint, FilterQuality.Medium)
+        if (w <= 0f || h <= 0f) return
+        context.image(bitmap, x, y, w, h, u0, v0, u1, v1, tint, FilterQuality.Medium)
     }
 
     fun text(
@@ -134,8 +134,16 @@ class LbHudCanvas internal constructor(
         align: PolyAlign = PolyAlign.TopLeft,
     ): Float {
         if (text.isEmpty() || color.alpha == 0) return 0f
-        val w = context.measureText(text, font)
-        context.text(text, alignedX(x, w, align), alignedY(y, font.size, align), color, font)
+        val w = measure(text, font)
+        val dx = alignedX(x, w, align)
+        val dy = alignedY(y, font.size, align)
+
+        if (isGameFont(font)) {
+            context.mcText(text, dx, dy, color.argb, false, gameFontScale(font))
+        } else {
+            context.text(text, dx, dy, color, font)
+        }
+
         return w
     }
 
@@ -154,8 +162,8 @@ class LbHudCanvas internal constructor(
     /**
      * Draws [text] with a one pixel drop shadow.
      *
-     * PolyCompose has no dedicated text shadow primitive, so the shadow is the same text painted once at an offset in
-     * the shadow colour before the real text is drawn on top.
+     * The game font has its own shadow pass, which is what the vanilla interface uses; every other font gets the same
+     * text painted once at an offset in the shadow colour before the real text is drawn on top.
      */
     fun textShadow(
         text: String,
@@ -166,9 +174,15 @@ class LbHudCanvas internal constructor(
         align: PolyAlign = PolyAlign.TopLeft,
     ): Float {
         if (text.isEmpty() || (argb ushr 24) == 0) return 0f
-        val w = context.measureText(text, font)
+        val w = measure(text, font)
         val dx = alignedX(x, w, align)
         val dy = alignedY(y, font.size, align)
+
+        if (isGameFont(font)) {
+            context.mcText(text, dx, dy, argb, true, gameFontScale(font))
+            return w
+        }
+
         context.text(text, dx + SHADOW_OFFSET, dy + SHADOW_OFFSET, PolyColor(SHADOW_ARGB), font)
         context.text(text, dx, dy, PolyColor(argb), font)
         return w
@@ -185,10 +199,17 @@ class LbHudCanvas internal constructor(
         thickness: Float = 1f,
     ): Float {
         if (text.isEmpty()) return 0f
-        val w = context.measureText(text, font)
+        val w = measure(text, font)
+        val dx = alignedX(x, w, PolyAlign.TopLeft)
         val outlineColor = if ((outline ushr 24) == 0) PolyColor(0xFF000000.toInt()) else PolyColor(outline)
-        context.textOutline(text, alignedX(x, w, PolyAlign.TopLeft), y, outlineColor, font, thickness)
-        context.text(text, alignedX(x, w, PolyAlign.TopLeft), y, color, font)
+
+        if (isGameFont(font)) {
+            context.mcTextOutline(text, dx, y, color.argb, outlineColor.argb, gameFontScale(font))
+            return w
+        }
+
+        context.textOutline(text, dx, y, outlineColor, font, thickness)
+        context.text(text, dx, y, color, font)
         return w
     }
 
@@ -205,15 +226,17 @@ class LbHudCanvas internal constructor(
         return if (shadow) textShadow(text, x, y, font, argb) else text(text, x, y, font, argb)
     }
 
+    /** Width of [text] in [font], usable with or without a render context. */
     fun measure(text: String, font: PolyFont): Float =
-        if (text.isEmpty()) 0f else context.measureText(text, font)
+        if (text.isEmpty()) 0f else font.measureTextWidth(text)
 
     fun measure(component: Component, font: PolyFont): Float = measure(component.string, font)
 
     /** Line height of [font], based on the metrics the font engine reports. */
     fun lineHeight(font: PolyFont): Float {
         val metrics = font.metrics
-        return (metrics.ascent + metrics.descent + metrics.leading).coerceAtLeast(font.size)
+        val extent = kotlin.math.abs(metrics.ascent) + kotlin.math.abs(metrics.descent) + metrics.leading
+        return extent.coerceAtLeast(font.size)
     }
 
     /** A colour cycling through the hue wheel, used by the rainbow options. */
@@ -223,7 +246,13 @@ class LbHudCanvas internal constructor(
         return PolyColor(hsvToArgb(hue, 0.65f, 1f))
     }
 
-    fun font(size: Float, name: String = DEFAULT_FONT): PolyFont = PolyFont(name, size)
+    fun font(size: Float, name: String = GAME_FONT): PolyFont = PolyFont(name, size)
+
+    private fun isGameFont(font: PolyFont): Boolean =
+        font.name == GAME_FONT || font.name == GAME_FONT_BOLD
+
+    /** The game font renders on an eight pixel grid, so its size is expressed as a multiple of that grid. */
+    private fun gameFontScale(font: PolyFont): Float = font.size / GAME_FONT_BASE_SIZE
 
     private fun alignedX(x: Float, width: Float, align: PolyAlign): Float = when (align) {
         PolyAlign.TopRight, PolyAlign.Right, PolyAlign.BottomRight -> x - width
@@ -262,10 +291,19 @@ class LbHudCanvas internal constructor(
     }
 
     companion object {
-        const val DEFAULT_FONT: String = "minecraft"
-        const val VANILLA_FONT_SIZE: Float = 9f
+        /** The font key PolyCompose maps onto the game's own font, so text keeps the vanilla look and glyph coverage. */
+        const val GAME_FONT: String = "polycompose:minecraft"
 
-        /** Offset and colour of the drop shadow used by [textShadow], matching the vanilla shadow. */
+        /** Bold variant of [GAME_FONT]. */
+        const val GAME_FONT_BOLD: String = "polycompose:minecraft-bold"
+
+        /** Size of one game font glyph cell, in logical units. */
+        const val GAME_FONT_BASE_SIZE: Float = 8f
+
+        /** Smallest font size an element is allowed to ask for, so a stray option value cannot vanish the text. */
+        const val MIN_FONT_SIZE: Float = 4f
+
+        /** Offset and colour of the drop shadow used by [textShadow] for fonts without a shadow pass of their own. */
         private const val SHADOW_OFFSET: Float = 1f
         private const val SHADOW_ARGB: Int = 0x80000000.toInt()
     }

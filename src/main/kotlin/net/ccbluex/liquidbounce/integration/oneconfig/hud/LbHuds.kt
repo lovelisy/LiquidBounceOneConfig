@@ -28,8 +28,8 @@ import org.polyfrost.oneconfig.api.ui.v1.ExperimentalOneConfigUiApi
 /**
  * Hands every LiquidBounce HUD element to OneConfig's HUD registry.
  *
- * Each element becomes its own unit in OneConfig's HUD editor, so it can be placed, scaled and toggled on its own.
- * The element itself only has to declare its options and its paint pass.
+ * Each element becomes its own unit in OneConfig's HUD editor, so it can be placed, scaled and toggled on its own. The
+ * element itself only declares its options and its paint pass.
  */
 object LbHuds {
 
@@ -39,8 +39,9 @@ object LbHuds {
     )
 
     /** Whether the HUD elements should be visible. Follows the HUD module, so disabling it clears the screen. */
-    private val enabledSupplier = { ModuleHud.running }
+    private val enabledSupplier: () -> Boolean = { ModuleHud.running }
 
+    /** OneConfig queues the registration until its own HUD registry is ready, which is when the client boots. */
     fun init() {
         elements.forEach { element ->
             runCatching {

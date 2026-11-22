@@ -27,21 +27,21 @@ import org.polyfrost.oneconfig.api.config.v1.annotations.Text
 import org.polyfrost.oneconfig.api.hud.v1.Hud
 
 /**
- * Draws the client name in the corner of the screen.
+ * Draws the client name and its version.
  */
 object WatermarkHud : LbHudBase("watermark", "Watermark", Hud.Category.INFO) {
 
-    @Text(title = "Text")
+    @Text(title = "Label")
     @JvmField
-    var text: String = "LiquidBounce"
+    var label: String = "LiquidBounce"
 
     @Switch(title = "Show Version")
     @JvmField
     var showVersion: Boolean = true
 
-    @Color(title = "Text Color", alpha = true)
+    @Color(title = "Accent Color", alpha = true)
     @JvmField
-    var color: PolyColor = PolyColor(0xFF57C0FF.toInt())
+    var accent: PolyColor = PolyColor(0xFF57C0FF.toInt())
 
     @Switch(title = "Rainbow")
     @JvmField
@@ -51,18 +51,18 @@ object WatermarkHud : LbHudBase("watermark", "Watermark", Hud.Category.INFO) {
     @JvmField
     var rainbowSpeed: Float = 6f
 
-    override fun paint(canvas: LbHudCanvas): HudSize {
-        val font = canvas.font(fontSize, fontName)
-        val label = if (showVersion) "$text v${LiquidBounce.clientVersion}" else text
+    private fun text(): String = if (showVersion) "$label v${LiquidBounce.clientVersion}" else label
 
-        val contentWidth = canvas.measure(label, font)
-        val contentHeight = canvas.lineHeight(font)
+    override fun measure(): HudSize {
+        val text = text()
+        return HudSize(textWidth(text), lineHeight())
+    }
 
-        val size = backdrop(canvas, contentWidth, contentHeight)
-        val painted = if (rainbow) canvas.rainbow(rainbowSpeed) else color
-        drawLabel(content(canvas), label, 0f, 0f, painted, font)
+    override fun paint(canvas: LbHudCanvas) {
+        val font = hudFont()
+        val color = if (rainbow) canvas.rainbow(rainbowSpeed) else accent
 
-        return size
+        drawText(canvas, text(), 0f, 0f, color, font)
     }
 
 }

@@ -18,99 +18,121 @@
  */
 package net.ccbluex.liquidbounce.integration.oneconfig.hud
 
+import androidx.compose.runtime.Composable
 import net.ccbluex.liquidbounce.utils.client.inGame
 import net.ccbluex.liquidbounce.utils.client.logger
-import net.ccbluex.liquidbounce.utils.client.mc
-import net.minecraft.client.gui.GuiGraphicsExtractor
-import org.polyfrost.compose.minecraft.render.blaze.BlazeRenderer
-import org.polyfrost.compose.minecraft.render.blaze.GlyphAtlas
-import org.polyfrost.compose.minecraft.render.blaze.StackingGuiRenderState
+import org.polyfrost.compose.composables.NodeCanvas
+import org.polyfrost.compose.composables.padding
+import org.polyfrost.compose.composables.size
 import org.polyfrost.compose.render.RenderContext
 import org.polyfrost.oneconfig.api.config.v1.Tree
 import org.polyfrost.oneconfig.api.hud.v1.Hud
 import org.polyfrost.oneconfig.api.hud.v1.HudManager
-import org.polyfrost.oneconfig.api.hud.v1.LegacyHud
 
 /**
  * Base class of every LiquidBounce HUD element.
  *
  * OneConfig owns the placement, the scale, the toggle key and the per element settings panel; the element only has to
- * report its natural size and paint itself into an [LbHudCanvas].
+ * describe its size and its content. The shared look, meaning the background, the border, the padding, the font and the
+ * text colour, lives on [Hud] itself and is edited in the very same panel.
  *
- * The paint pass goes through PolyCompose's immediate mode renderer, so text and shapes use OneConfig's font engine
- * instead of a font of its own. A frame is recorded into a fresh [BlazeRenderer], the recorded operations are handed to
- * the client's GUI render state and replayed by [GuiGraphicsExtractor].
+ * Content is drawn through a Compose canvas, so text and shapes go through OneConfig's font engine and PolyCompose's
+ * renderer. Nothing here measures or rasterises a font on its own.
  */
 abstract class LbHud(
     id: String,
     title: String,
     category: Hud.Category,
-) : LegacyHud(id, title, category) {
+) : Hud(id, title, category) {
 
     private var lastFrameNanos: Long = 0L
 
-    private var measuredWidth: Float = 0f
-    private var measuredHeight: Float = 0f
+    /**
+     * Computes the size the content occupies, excluding the padding around it.
+     *
+     * Called from the update pass and from the Compose pass, so it has to be cheap and free of side effects: only
+     * measure text, never draw it.
+     */
+    protected abstract fun measure(): HudSize
+
+    /** Paints the content, with the origin on the top left corner of the padded area. */
+    protected abstract fun paint(canvas: LbHudCanvas)
+
+    init {
+        staticW = DEFAULT_WIDTH
+        staticH = DEFAULT_HEIGHT
+    }
 
     /**
-     * Fallback size used before the first paint pass.
+     * OneConfig asks the element how often it wants to be updated. The content is repainted every frame from the live
+     * game state, so the update pass only exists to keep the reported size in sync with the content.
      *
-     * OneConfig asks for the minimum size *before* it renders the element for the first time, so a zero size would
-     * make the very first frame invisible and misplaced until the next frame.
+     * The size is not measured during registration: measuring text needs the game's font pipeline, which is only
+     * available once the client is running.
      */
-    protected open fun defaultSize(): HudSize = HudSize(DEFAULT_WIDTH, DEFAULT_HEIGHT)
+    override fun updateFrequency(): Long = UPDATE_INTERVAL_NANOS
 
-    final override fun getWidth(): Float = measuredWidth.takeIf { it > 0f } ?: defaultSize().width
+    override fun update(): Boolean {
+        syncSize()
+        return true
+    }
 
-    final override fun getHeight(): Float = measuredHeight.takeIf { it > 0f } ?: defaultSize().height
+    /** Recomputes the reported size, asking OneConfig for a new layout pass when it changed. */
+    private fun syncSize() {
+        val content = measure()
+        val width = (content.width + padLeft + padRight).coerceAtLeast(MIN_EXTENT)
+        val height = (content.height + padTop + padBottom).coerceAtLeast(MIN_EXTENT)
 
-    /** Paints the element at HUD local origin `(0, 0)` and returns the size it occupied. */
-    protected abstract fun paint(canvas: LbHudCanvas): HudSize
-
-    /** OneConfig polls the element on a timer, but the element is redrawn every frame anyway. */
-    override fun update(): Boolean = true
-
-    /** HUD content follows the world state, so a cached frame would go stale right away. */
-    override fun getAlwaysRedraw(): Boolean = true
-
-    final override fun render(ctx: GuiGraphicsExtractor) {
-        val delta = deltaSeconds()
-        val renderer = BlazeRenderer(mc.window.guiScale.toFloat(), false)
-
-        val operations = try {
-            val size = paint(
-                LbHudCanvas(
-                    context = RenderContext(renderer),
-                    width = mc.window.guiScaledWidth.toFloat(),
-                    height = mc.window.guiScaledHeight.toFloat(),
-                    deltaSeconds = delta,
-                    inEditor = HudManager.isEditing,
-                ),
-            )
-            measuredWidth = size.width.coerceAtLeast(0f)
-            measuredHeight = size.height.coerceAtLeast(0f)
-            renderer.finish()
-        } catch (throwable: Throwable) {
-            // A broken element must not take the whole HUD pass down.
-            logger.error("Unable to paint the '$title' HUD element", throwable)
+        if (width == staticW && height == staticH) {
             return
         }
 
-        GlyphAtlas.uploadDirty()
-        replay(ctx, operations)
+        staticW = width
+        staticH = height
+        contentChanged()
     }
 
-    /** Hands the recorded operations to the GUI render state, so they are drawn after the current layer. */
-    private fun replay(ctx: GuiGraphicsExtractor, operations: List<(GuiGraphicsExtractor) -> Unit>) {
-        val state = ctx.guiRenderState
-        val stacking = state as? StackingGuiRenderState
+    /** The content is drawn every frame from the live game state, so a cached frame must never be reused. */
+    override val alwaysRedraw: Boolean
+        get() = true
 
-        stacking?.polycompose$setStacking(true)
-        try {
-            operations.forEach { operation -> operation(ctx) }
-        } finally {
-            stacking?.polycompose$setStacking(false)
+    @Composable
+    override fun Content() {
+        NodeCanvas(
+            hudBackground()
+                .size(staticW, staticH)
+                .padding(padLeft, padTop, padRight, padBottom),
+            live = true,
+        ) { x, y, width, height ->
+            paintSafely(this, x, y, width, height)
         }
+    }
+
+    /** Runs the paint pass, logging instead of throwing so one broken element cannot take the HUD down. */
+    private fun paintSafely(context: RenderContext, x: Float, y: Float, width: Float, height: Float) {
+        context.save()
+        context.translate(x, y)
+
+        try {
+            paint(
+                LbHudCanvas(
+                    context = context,
+                    width = width,
+                    height = height,
+                    deltaSeconds = deltaSeconds(),
+                    inEditor = HudManager.isEditing,
+                ),
+            )
+        } catch (throwable: Throwable) {
+            logger.error("Unable to paint the '$title' HUD element", throwable)
+        } finally {
+            context.restore()
+        }
+    }
+
+    /** Asks OneConfig to re-run the Compose pass, used when an option of this element changed. */
+    fun invalidate() {
+        contentChanged()
     }
 
     /**
@@ -133,6 +155,13 @@ abstract class LbHud(
     }
 
     private companion object {
+        /** How often OneConfig polls the element, in nanoseconds. */
+        const val UPDATE_INTERVAL_NANOS: Long = 50_000_000L
+
+        /** Smallest extent an element may report, so an empty element stays snappable in the editor. */
+        const val MIN_EXTENT: Float = 1f
+
+        /** Size reported for the first layout pass, before the content has been measured once. */
         const val DEFAULT_WIDTH: Float = 60f
         const val DEFAULT_HEIGHT: Float = 12f
     }

@@ -74,7 +74,7 @@ internal object LbHudStore {
 
         tree.addMetadata(CUSTOM_SAVE, Runnable { save(tree, file) })
 
-        tree.onAllProps { _, property -> bindSave(property, tree, file) }
+        tree.onAllProps { _, property -> bindSave(owner, property, tree, file) }
     }
 
     /**
@@ -82,12 +82,13 @@ internal object LbHudStore {
      * waiting for OneConfig to flush its profiles.
      *
      * The predicate is called while the value is being written and may veto the change by returning `true`; this
-     * listener always allows it and only records that something changed.
+     * listener always allows it, records that something changed and asks the element to repaint.
      */
     @Suppress("UNCHECKED_CAST")
-    private fun bindSave(property: Property<*>, tree: Tree, file: File) {
+    private fun bindSave(owner: LbHud, property: Property<*>, tree: Tree, file: File) {
         (property as Property<Any?>).addCallback {
             requestSave(tree, file)
+            owner.invalidate()
             false
         }
     }

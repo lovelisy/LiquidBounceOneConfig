@@ -21,6 +21,7 @@ package net.ccbluex.liquidbounce.integration.oneconfig.hud
 import net.ccbluex.liquidbounce.features.module.ClientModule
 import net.ccbluex.liquidbounce.features.module.ModuleManager
 import org.polyfrost.compose.render.PolyColor
+import org.polyfrost.compose.render.PolyFont
 import org.polyfrost.oneconfig.api.config.v1.annotations.Color
 import org.polyfrost.oneconfig.api.config.v1.annotations.Dropdown
 import org.polyfrost.oneconfig.api.config.v1.annotations.Slider
@@ -28,7 +29,7 @@ import org.polyfrost.oneconfig.api.config.v1.annotations.Switch
 import org.polyfrost.oneconfig.api.hud.v1.Hud
 
 /**
- * Lists every running module, one per line.
+ * Lists every enabled module, one per line.
  */
 object ArrayListHud : LbHudBase("arraylist", "Array List", Hud.Category.INFO) {
 
@@ -60,39 +61,51 @@ object ArrayListHud : LbHudBase("arraylist", "Array List", Hud.Category.INFO) {
     @JvmField
     var lineSpacing: Float = 0f
 
-    override fun paint(canvas: LbHudCanvas): HudSize {
-        val modules = runningModules()
-        if (modules.isEmpty()) {
-            return HudSize(0f, 0f)
+    private fun modules(): List<ClientModule> {
+        val enabled = ModuleManager.filter { module -> module.enabled && !module.hidden }
+        return when (sortMode) {
+            "Alphabetical" -> enabled.sortedBy { it.name.lowercase() }
+            else -> enabled.sortedByDescending { it.name.length }
         }
+    }
 
-        val font = canvas.font(fontSize, fontName)
-        val lineHeight = canvas.lineHeight(font) + lineSpacing
-        val labels = modules.map(::labelFor)
+    private fun labels(): List<String> = modules().map { module ->
+        val tag = module.category.tag
+        if (!showCategory || tag == null) module.name else "$tag · ${module.name}"
+    }
 
-        val contentWidth = labels.maxOf { canvas.measure(it, font) }
-        val contentHeight = lineHeight * labels.size
+    override fun measure(): HudSize {
+        val font = hudFont()
+        val labels = labels()
+        val width = labels.maxOfOrNull { textWidth(it, font) } ?: textWidth(PLACEHOLDER, font)
+        val height = lineHeight(font) * labels.size.coerceAtLeast(1)
+        return HudSize(width, height)
+    }
 
-        val size = backdrop(canvas, contentWidth, contentHeight)
-        val inner = content(canvas)
-        val textX = if (rightAligned) contentWidth else 0f
+    override fun paint(canvas: LbHudCanvas) {
+        val font = hudFont()
+        val step = lineHeight(font) + lineSpacing
+        val labels = labels()
+        val painted = if (rainbow) canvas.rainbow(rainbowSpeed) else color
+        val contentWidth = labels.maxOfOrNull { canvas.measure(it, font) } ?: 0f
 
         labels.forEachIndexed { index, label ->
-            val painted = if (rainbow) canvas.rainbow(rainbowSpeed) else color
-            drawLabel(inner, label, textX, index * lineHeight, painted, font)
+            val x = if (rightAligned) contentWidth - canvas.measure(label, font) else 0f
+            drawLabel(canvas, label, x, index * step, painted, font)
         }
-
-        return size
     }
 
-    private fun runningModules(): List<ClientModule> = when (sortMode) {
-        "Alphabetical" -> ModuleManager.filter(::isListed).sortedBy { it.name.lowercase() }
-        else -> ModuleManager.filter(::isListed).sortedByDescending { it.name.length }
+    private fun drawLabel(
+        canvas: LbHudCanvas,
+        label: String,
+        x: Float,
+        y: Float,
+        color: PolyColor,
+        font: PolyFont,
+    ) {
+        drawText(canvas, label, x, y, color, font)
     }
 
-    private fun isListed(module: ClientModule): Boolean = module.enabled && !module.hidden
-
-    private fun labelFor(module: ClientModule): String =
-        if (showCategory) "${module.category.tag} · ${module.name}" else module.name
+    private const val PLACEHOLDER = "Array List"
 
 }
