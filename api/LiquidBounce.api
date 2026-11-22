@@ -955,11 +955,12 @@ public final class net/ccbluex/liquidbounce/features/module/modules/player/autos
 	public fun onTick (Ljava/lang/Runnable;)Ljava/lang/AutoCloseable;
 }
 
-public final class net/ccbluex/liquidbounce/features/module/modules/render/ModuleClickGui : net/ccbluex/liquidbounce/features/module/ClientModule {
-	public static final field $stable I
-	public static final field INSTANCE Lnet/ccbluex/liquidbounce/features/module/modules/render/ModuleClickGui;
-	public fun getRunning ()Z
-	public fun onEnabled ()V
+public abstract class net/ccbluex/liquidbounce/integration/oneconfig/hud/LbHud : org/polyfrost/oneconfig/api/hud/v1/Hud, net/ccbluex/liquidbounce/event/EventListener {
+	public fun after (ILjava/lang/Runnable;)Ljava/lang/AutoCloseable;
+	public fun every (ILjava/lang/Runnable;)Ljava/lang/AutoCloseable;
+	public fun on (Ljava/lang/Class;Ljava/util/function/Consumer;)Ljava/lang/AutoCloseable;
+	public fun on (Ljava/lang/Class;SLjava/util/function/Consumer;)Ljava/lang/AutoCloseable;
+	public fun onTick (Ljava/lang/Runnable;)Ljava/lang/AutoCloseable;
 }
 
 public final class net/ccbluex/liquidbounce/lang/LanguageKt {
