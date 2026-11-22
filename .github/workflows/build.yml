@@ -34,19 +34,6 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
 
-      - name: Refresh the Kotlin ABI dump
-        env:
-          CI: true
-        run: ./gradlew updateKotlinAbi --console=plain
-
-      - name: Upload the Kotlin ABI dump
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: kotlin-abi
-          path: api/LiquidBounce.api
-          if-no-files-found: warn
-
       - name: Build
         env:
           CI: true
