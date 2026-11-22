@@ -35,6 +35,10 @@ internal object LbText {
     private const val CATEGORY_PREFIX = "liquidbounce.category"
     private const val TAG_PREFIX = "liquidbounce.tag"
 
+    /** Namespace of the HUD element translations inside the LiquidBounce language files. */
+    const val HUD_KEY_PREFIX = "liquidbounce.hud"
+    private const val HUD_PREFIX = "liquidbounce.hud"
+
     fun trOrNull(key: String?): String? {
         if (key.isNullOrBlank()) {
             return null
@@ -65,6 +69,28 @@ internal object LbText {
             ?: trOrNull("$SETTING_PREFIX.${lowerFirst(tag)}.name")
             ?: tag
 
+    /**
+     * Title of a HUD element as a translatable component through the `liquidbounce.hud` namespace, falling back to
+     * [fallback] for languages that do not carry the key. The component is resolved by OneConfig with the game's own
+     * translation system, so a language switch applies without a restart.
+     */
+    fun hudTitle(hudId: String, fallback: String): net.minecraft.network.chat.Component =
+        hudComponent("$HUD_PREFIX.$hudId.name", fallback)
+
+    /** Translatable component of a `liquidbounce.hud` key, falling back to [fallback]. */
+    fun hudComponent(key: String, fallback: String): net.minecraft.network.chat.Component =
+        net.minecraft.network.chat.Component.translatableWithFallback(key, fallback)
+
+    /**
+     * Plain translated string of a `liquidbounce.hud` key in the in-game language, falling back to [fallback].
+     * Used for text the HUD paints itself, where a component cannot be handed to the renderer.
+     */
+    fun hudString(key: String, fallback: String): String =
+        trOrNull(key) ?: fallback
+
+    fun lowerFirst(name: String): String =
+        if (name.isEmpty()) name else name[0].lowercaseChar() + name.substring(1)
+
     fun description(value: Value<*>): String? {
         val key = value.descriptionKey
         val text = value.description.get()?.takeIf { it.isNotBlank() } ?: return null
@@ -75,8 +101,5 @@ internal object LbText {
 
         return text
     }
-
-    private fun lowerFirst(name: String): String =
-        if (name.isEmpty()) name else name[0].lowercaseChar() + name.substring(1)
 
 }

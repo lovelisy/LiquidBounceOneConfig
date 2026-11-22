@@ -20,6 +20,7 @@ package net.ccbluex.liquidbounce.integration.oneconfig.hud
 
 import net.ccbluex.liquidbounce.event.events.NotificationEvent
 import net.ccbluex.liquidbounce.event.handler
+import net.ccbluex.liquidbounce.integration.oneconfig.LbText
 import org.polyfrost.oneconfig.api.config.v1.annotations.Switch
 import org.polyfrost.oneconfig.api.hud.v1.Hud
 import java.util.concurrent.CopyOnWriteArrayList
@@ -119,8 +120,8 @@ object NotificationsHud : LbHudBase("notifications", "Notifications", Hud.Catego
                     canvas,
                     0f,
                     0f,
-                    SAMPLE_TITLE,
-                    SAMPLE_MESSAGE,
+                    LbText.hudString("liquidbounce.hud.notifications.name", "Notifications"),
+                    LbText.hudString("liquidbounce.hud.notifications.sample.message", "Client notifications appear here"),
                     NotificationEvent.Severity.INFO,
                     0.5f,
                     1f,
@@ -220,7 +221,5 @@ object NotificationsHud : LbHudBase("notifications", "Notifications", Hud.Catego
     private const val LIFETIME_MS: Long = 3200L
     private const val FADE_START_MS: Long = 3000L
     private const val FADE_DURATION_MS: Long = 200L
-    private const val SAMPLE_TITLE: String = "Notifications"
-    private const val SAMPLE_MESSAGE: String = "Client notifications appear here"
 
 }

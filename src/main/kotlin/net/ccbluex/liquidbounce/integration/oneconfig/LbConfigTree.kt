@@ -601,12 +601,22 @@ internal object LbConfigTree {
         return property
     }
 
+    /**
+     * Text property of a [Value]. The value type only tells the input format, not the runtime class: regex values and
+     * regex lists are also [ValueType.TEXT], so reading and writing has to go through [Value.get] unchecked and fall
+     * back to [Value.setByString] whenever the value is not a plain string.
+     */
     private fun textProperty(value: Value<*>): Property<String> {
-        @Suppress("UNCHECKED_CAST")
-        val target = value as Value<String>
         val property = Properties.functional(
-            Supplier { target.get() },
-            Consumer { text: String -> target.set(text) },
+            Supplier {
+                runCatching { @Suppress("UNCHECKED_CAST") (value as Value<String>).get() }
+                    .getOrElse { describeValue(value.get()) }
+            },
+            Consumer { text: String ->
+                runCatching { @Suppress("UNCHECKED_CAST") (value as Value<String>).set(text) }
+                    .onFailure { runCatching { value.setByString(text) } }
+                Unit
+            },
             id("text", value.name),
             LbText.valueName(value),
             LbText.description(value) ?: "",

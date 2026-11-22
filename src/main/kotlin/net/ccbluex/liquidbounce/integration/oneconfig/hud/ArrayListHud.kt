@@ -19,6 +19,7 @@
 package net.ccbluex.liquidbounce.integration.oneconfig.hud
 
 import net.ccbluex.liquidbounce.features.module.ClientModule
+import net.ccbluex.liquidbounce.integration.oneconfig.LbText
 import net.ccbluex.liquidbounce.features.module.ModuleManager
 import org.polyfrost.oneconfig.api.config.v1.annotations.Dropdown
 import org.polyfrost.oneconfig.api.config.v1.annotations.Switch
@@ -96,11 +97,14 @@ object ArrayListHud : LbHudBase("arraylist", "Array List", Hud.Category.INFO) {
         return HudSize(maxWidth, rows.size * rowHeight())
     }
 
+    /** Sample row shown in the HUD editor, in the in-game language. */
+    private fun sampleName(): String = LbText.hudString("liquidbounce.hud.arraylist.sample.name", "Array List")
+
     override fun paint(canvas: LbHudCanvas) {
         val rows = rows()
         if (rows.isEmpty()) {
             if (canvas.inEditor) {
-                drawRow(canvas, SAMPLE_NAME, null, 0f, 0f, EMPTY_WIDTH)
+                drawRow(canvas, sampleName(), null, 0f, 0f, EMPTY_WIDTH)
             }
             return
         }
@@ -179,6 +183,5 @@ object ArrayListHud : LbHudBase("arraylist", "Array List", Hud.Category.INFO) {
     private const val HORIZONTAL_PADDING: Float = 8f
     private const val ACCENT_WIDTH: Float = 4f
     private const val EMPTY_WIDTH: Float = 110f
-    private const val SAMPLE_NAME: String = "Array List"
 
 }

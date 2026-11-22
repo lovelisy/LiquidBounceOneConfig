@@ -20,6 +20,7 @@ package net.ccbluex.liquidbounce.integration.oneconfig.hud
 
 import net.ccbluex.liquidbounce.event.events.AttackEntityEvent
 import net.ccbluex.liquidbounce.event.handler
+import net.ccbluex.liquidbounce.integration.oneconfig.LbText
 import net.ccbluex.liquidbounce.features.module.modules.combat.killaura.ModuleKillAura
 import net.ccbluex.liquidbounce.utils.client.mc
 import net.ccbluex.liquidbounce.utils.combat.shouldBeAttacked
@@ -48,8 +49,6 @@ object TargetHud : LbHudBase("target_hud", "Target HUD", Hud.Category.COMBAT) {
     private const val GAP: Float = 10f
     private const val MAIN_HEIGHT: Float = 70f
     private const val BAR_HEIGHT: Float = 8f
-    private const val EMPTY_WIDTH: Float = 240f
-    private const val EMPTY_HEIGHT: Float = 78f
 
     private var lastTarget: LivingEntity? = null
     private var lastTargetMs: Long = 0L
@@ -107,12 +106,18 @@ object TargetHud : LbHudBase("target_hud", "Target HUD", Hud.Category.COMBAT) {
     }
 
     override fun measure(): HudSize {
-        val target = resolveTarget(HudManager.isEditing) ?: return HudSize(EMPTY_WIDTH, EMPTY_HEIGHT)
+        val target = resolveTarget(HudManager.isEditing) ?: return HudSize(SAMPLE_WIDTH, SAMPLE_HEIGHT)
         return HudSize(cardWidth(target), MAIN_HEIGHT + BAR_HEIGHT)
     }
 
     override fun paint(canvas: LbHudCanvas) {
-        val target = resolveTarget(canvas.inEditor) ?: return
+        val target = resolveTarget(canvas.inEditor)
+        if (target == null) {
+            if (canvas.inEditor) {
+                paintSample(canvas)
+            }
+            return
+        }
 
         val name = target.name.string
         val health = target.health.coerceAtLeast(0f)
@@ -161,6 +166,46 @@ object TargetHud : LbHudBase("target_hud", "Target HUD", Hud.Category.COMBAT) {
                 LbHudPalette.HOTBAR_HEALTH_COLOR,
             )
         }
+    }
+
+    /**
+     * Editor sample card, drawn whenever there is no real target, for example in the HUD browser preview while the
+     * main menu is open. It keeps the fixed sample size so OneConfig can fit it inside the preview box.
+     */
+    private fun paintSample(canvas: LbHudCanvas) {
+        val cardWidth = SAMPLE_WIDTH
+        val cardHeight = MAIN_HEIGHT + BAR_HEIGHT
+
+        canvas.fill(0f, 0f, cardWidth, cardHeight, LbHudPalette.surface(0.68f), 5f)
+
+        val fallback = LbHudTextures.get(STEVE_FACE)
+        if (fallback != null) {
+            canvas.roundedTexture(
+                fallback,
+                PADDING, 10f, AVATAR_SIZE, AVATAR_SIZE, 5f,
+                0f, 0f, fallback.width.toFloat(), fallback.height.toFloat(),
+                -1,
+            )
+        }
+
+        drawText(canvas, LbText.hudString("liquidbounce.hud.target_hud.sample.name", "Player"), PADDING + AVATAR_SIZE + GAP, 14f, NAME_SIZE, LbHudPalette.TEXT_COLOR, LbHudFonts.Weight.MEDIUM)
+
+        var statX = PADDING + AVATAR_SIZE + GAP
+        val statY = 40f
+        statX += drawStat(canvas, statX, statY, SAMPLE_HEALTH, TARGET_HEALTH) + GAP
+        drawStat(canvas, statX, statY, SAMPLE_ARMOUR, TARGET_ARMOR)
+
+        canvas.fillCssBox(
+            0f,
+            MAIN_HEIGHT,
+            cardWidth * SAMPLE_HEALTH_RATIO,
+            BAR_HEIGHT,
+            0f,
+            0f,
+            0f,
+            5f,
+            LbHudPalette.HOTBAR_HEALTH_COLOR,
+        )
     }
 
     private fun drawAvatar(canvas: LbHudCanvas, target: LivingEntity) {
@@ -239,5 +284,12 @@ object TargetHud : LbHudBase("target_hud", "Target HUD", Hud.Category.COMBAT) {
     private const val NAME_SIZE: Float = 15f
     private const val STAT_SIZE: Float = 14f
     private const val TARGET_CACHE_MS: Long = 1200L
+
+    /** Fixed size of the editor sample card, chosen to stay inside OneConfig's HUD browser preview box. */
+    private const val SAMPLE_WIDTH: Float = 150f
+    private const val SAMPLE_HEIGHT: Float = 78f
+    private const val SAMPLE_HEALTH: String = "20"
+    private const val SAMPLE_ARMOUR: String = "10"
+    private const val SAMPLE_HEALTH_RATIO: Float = 1f
 
 }

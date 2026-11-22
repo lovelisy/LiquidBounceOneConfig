@@ -180,7 +180,7 @@ class LbHudCanvas internal constructor(
         if (boxW <= 0f || boxH <= 0f || (argb ushr 24) == 0) return
 
         val bitmap = LbHudTextures.get(path) ?: return
-        if (bitmap.height <= 0) return
+        if (bitmap.width <= 0 || bitmap.height <= 0) return
 
         val aspect = bitmap.width.toFloat() / bitmap.height.toFloat()
         val drawW: Float
@@ -203,8 +203,8 @@ class LbHudCanvas internal constructor(
             drawH,
             0f,
             0f,
-            bitmap.width.toFloat(),
-            bitmap.height.toFloat(),
+            1f,
+            1f,
             PolyColor(argb),
             FilterQuality.Medium,
         )
@@ -213,7 +213,8 @@ class LbHudCanvas internal constructor(
     /**
      * Draws a rounded cut-out of [bitmap].
      *
-     * The texture coordinates are expressed in pixels of the bitmap, matching the native rounded texture helper.
+     * The texture coordinates are expressed in pixels of the bitmap and normalized internally, because the renderer
+     * samples the whole bitmap with the unit square.
      */
     fun roundedTexture(
         bitmap: PolyBitmap,
@@ -229,11 +230,26 @@ class LbHudCanvas internal constructor(
         argb: Int = -1,
     ) {
         if (w <= 0f || h <= 0f || (argb ushr 24) == 0) return
+        if (bitmap.width <= 0 || bitmap.height <= 0) return
 
+        val uMax = bitmap.width.toFloat()
+        val vMax = bitmap.height.toFloat()
         context.save()
         try {
             context.clipRRect(x, y, w, h, radius.coerceIn(0f, min(w, h) * 0.5f))
-            context.image(bitmap, x, y, w, h, u0, v0, u1, v1, PolyColor(argb), FilterQuality.Medium)
+            context.image(
+                bitmap,
+                x,
+                y,
+                w,
+                h,
+                u0 / uMax,
+                v0 / vMax,
+                u1 / uMax,
+                v1 / vMax,
+                PolyColor(argb),
+                FilterQuality.Medium,
+            )
         } finally {
             context.restore()
         }

@@ -20,9 +20,13 @@ package net.ccbluex.liquidbounce.integration.oneconfig.hud
 
 import com.google.gson.JsonObject
 import net.ccbluex.liquidbounce.config.ConfigSystem
+import net.ccbluex.liquidbounce.integration.oneconfig.LbText
 import net.ccbluex.liquidbounce.utils.client.logger
+import org.polyfrost.oneconfig.api.config.v1.MetaKeys
+import org.polyfrost.oneconfig.api.config.v1.Node
 import org.polyfrost.oneconfig.api.config.v1.Property
 import org.polyfrost.oneconfig.api.config.v1.Tree
+import java.lang.reflect.Method
 import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executors
@@ -74,8 +78,60 @@ internal object LbHudStore {
 
         tree.addMetadata(CUSTOM_SAVE, Runnable { save(tree, file) })
 
+        replaceTitle(
+            tree,
+            LbText.hudTitle(owner.id, tree.getTitle()?.toString() ?: owner.id),
+        )
+
+        tree.onAllProps { _, property -> localize(owner, property) }
         tree.onAllProps { _, property -> bindSave(owner, property, tree, file) }
     }
+
+    /**
+     * Wires the collected properties into OneConfig's translation system. Titles become translatable components and
+     * dropdown options get translatable labels, so the settings panel of the element follows the in-game language and
+     * falls back to the annotated English text. The language files of the client are standard Minecraft language
+     * resources, which the game loads for every namespace, so the keys resolve without further plumbing.
+     *
+     * OneConfig marks the title of a node as final once it has been read, so the package private title replace has to
+     * be used through reflection.
+     */
+    private fun localize(owner: LbHud, property: Property<*>) {
+        val title = property.getTitle()?.toString() ?: return
+        val prefix = "${LbText.HUD_KEY_PREFIX}.${owner.id}"
+
+        val options = property.getMetadata(MetaKeys.OPTIONS.name) as? List<*>
+        if (!options.isNullOrEmpty()) {
+            val labels = options.map { option ->
+                LbText.hudComponent("$prefix.${LbText.lowerFirst(title)}.${LbText.lowerFirst(option.toString())}", option.toString())
+            }
+            property.addMetadata(MetaKeys.LABELS.name, labels)
+        }
+
+        replaceTitle(property, LbText.hudComponent("$prefix.${LbText.lowerFirst(title)}.name", title))
+    }
+
+    private fun replaceTitle(node: Node, title: Any) {
+        runCatching {
+            replacement().apply(node, title)
+        }.onFailure {
+            logger.warn("Unable to translate the title of '${node.getID()}'", it)
+        }
+    }
+
+    /**
+     * `Node.replaceTitle` is package private: OneConfig locks the title of a node after it has been read once, and
+     * only this method may overwrite it. The lookup is deferred so a changed OneConfig build cannot break class
+     * initialisation, it only skips the translation.
+     */
+    private fun replacement(): Method? =
+        replacementCache ?: run {
+            runCatching {
+                Node::class.java.getDeclaredMethod("replaceTitle", Any::class.java).apply { isAccessible = true }
+            }.getOrNull().also { replacementCache = it }
+        }
+
+    private var replacementCache: Method? = null
 
     /**
      * Wires [property] to a deferred write, so a change made in the HUD settings panel reaches the disk without
