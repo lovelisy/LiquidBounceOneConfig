@@ -40,8 +40,6 @@ import net.ccbluex.liquidbounce.api.services.client.ClientUpdate
 import net.ccbluex.liquidbounce.api.thirdparty.IpInfoApi
 import net.ccbluex.liquidbounce.config.ConfigSystem
 import net.ccbluex.liquidbounce.config.types.Config
-import net.ccbluex.liquidbounce.deeplearn.DeepLearningEngine
-import net.ccbluex.liquidbounce.deeplearn.ModelManager
 import net.ccbluex.liquidbounce.event.EventListener
 import net.ccbluex.liquidbounce.event.EventManager
 import net.ccbluex.liquidbounce.features.addon.AddonInstaller
@@ -67,12 +65,10 @@ import net.ccbluex.liquidbounce.features.misc.proxy.ProxyManager
 import net.ccbluex.liquidbounce.features.module.ModuleManager
 import net.ccbluex.liquidbounce.features.spoofer.SpooferManager
 import net.ccbluex.liquidbounce.integration.backend.BrowserBackendManager
-import net.ccbluex.liquidbounce.integration.backend.BrowserSelectionScreen
 import net.ccbluex.liquidbounce.integration.interop.ClientInteropServer
 import net.ccbluex.liquidbounce.integration.interop.protocol.rest.v1.game.ActiveServerList
 import net.ccbluex.liquidbounce.integration.screen.ScreenManager
 import net.ccbluex.liquidbounce.integration.task.TaskManager
-import net.ccbluex.liquidbounce.integration.task.TaskProgressScreen
 import net.ccbluex.liquidbounce.integration.theme.ThemeManager
 import net.ccbluex.liquidbounce.lang.LanguageManager
 import net.ccbluex.liquidbounce.render.FontManager
@@ -408,37 +404,12 @@ object LiquidBounce : EventListener {
         // Holds the chosen browser backend
         ConfigSystem.load(GlobalManager)
 
+        // WebUI dependency downloads, the AI/deep-learning engine and the marketplace
+        // updater have been removed. No browser backend is requested and nothing is
+        // downloaded on startup, so there is no loading screen to display.
+        // Keep a completed TaskManager for API compatibility with code that reads it.
         taskManager = TaskManager(ioScope).apply {
-            // Either immediately starts browser or spawns a task to request browser dependencies,
-            // and then starts the browser through render thread.
-            BrowserBackendManager.makeDependenciesAvailable(this)
-
-            // Initialize deep learning engine as task, because we cannot know if DJL will request
-            // resources from the internet.
-            launch("Deep Learning") { task ->
-                runCatching {
-                    DeepLearningEngine.init(task)
-                    ModelManager.load()
-                    DeepLearningEngine.markInitialized()
-                }.onFailure { exception ->
-                    task.subTasks.clear()
-                    DeepLearningEngine.markUnavailable()
-
-                    // LiquidBounce can still run without deep learning,
-                    // and we don't want to crash the client if it fails.
-                    logger.info("Failed to initialize deep learning.", exception)
-                }
-            }
-
-            launch("Marketplace") { task ->
-                runCatching {
-                    MarketplaceManager.updateAll(task)
-                }.onFailure { exception ->
-                    logger.error("Failed to update marketplace items.", exception)
-                }
-
-                task.isCompleted = true
-            }
+            launch("No-op") { task -> task.isCompleted = true }
         }
 
         // Prepare glyph manager
@@ -519,21 +490,8 @@ object LiquidBounce : EventListener {
 
     @Suppress("unused")
     private val screenHandler = handler<ScreenEvent>(priority = FIRST_PRIORITY) { event ->
-        val taskManager = taskManager ?: return@handler
-
-        val selection = BrowserBackendManager.pendingSelection
-        if (selection != null && !selection.isCompleted) {
-            if (event.screen !is BrowserSelectionScreen) {
-                event.cancelEvent()
-                mc.gui.setScreen(BrowserSelectionScreen(BrowserBackendManager.selectableBackends, selection))
-            }
-            return@handler
-        }
-
-        if (!taskManager.isCompleted && event.screen !is TaskProgressScreen) {
-            event.cancelEvent()
-            mc.gui.setScreen(TaskProgressScreen("Loading Required Libraries", taskManager))
-        }
+        // WebUI dependency downloads and the browser-backend selection screen have been
+        // removed. No "Loading Required Libraries" or browser selection overlay is shown.
     }
 
     /**

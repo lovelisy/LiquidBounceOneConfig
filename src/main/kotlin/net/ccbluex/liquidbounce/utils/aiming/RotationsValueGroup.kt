@@ -27,7 +27,6 @@ import net.ccbluex.liquidbounce.utils.aiming.features.MovementCorrection
 import net.ccbluex.liquidbounce.utils.aiming.features.processors.FailRotationProcessor
 import net.ccbluex.liquidbounce.utils.aiming.features.processors.ShortStopRotationProcessor
 import net.ccbluex.liquidbounce.utils.aiming.features.processors.anglesmooth.impl.AccelerationAngleSmooth
-import net.ccbluex.liquidbounce.utils.aiming.features.processors.anglesmooth.impl.AiAngleSmooth
 import net.ccbluex.liquidbounce.utils.aiming.features.processors.anglesmooth.impl.InterpolationAngleSmooth
 import net.ccbluex.liquidbounce.utils.aiming.features.processors.anglesmooth.impl.LinearAngleSmooth
 import net.ccbluex.liquidbounce.utils.aiming.features.processors.anglesmooth.impl.SigmoidAngleSmooth
@@ -52,8 +51,7 @@ open class RotationsValueGroup(
             linearAngleSmooth,
             SigmoidAngleSmooth(it),
             interpolationAngleSmooth,
-            AccelerationAngleSmooth(it),
-            if (combatSpecific) AiAngleSmooth(it, interpolationAngleSmooth ?: linearAngleSmooth) else null
+            AccelerationAngleSmooth(it)
         ).toTypedArray()
     }
 
