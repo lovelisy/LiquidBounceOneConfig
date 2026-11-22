@@ -202,6 +202,10 @@ class LbHudCanvas internal constructor(
             centerY - drawH * 0.5f,
             drawW,
             drawH,
+            0f,
+            0f,
+            bitmap.width.toFloat(),
+            bitmap.height.toFloat(),
             PolyColor(argb),
             FilterQuality.Medium,
         )
