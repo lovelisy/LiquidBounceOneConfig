@@ -39,7 +39,7 @@ abstract class LbHudBase(id: String, title: String, category: Hud.Category) : Lb
         text: String,
         size: Float,
         weight: LbHudFonts.Weight = LbHudFonts.Weight.REGULAR,
-    ): Float = LbHudFonts.measure(text, size, weight)
+    ): Float = LbHudFonts.measureFor(text, size, weight)
 
     protected fun lineHeight(
         size: Float,
@@ -59,7 +59,7 @@ abstract class LbHudBase(id: String, title: String, category: Hud.Category) : Lb
         size: Float,
         argb: Int,
         weight: LbHudFonts.Weight = LbHudFonts.Weight.REGULAR,
-    ): Float = canvas.text(text, x, y, hudFont(size, weight), PolyColor(argb))
+    ): Float = canvas.text(text, x, y, LbHudFonts.fontFor(text, size, weight), PolyColor(argb))
 
     /** Shortens [text] with an ellipsis until it fits into [maxWidth]. */
     protected fun ellipsize(

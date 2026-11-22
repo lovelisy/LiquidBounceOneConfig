@@ -39,6 +39,13 @@ object LbHudFonts {
         BOLD("lb-inter-bold", "assets/liquidbounce/fonts/Inter-Bold.ttf"),
     }
 
+    /**
+     * Font engine key of OneConfig's bundled unifont, used whenever a string contains glyphs that Inter does not
+     * carry, which is every CJK ideograph. The stb font engine has no glyph level fallback, so callers have to
+     * switch fonts themselves.
+     */
+    private const val UNIFONT_KEY = "unifont"
+
     @Volatile
     private var registered: Boolean = false
 
@@ -70,6 +77,21 @@ object LbHudFonts {
         ensureRegistered()
         return PolyFont(weight.key, size)
     }
+
+    /**
+     * Picks the font for [text]: Inter whenever the string is fully covered by it, otherwise OneConfig's unifont,
+     * which carries every CJK glyph. The choice is per string, matching how the native HUD components pass whole
+     * lines of text.
+     */
+    fun fontFor(text: String, size: Float, weight: Weight = Weight.REGULAR): PolyFont =
+        if (needsCjkFallback(text)) PolyFont(UNIFONT_KEY, size) else font(size, weight)
+
+    /** Width of [text] in the font that [fontFor] would pick, at [size]. */
+    fun measureFor(text: String, size: Float, weight: Weight = Weight.REGULAR): Float =
+        if (text.isEmpty()) 0f else fontFor(text, size, weight).measureTextWidth(text)
+
+    /** Whether [text] contains at least one glyph outside the Latin, punctuation and symbol ranges of Inter. */
+    fun needsCjkFallback(text: String): Boolean = text.any { it.code >= 0x2E80 }
 
     /** Width of [text] in [weight] at [size], without needing a render context. */
     fun measure(text: String, size: Float, weight: Weight = Weight.REGULAR): Float =
