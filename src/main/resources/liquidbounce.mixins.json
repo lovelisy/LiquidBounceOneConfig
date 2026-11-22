@@ -94,7 +94,6 @@
     
     "minecraft.gui.custom.MixinConnectScreen",
     "minecraft.gui.custom.MixinDisconnectedScreen",
-    "minecraft.gui.custom.MixinLevelLoadingScreen",
     "minecraft.gui.widget.MixinAbstractSelectionList",
     "minecraft.gui.widget.MixinEditBox",
     "minecraft.item.MixinAttackRange",
