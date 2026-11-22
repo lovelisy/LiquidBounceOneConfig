@@ -30,7 +30,7 @@ object MurderMysteryFontDetection {
 
     private val LETTER_MAP: Map<String, BooleanArray> = run {
         val stream =
-            ModuleMurderMystery.javaClass.getResourceAsStream("/resources/liquidbounce/data/$FILE_NAME")
+            ModuleMurderMystery.javaClass.getResourceAsStream("/assets/liquidbounce/data/$FILE_NAME")
 
         checkNotNull(stream) { "Unable to find $FILE_NAME!" }
 

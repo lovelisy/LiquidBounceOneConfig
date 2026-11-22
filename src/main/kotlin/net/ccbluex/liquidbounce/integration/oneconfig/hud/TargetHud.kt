@@ -21,10 +21,8 @@ package net.ccbluex.liquidbounce.integration.oneconfig.hud
 import net.ccbluex.liquidbounce.event.events.AttackEntityEvent
 import net.ccbluex.liquidbounce.event.handler
 import net.ccbluex.liquidbounce.features.module.modules.combat.killaura.ModuleKillAura
-import net.ccbluex.liquidbounce.utils.client.clientIdentifier
 import net.ccbluex.liquidbounce.utils.client.mc
 import net.ccbluex.liquidbounce.utils.combat.shouldBeAttacked
-import net.minecraft.resources.Identifier
 import net.minecraft.util.ARGB
 import net.minecraft.world.entity.EquipmentSlot
 import net.minecraft.world.entity.LivingEntity
@@ -200,7 +198,7 @@ object TargetHud : LbHudBase("target_hud", "Target HUD", Hud.Category.COMBAT) {
         )
     }
 
-    private fun drawStat(canvas: LbHudCanvas, x: Float, y: Float, value: String, icon: Identifier): Float {
+    private fun drawStat(canvas: LbHudCanvas, x: Float, y: Float, value: String, icon: String): Float {
         val valueWidth = max(18f, textWidth(value, STAT_SIZE))
         drawText(canvas, value, x, y, STAT_SIZE, LbHudPalette.TEXT_DIMMED_COLOR)
         canvas.icon(icon, x + valueWidth + 3f, y + 1.5f, 14f, 14f, LbHudPalette.TEXT_COLOR)
@@ -233,10 +231,10 @@ object TargetHud : LbHudBase("target_hud", "Target HUD", Hud.Category.COMBAT) {
         }
     }
 
-    private val TARGET_HEALTH: Identifier = clientIdentifier("textures/ui/hud/targethud/icon-health.png")
-    private val TARGET_ABSORPTION: Identifier = clientIdentifier("textures/ui/hud/targethud/icon-absorption.png")
-    private val TARGET_ARMOR: Identifier = clientIdentifier("textures/ui/hud/targethud/icon-armor.png")
-    private val STEVE_FACE: Identifier = clientIdentifier("textures/ui/hud/targethud/steve.png")
+    private val TARGET_HEALTH = "textures/ui/hud/targethud/icon-health.png"
+    private val TARGET_ABSORPTION = "textures/ui/hud/targethud/icon-absorption.png"
+    private val TARGET_ARMOR = "textures/ui/hud/targethud/icon-armor.png"
+    private val STEVE_FACE = "textures/ui/hud/targethud/steve.png"
 
     private const val NAME_SIZE: Float = 15f
     private const val STAT_SIZE: Float = 14f

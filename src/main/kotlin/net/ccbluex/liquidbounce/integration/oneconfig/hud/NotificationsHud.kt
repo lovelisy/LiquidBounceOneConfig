@@ -20,8 +20,6 @@ package net.ccbluex.liquidbounce.integration.oneconfig.hud
 
 import net.ccbluex.liquidbounce.event.events.NotificationEvent
 import net.ccbluex.liquidbounce.event.handler
-import net.ccbluex.liquidbounce.utils.client.clientIdentifier
-import net.minecraft.resources.Identifier
 import org.polyfrost.oneconfig.api.config.v1.annotations.Switch
 import org.polyfrost.oneconfig.api.hud.v1.Hud
 import java.util.concurrent.CopyOnWriteArrayList
@@ -209,10 +207,10 @@ object NotificationsHud : LbHudBase("notifications", "Notifications", Hud.Catego
         }
     }
 
-    private val NOTIFY_SUCCESS: Identifier = clientIdentifier("textures/ui/hud/notification/icon-success.png")
-    private val NOTIFY_ERROR: Identifier = clientIdentifier("textures/ui/hud/notification/icon-error.png")
-    private val NOTIFY_INFO: Identifier = clientIdentifier("textures/ui/hud/notification/icon-info.png")
-    private val NOTIFY_TOGGLE: Identifier = clientIdentifier("textures/ui/hud/notification/icon-toggle.png")
+    private val NOTIFY_SUCCESS = "textures/ui/hud/notification/icon-success.png"
+    private val NOTIFY_ERROR = "textures/ui/hud/notification/icon-error.png"
+    private val NOTIFY_INFO = "textures/ui/hud/notification/icon-info.png"
+    private val NOTIFY_TOGGLE = "textures/ui/hud/notification/icon-toggle.png"
 
     private const val CARD_WIDTH: Float = 300f
     private const val CARD_HEIGHT: Float = 60f

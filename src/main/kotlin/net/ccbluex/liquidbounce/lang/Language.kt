@@ -87,7 +87,7 @@ object LanguageManager : ValueGroup("Language") {
     }
 
     private val clientTranslations = TranslationSource { code ->
-        javaClass.getResourceAsStream("/resources/liquidbounce/lang/$code.json")
+        javaClass.getResourceAsStream("/assets/liquidbounce/lang/$code.json")
             ?.readJson<HashMap<String, String>>()
     }
 

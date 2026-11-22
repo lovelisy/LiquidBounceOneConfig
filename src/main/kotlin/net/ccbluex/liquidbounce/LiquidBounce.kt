@@ -165,18 +165,18 @@ object LiquidBounce : EventListener {
     /**
      * Gets client resource.
      *
-     * @param path prefix `/resources/liquidbounce/`
+     * @param path prefix `/assets/liquidbounce/`
      * @throws IllegalArgumentException if the resource is not found
      */
     @JvmStatic
     fun resource(path: String): InputStream =
-        LiquidBounce::class.java.getResourceAsStream("/resources/liquidbounce/$path")
+        LiquidBounce::class.java.getResourceAsStream("/assets/liquidbounce/$path")
             ?: throw IllegalArgumentException("Resource $path not found")
 
     /**
      * Gets client resource as string.
      *
-     * @param path prefix `/resources/liquidbounce/`
+     * @param path prefix `/assets/liquidbounce/`
      * @throws IllegalArgumentException if the resource is not found
      */
     @JvmStatic

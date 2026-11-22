@@ -88,7 +88,7 @@ enum class ShopConfigPreset(override val tag: String, private val localFileName:
     DEXLAND("Dexland", "dexland");
 
     fun reader(): Reader {
-        val internalPath = "/resources/liquidbounce/data/shops/${localFileName}.json"
+        val internalPath = "/assets/liquidbounce/data/shops/${localFileName}.json"
         val inputStream = javaClass.getResourceAsStream(internalPath)
         check(inputStream != null) { "Failed to load resource: $internalPath" }
         return inputStream.bufferedReader()

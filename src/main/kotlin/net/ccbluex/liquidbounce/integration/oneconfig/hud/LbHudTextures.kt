@@ -18,32 +18,30 @@
  */
 package net.ccbluex.liquidbounce.integration.oneconfig.hud
 
-import net.ccbluex.liquidbounce.utils.client.mc
-import net.minecraft.resources.Identifier
 import org.polyfrost.compose.render.PolyBitmap
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.jvm.optionals.getOrNull
 
 /**
- * Loads the icon textures of the native HUD out of the client's resource packs.
+ * Loads the icon textures of the native HUD straight off the classpath.
  *
- * OneConfig's renderer draws bitmaps, not Minecraft texture handles, so every icon identifier is decoded once into a
- * [PolyBitmap] and kept around. Icons never change at runtime, which makes the cache safe to keep for the whole session.
+ * OneConfig's renderer draws bitmaps, not Minecraft texture handles, so every icon is decoded once into a [PolyBitmap]
+ * and kept around. Icons never change at runtime, which makes the cache safe to keep for the whole session.
  */
 object LbHudTextures {
 
-    private val cache: ConcurrentHashMap<Identifier, PolyBitmap> = ConcurrentHashMap()
+    private val cache: ConcurrentHashMap<String, PolyBitmap> = ConcurrentHashMap()
 
-    /** Decoded bitmap of [id], or `null` when the resource pack does not contain it. */
-    fun get(id: Identifier): PolyBitmap? {
-        cache[id]?.let { return it }
+    /** Decoded bitmap of the classpath [path] relative to `assets/liquidbounce/`, or `null` when it is missing. */
+    fun get(path: String): PolyBitmap? {
+        cache[path]?.let { return it }
 
         val bitmap = runCatching {
-            val resource = mc.resourceManager.getResource(id).getOrNull() ?: return null
-            resource.open().use { PolyBitmap.decode(it.readBytes()) }
+            LbHudTextures::class.java.classLoader
+                .getResourceAsStream("assets/liquidbounce/$path")
+                ?.use { PolyBitmap.decode(it.readBytes()) }
         }.getOrNull() ?: return null
 
-        cache[id] = bitmap
+        cache[path] = bitmap
         return bitmap
     }
 

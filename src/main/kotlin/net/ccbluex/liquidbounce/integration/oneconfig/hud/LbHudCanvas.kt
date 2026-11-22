@@ -18,7 +18,6 @@
  */
 package net.ccbluex.liquidbounce.integration.oneconfig.hud
 
-import net.minecraft.resources.Identifier
 import net.minecraft.world.item.ItemStack
 import org.polyfrost.compose.layout.PolyAlign
 import org.polyfrost.compose.minecraft.mc.McItemIcons
@@ -176,11 +175,11 @@ class LbHudCanvas internal constructor(
         }
     }
 
-    /** Draws the icon [id] aspect fitted and centred inside the given box. */
-    fun icon(id: Identifier, x: Float, y: Float, boxW: Float, boxH: Float, argb: Int = -1) {
+    /** Draws the icon at the classpath [path] aspect fitted and centred inside the given box. */
+    fun icon(path: String, x: Float, y: Float, boxW: Float, boxH: Float, argb: Int = -1) {
         if (boxW <= 0f || boxH <= 0f || (argb ushr 24) == 0) return
 
-        val bitmap = LbHudTextures.get(id) ?: return
+        val bitmap = LbHudTextures.get(path) ?: return
         if (bitmap.height <= 0) return
 
         val aspect = bitmap.width.toFloat() / bitmap.height.toFloat()

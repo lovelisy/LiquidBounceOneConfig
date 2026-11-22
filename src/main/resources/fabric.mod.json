@@ -15,7 +15,7 @@
     "email": "support@liquidbounce.net"
   },
   "license": "GNU General Public License v3.0",
-  "icon": "resources/liquidbounce/icon_64x64.png",
+  "icon": "assets/liquidbounce/icon_64x64.png",
   "environment": "client",
   "custom": {
     "modmenu": {
