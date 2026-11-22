@@ -112,8 +112,14 @@ internal object LbHudStore {
     }
 
     private fun replaceTitle(node: Node, title: Any) {
+        val method = replacement()
+        if (method == null) {
+            logger.warn("Unable to translate the title of '${node.getID()}': no replaceTitle method")
+            return
+        }
+
         runCatching {
-            replacement().apply(node, title)
+            method.invoke(node, title)
         }.onFailure {
             logger.warn("Unable to translate the title of '${node.getID()}'", it)
         }
