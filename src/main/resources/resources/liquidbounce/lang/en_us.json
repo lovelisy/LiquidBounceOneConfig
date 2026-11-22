@@ -2285,5 +2285,17 @@
   "liquidbounce.tag.fast.name": "Fast",
   "liquidbounce.tag.slow.name": "Slow",
   "liquidbounce.ui.locale": "en_us",
-  "liquidbounce.category.global.name": "Global"
+  "liquidbounce.category.global.name": "Global",
+  "liquidbounce.command.client.reset.successfullyReset": "Successfully reset all client settings.",
+  "liquidbounce.generic.locked": "This module is locked and cannot be enabled, because it most likely does not bypass.",
+  "liquidbounce.module.antiCheatDetect.messages.actionNumbers": "Action numbers: %s",
+  "liquidbounce.module.antiCheatDetect.messages.description": "AntiCheatDetect tries to detect the server's anti-cheat system by monitoring ping parameters the next time you join any server or game. Note that the results may be inaccurate, especially when the server has multiple anti-cheat systems.",
+  "liquidbounce.module.antiCheatDetect.messages.differences": "Differences: %s",
+  "liquidbounce.module.antiStaff.messages.vanishClear": "No vanished players found.",
+  "liquidbounce.module.autoArmor.value.delay.description": "Equip delay.",
+  "liquidbounce.module.autoArmor.value.hotbar.description": "Whether to take armor from the hotbar.",
+  "liquidbounce.module.autoArmor.value.inv_open.description": "Whether the inventory has to be open.",
+  "liquidbounce.module.autoArmor.value.no_move.description": "Whether to simulate dragging the item.",
+  "liquidbounce.module.autoArmor.value.simulate_inventory.description": "Whether to simulate opening the inventory server side.",
+  "liquidbounce.module.noFall.messages.spoofLanding": "NoFall SpoofLanding mode only works on 1.8+!"
 }

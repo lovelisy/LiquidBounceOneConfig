@@ -20,92 +20,165 @@ package net.ccbluex.liquidbounce.integration.oneconfig.hud
 
 import net.ccbluex.liquidbounce.features.module.ClientModule
 import net.ccbluex.liquidbounce.features.module.ModuleManager
-import org.polyfrost.compose.render.PolyColor
-import org.polyfrost.compose.render.PolyFont
-import org.polyfrost.oneconfig.api.config.v1.annotations.Color
 import org.polyfrost.oneconfig.api.config.v1.annotations.Dropdown
-import org.polyfrost.oneconfig.api.config.v1.annotations.Slider
 import org.polyfrost.oneconfig.api.config.v1.annotations.Switch
 import org.polyfrost.oneconfig.api.hud.v1.Hud
+import org.polyfrost.oneconfig.api.hud.v1.HudManager
 
 /**
- * Lists every enabled module, one per line.
+ * Native module list.
+ *
+ * Every enabled and visible module is listed with its tag, sorted by the width of its label. Rows fly in from the side
+ * and slide into place when the order changes, and the accent bar on the left marks the element as a LiquidBounce HUD.
  */
 object ArrayListHud : LbHudBase("arraylist", "Array List", Hud.Category.INFO) {
 
-    @Dropdown(title = "Sort By", options = ["Length", "Alphabetical"])
+    @Switch(title = "Show Tags")
     @JvmField
-    var sortMode: String = "Length"
+    var showTags: Boolean = true
 
-    @Switch(title = "Show Category")
+    @Dropdown(title = "Item Alignment", options = ["Left", "Right"])
     @JvmField
-    var showCategory: Boolean = false
+    var itemAlignment: String = "Right"
 
-    @Color(title = "Text Color", alpha = true)
+    @Dropdown(title = "Order", options = ["Ascending", "Descending"])
     @JvmField
-    var color: PolyColor = PolyColor(0xFFFFFFFF.toInt())
+    var order: String = "Descending"
 
-    @Switch(title = "Rainbow")
-    @JvmField
-    var rainbow: Boolean = false
+    private class AnimEntry(var y: Float, var slideProgress: Float)
 
-    @Slider(title = "Rainbow Speed", min = 1f, max = 20f, step = 1f)
-    @JvmField
-    var rainbowSpeed: Float = 6f
+    private val animMap: HashMap<String, AnimEntry> = HashMap()
 
-    @Switch(title = "Right Aligned")
-    @JvmField
-    var rightAligned: Boolean = false
+    private data class Row(
+        val module: ClientModule,
+        val name: String,
+        val tag: String?,
+        val textWidth: Float,
+    )
 
-    @Slider(title = "Line Spacing", min = 0f, max = 8f, step = 0.5f)
-    @JvmField
-    var lineSpacing: Float = 0f
+    private fun rows(): List<Row> {
+        val result = ArrayList<Row>()
+        for (module in ModuleManager) {
+            if (!module.enabled || module.hidden) continue
 
-    private fun modules(): List<ClientModule> {
-        val enabled = ModuleManager.filter { module -> module.enabled && !module.hidden }
-        return when (sortMode) {
-            "Alphabetical" -> enabled.sortedBy { it.name.lowercase() }
-            else -> enabled.sortedByDescending { it.name.length }
+            val name = displayName(module.name)
+            val tag = if (showTags) module.tag else null
+            val nameWidth = textWidth(name, ROW_FONT_SIZE, LbHudFonts.Weight.MEDIUM)
+            val tagWidth = if (!tag.isNullOrEmpty()) {
+                textWidth(" $tag", ROW_FONT_SIZE, LbHudFonts.Weight.MEDIUM)
+            } else {
+                0f
+            }
+            result.add(Row(module, name, tag, nameWidth + tagWidth))
         }
+
+        if (order == "Ascending") {
+            result.sortBy { it.textWidth }
+        } else {
+            result.sortByDescending { it.textWidth }
+        }
+        return result
     }
 
-    private fun labels(): List<String> = modules().map { module ->
-        val tag = module.category.tag
-        if (!showCategory || tag == null) module.name else "$tag · ${module.name}"
-    }
+    private fun rowHeight(): Float = lineHeight(ROW_FONT_SIZE, LbHudFonts.Weight.MEDIUM) + ROW_VERTICAL_PADDING
 
     override fun measure(): HudSize {
-        val font = hudFont()
-        val labels = labels()
-        val width = labels.maxOfOrNull { textWidth(it, font) } ?: textWidth(PLACEHOLDER, font)
-        val height = lineHeight(font) * labels.size.coerceAtLeast(1)
-        return HudSize(width, height)
+        val rows = rows()
+        if (rows.isEmpty()) {
+            return HudSize(EMPTY_WIDTH, rowHeight())
+        }
+
+        var maxWidth = 0f
+        for (row in rows) {
+            val width = ACCENT_WIDTH + HORIZONTAL_PADDING * 2f + row.textWidth
+            if (width > maxWidth) maxWidth = width
+        }
+        return HudSize(maxWidth, rows.size * rowHeight())
     }
 
     override fun paint(canvas: LbHudCanvas) {
-        val font = hudFont()
-        val step = lineHeight(font) + lineSpacing
-        val labels = labels()
-        val painted = if (rainbow) canvas.rainbow(rainbowSpeed) else color
-        val contentWidth = labels.maxOfOrNull { canvas.measure(it, font) } ?: 0f
+        val rows = rows()
+        if (rows.isEmpty()) {
+            if (canvas.inEditor) {
+                drawRow(canvas, SAMPLE_NAME, null, 0f, 0f, EMPTY_WIDTH)
+            }
+            return
+        }
 
-        labels.forEachIndexed { index, label ->
-            val x = if (rightAligned) contentWidth - canvas.measure(label, font) else 0f
-            drawLabel(canvas, label, x, index * step, painted, font)
+        val activeNames = rows.mapTo(HashSet(rows.size * 2)) { it.module.name }
+        animMap.keys.retainAll(activeNames)
+
+        val rowHeight = rowHeight()
+        val lineHeight = lineHeight(ROW_FONT_SIZE, LbHudFonts.Weight.MEDIUM)
+        var maxRowWidth = 0f
+        for (row in rows) {
+            val width = ACCENT_WIDTH + HORIZONTAL_PADDING * 2f + row.textWidth
+            if (width > maxRowWidth) maxRowWidth = width
+        }
+
+        rows.forEachIndexed { index, row ->
+            val targetY = index * rowHeight
+            val anim = animMap.getOrPut(row.module.name) { AnimEntry(targetY, 0f) }
+            anim.y = LbHudPalette.expLerp(anim.y, targetY, 16f, canvas.deltaSeconds)
+            anim.slideProgress = LbHudPalette.expLerp(anim.slideProgress, 1f, 15f, canvas.deltaSeconds)
+
+            val rowWidth = ACCENT_WIDTH + HORIZONTAL_PADDING * 2f + row.textWidth
+            val baseX = if (itemAlignment == "Left") 0f else maxRowWidth - rowWidth
+            val flyOffset = (1f - anim.slideProgress) * if (itemAlignment == "Left") -36f else 36f
+            val x = baseX + flyOffset
+            val y = anim.y
+
+            drawRow(canvas, row.name, row.tag, x, y, rowWidth, lineHeight)
         }
     }
 
-    private fun drawLabel(
+    private fun drawRow(
         canvas: LbHudCanvas,
-        label: String,
+        name: String,
+        tag: String?,
         x: Float,
         y: Float,
-        color: PolyColor,
-        font: PolyFont,
+        rowWidth: Float,
+        rowLineHeight: Float = lineHeight(ROW_FONT_SIZE, LbHudFonts.Weight.MEDIUM),
     ) {
-        drawText(canvas, label, x, y, color, font)
+        val rowHeight = rowLineHeight + ROW_VERTICAL_PADDING
+
+        canvas.fillCssBox(x, y, rowWidth, rowHeight, 4f, 0f, 0f, 4f, LbHudPalette.surface(0.68f))
+        canvas.fillCssBox(x, y, ACCENT_WIDTH, rowHeight, 4f, 0f, 0f, 4f, LbHudPalette.accent(1f))
+
+        val textX = x + ACCENT_WIDTH + HORIZONTAL_PADDING
+        val textY = y + (rowHeight - rowLineHeight) * 0.5f
+        val nameWidth = drawText(canvas, name, textX, textY, ROW_FONT_SIZE, LbHudPalette.TEXT_COLOR, LbHudFonts.Weight.MEDIUM)
+        if (!tag.isNullOrEmpty()) {
+            drawText(
+                canvas,
+                " $tag",
+                textX + nameWidth,
+                textY,
+                ROW_FONT_SIZE,
+                LbHudPalette.ARRAYLIST_TAG_COLOR,
+                LbHudFonts.Weight.MEDIUM,
+            )
+        }
     }
 
-    private const val PLACEHOLDER = "Array List"
+    /** Matches the native client's word splitting, which turns `KillAura` into `Kill Aura`. */
+    private fun displayName(name: String): String {
+        if (name.isEmpty() || name.contains(' ')) {
+            return name
+        }
+
+        val words = SPACED_WORD_REGEX.findAll(name).map { it.value }.toList()
+        return if (words.isEmpty()) name else words.joinToString(" ")
+    }
+
+    private val SPACED_WORD_REGEX: Regex = Regex("[A-Z]?[a-z]+|[A-Z]+[0-9]+|[0-9]+|[A-Z]+(?![a-z])")
+
+    private const val ROW_FONT_SIZE: Float = 14f
+    private const val ROW_VERTICAL_PADDING: Float = 10f
+    private const val HORIZONTAL_PADDING: Float = 8f
+    private const val ACCENT_WIDTH: Float = 4f
+    private const val EMPTY_WIDTH: Float = 110f
+    private const val SAMPLE_NAME: String = "Array List"
 
 }

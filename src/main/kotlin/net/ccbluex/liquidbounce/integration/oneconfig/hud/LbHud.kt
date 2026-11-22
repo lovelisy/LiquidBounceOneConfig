@@ -19,6 +19,7 @@
 package net.ccbluex.liquidbounce.integration.oneconfig.hud
 
 import androidx.compose.runtime.Composable
+import net.ccbluex.liquidbounce.event.EventListener
 import net.ccbluex.liquidbounce.utils.client.inGame
 import net.ccbluex.liquidbounce.utils.client.logger
 import org.polyfrost.compose.composables.NodeCanvas
@@ -43,7 +44,7 @@ abstract class LbHud(
     id: String,
     title: String,
     category: Hud.Category,
-) : Hud(id, title, category) {
+) : Hud(id, title, category), EventListener {
 
     private var lastFrameNanos: Long = 0L
 
@@ -61,6 +62,9 @@ abstract class LbHud(
     init {
         staticW = DEFAULT_WIDTH
         staticH = DEFAULT_HEIGHT
+
+        // The native elements paint their own card surface, so OneConfig must not draw a second background behind it.
+        showBackground = false
     }
 
     /**

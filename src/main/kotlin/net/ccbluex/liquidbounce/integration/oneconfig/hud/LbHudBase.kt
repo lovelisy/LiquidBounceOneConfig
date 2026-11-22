@@ -20,63 +20,76 @@ package net.ccbluex.liquidbounce.integration.oneconfig.hud
 
 import org.polyfrost.compose.render.PolyColor
 import org.polyfrost.compose.render.PolyFont
-import org.polyfrost.oneconfig.api.hud.v1.Font
 import org.polyfrost.oneconfig.api.hud.v1.Hud
+import kotlin.math.abs
 
 /**
- * Common helper layer for LiquidBounce HUD elements.
+ * Shared drawing helpers for the native LiquidBounce HUD elements.
  *
- * The visual options, meaning the background, the border, the padding, the font, the text colour and the shadow, are
- * provided by [Hud] and edited in the element's own settings panel, so they are not declared again here. What this class
- * adds is the plumbing every element needs: turning the shared font option into a [PolyFont] and drawing a line of text
- * with the shared colour and shadow settings.
+ * Every element is drawn with the Inter family and the fixed native colour tokens, so the helpers here only take a
+ * size, a weight and an ARGB colour. The background, the border and the padding of OneConfig's generic HUD units are
+ * not used: the native cards paint their own surface.
  */
 abstract class LbHudBase(id: String, title: String, category: Hud.Category) : LbHud(id, title, category) {
 
-    /** The font the element should draw with, built from the font options OneConfig exposes for this element. */
-    protected fun hudFont(): PolyFont {
-        val size = FONT_BASE_SIZE * textScale.coerceAtLeast(0f)
-        return when (font) {
-            Font.Poppins -> PolyFont(POPPINS_FONT, size)
-            Font.Minecraft -> PolyFont(LbHudCanvas.GAME_FONT, size)
-        }
+    protected fun hudFont(size: Float, weight: LbHudFonts.Weight = LbHudFonts.Weight.REGULAR): PolyFont =
+        LbHudFonts.font(size, weight)
+
+    protected fun textWidth(
+        text: String,
+        size: Float,
+        weight: LbHudFonts.Weight = LbHudFonts.Weight.REGULAR,
+    ): Float = LbHudFonts.measure(text, size, weight)
+
+    protected fun lineHeight(
+        size: Float,
+        weight: LbHudFonts.Weight = LbHudFonts.Weight.REGULAR,
+    ): Float {
+        val metrics = hudFont(size, weight).metrics
+        val extent = abs(metrics.ascent) + abs(metrics.descent) + metrics.leading
+        return extent.coerceAtLeast(size)
     }
 
-    /** The colour the element should draw its text with. */
-    protected fun hudTextColor(): PolyColor = PolyColor(textColor)
-
-    /** Width of [text] in [font], available before the element is drawn. */
-    protected fun textWidth(text: String, font: PolyFont = hudFont()): Float =
-        if (text.isEmpty()) 0f else font.measureTextWidth(text)
-    /** Line height of [font], based on the metrics the font engine reports. */
-    protected fun lineHeight(font: PolyFont = hudFont()): Float {
-        val metrics = font.metrics
-        val extent = kotlin.math.abs(metrics.ascent) + kotlin.math.abs(metrics.descent) + metrics.leading
-        return extent.coerceAtLeast(font.size)
-    }
-
-    /** Draws one line of [text], honouring the element's shadow switch. */
+    /** Draws one line of [text] at [size] and returns the width that was painted. */
     protected fun drawText(
         canvas: LbHudCanvas,
         text: String,
         x: Float,
         y: Float,
-        color: PolyColor = hudTextColor(),
-        font: PolyFont = hudFont(),
-    ) {
-        if (showShadow) {
-            canvas.textShadow(text, x, y, font, color.argb)
-        } else {
-            canvas.text(text, x, y, font, color)
+        size: Float,
+        argb: Int,
+        weight: LbHudFonts.Weight = LbHudFonts.Weight.REGULAR,
+    ): Float = canvas.text(text, x, y, hudFont(size, weight), PolyColor(argb))
+
+    /** Shortens [text] with an ellipsis until it fits into [maxWidth]. */
+    protected fun ellipsize(
+        text: String,
+        maxWidth: Float,
+        size: Float,
+        weight: LbHudFonts.Weight = LbHudFonts.Weight.REGULAR,
+    ): String {
+        if (text.isEmpty() || maxWidth <= 0f) {
+            return ""
         }
+        if (textWidth(text, size, weight) <= maxWidth) {
+            return text
+        }
+
+        val ellipsis = ELLIPSIS
+        val ellipsisWidth = textWidth(ellipsis, size, weight)
+        if (ellipsisWidth > maxWidth) {
+            return ""
+        }
+
+        var end = text.length
+        while (end > 0 && textWidth(text.substring(0, end), size, weight) + ellipsisWidth > maxWidth) {
+            end--
+        }
+        return text.substring(0, end) + ellipsis
     }
 
     private companion object {
-        /** Font key PolyCompose maps onto the OneConfig Poppins family. */
-        const val POPPINS_FONT: String = "poppins"
-
-        /** Size one font option unit maps onto, matching the scale OneConfig uses for its own HUD text. */
-        const val FONT_BASE_SIZE: Float = 8f
+        const val ELLIPSIS: String = "..."
     }
 
 }

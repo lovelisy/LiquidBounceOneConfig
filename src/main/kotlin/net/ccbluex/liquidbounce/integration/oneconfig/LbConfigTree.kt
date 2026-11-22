@@ -21,6 +21,7 @@ package net.ccbluex.liquidbounce.integration.oneconfig
 import androidx.compose.runtime.mutableStateOf
 import com.mojang.blaze3d.platform.InputConstants
 import net.ccbluex.liquidbounce.config.types.BindValue
+import net.ccbluex.liquidbounce.config.types.CurveValue
 import net.ccbluex.liquidbounce.config.types.RangedValue
 import net.ccbluex.liquidbounce.config.types.Value
 import net.ccbluex.liquidbounce.config.types.ValueType
@@ -38,12 +39,16 @@ import net.ccbluex.liquidbounce.features.module.ModuleCategories
 import net.ccbluex.liquidbounce.features.module.ModuleManager
 import net.ccbluex.liquidbounce.render.engine.type.Color4b
 import net.ccbluex.liquidbounce.utils.input.InputBind
+import net.minecraft.world.phys.Vec3
+import org.joml.Vector2f
 import org.polyfrost.oneconfig.api.config.v1.MetaKeys
 import org.polyfrost.oneconfig.api.config.v1.Properties
 import org.polyfrost.oneconfig.api.config.v1.Property
 import org.polyfrost.oneconfig.api.config.v1.Tree
 import org.polyfrost.oneconfig.api.config.v1.Visualizer
 import org.polyfrost.oneconfig.api.ui.v1.keybind.OneConfigKeybind
+import org.polyfrost.oneconfig.internal.ui.api.ConfigRegistry
+import org.polyfrost.oneconfig.internal.ui.api.ConfigSource
 import java.util.function.Consumer
 import java.util.function.Supplier
 
@@ -57,6 +62,8 @@ import java.util.function.Supplier
 internal object LbConfigTree {
 
     private const val SEPARATOR = " / "
+
+    private val VEC3_AXES = arrayOf("X", "Y", "Z")
 
     private val revisionState = mutableStateOf(0)
 
@@ -121,6 +128,8 @@ internal object LbConfigTree {
         val global = LbText.categoryName("Global")
         appendGroup(root, GlobalManager, global, emptyList(), "", emptySet())
 
+        ConfigRegistry.registerTree(root, ConfigSource.Compat)
+
         return root
     }
 
@@ -162,6 +171,7 @@ internal object LbConfigTree {
         val category = LbText.categoryName(module.category.tag)
         val tree = submenu(module.name, LbText.moduleName(module.name), category)
         tree.description = LbText.moduleDescription(module.descriptionKey)
+        tree.addMetadata("searchTags", listOf(module.name, LbText.moduleName(module.name)))
 
         val toggle = booleanProperty(module.enabledValue)
         toggle.addMetadata(MetaKeys.CATEGORY.name, category)
@@ -198,8 +208,9 @@ internal object LbConfigTree {
                     emptySet(),
                 )
                 else -> {
-                    val property = leafProperty(value) ?: continue
-                    place(tree, property, category, path, conditions, value)
+                    for (property in leafProperties(value)) {
+                        place(tree, property, category, path, conditions, value)
+                    }
                 }
             }
         }
@@ -325,9 +336,10 @@ internal object LbConfigTree {
                     collect,
                 )
                 else -> {
-                    val property = leafProperty(value) ?: continue
-                    place(tree, property, category, path, conditions, value)
-                    collect += property
+                    for (property in leafProperties(value)) {
+                        place(tree, property, category, path, conditions, value)
+                        collect += property
+                    }
                 }
             }
         }
@@ -377,24 +389,123 @@ internal object LbConfigTree {
         return property
     }
 
-    private fun leafProperty(value: Value<*>): Property<*>? {
+    private fun leafProperties(value: Value<*>): List<Property<*>> {
         if (value.notAnOption) {
-            return null
+            return emptyList()
         }
 
         return when (value.valueType) {
-            ValueType.BOOLEAN -> booleanProperty(value as Value<Boolean>)
-            ValueType.FLOAT -> floatProperty(value)
-            ValueType.INT -> intProperty(value)
-            ValueType.FLOAT_RANGE, ValueType.INT_RANGE -> rangeProperty(value)
-            ValueType.TEXT -> textProperty(value)
-            ValueType.COLOR -> colorProperty(value)
-            ValueType.KEY -> keyProperty(value)
-            ValueType.BIND -> bindProperty(value)
-            ValueType.CHOOSE -> choiceProperty(value)
-            ValueType.MULTI_CHOOSE -> multiChoiceProperty(value)
-            else -> stringProperty(value) ?: infoProperty(value)
+            ValueType.BOOLEAN -> listOf(booleanProperty(value as Value<Boolean>))
+            ValueType.FLOAT -> listOf(floatProperty(value))
+            ValueType.INT -> listOf(intProperty(value))
+            ValueType.FLOAT_RANGE, ValueType.INT_RANGE -> listOf(rangeProperty(value))
+            ValueType.TEXT -> listOf(textProperty(value))
+            ValueType.COLOR -> listOf(colorProperty(value))
+            ValueType.KEY -> listOf(keyProperty(value))
+            ValueType.BIND -> listOf(bindProperty(value))
+            ValueType.CHOOSE -> listOf(choiceProperty(value))
+            ValueType.MULTI_CHOOSE -> listOf(multiChoiceProperty(value))
+            ValueType.CURVE -> curveProperties(value)
+            ValueType.VECTOR3_D -> vector3Properties(value)
+            else -> listOfNotNull(stringProperty(value) ?: infoProperty(value))
         }
+    }
+
+    private fun curveProperties(value: Value<*>): List<Property<*>> {
+        val curve = value as? CurveValue ?: return listOf(infoProperty(value))
+        val points = curve.get()
+        if (points.isEmpty()) {
+            return listOf(infoProperty(value))
+        }
+
+        val properties = ArrayList<Property<*>>(points.size * 2)
+        for (index in points.indices) {
+            properties += curveAxisProperty(curve, index, xAxis = true)
+            properties += curveAxisProperty(curve, index, xAxis = false)
+        }
+        return properties
+    }
+
+    private fun curveAxisProperty(curve: CurveValue, index: Int, xAxis: Boolean): Property<Float> {
+        val axis = if (xAxis) curve.xAxis else curve.yAxis
+        val label = if (xAxis) "X" else "Y"
+
+        val property = Properties.functional(
+            Supplier {
+                val point = curve.get().getOrNull(index)
+                when {
+                    point == null -> 0f
+                    xAxis -> point.x
+                    else -> point.y
+                }
+            },
+            Consumer { number: Float ->
+                val current = curve.get()
+                if (index in current.indices) {
+                    val replacement = current.mapIndexedTo(ArrayList<Vector2f>(current.size)) { i, point ->
+                        if (i == index) {
+                            Vector2f(
+                                if (xAxis) number else point.x,
+                                if (xAxis) point.y else number,
+                            )
+                        } else {
+                            Vector2f(point.x, point.y)
+                        }
+                    }
+                    curve.set(replacement)
+                }
+                Unit
+            },
+            id("curve$label$index", curve.name),
+            "${LbText.valueName(curve)} $label${index + 1}",
+            LbText.description(curve) ?: "",
+            Float::class.javaObjectType,
+        )
+        property.addMetadata(MetaKeys.VISUALIZER.name, Visualizer.SliderVisualizer::class.java)
+        property.addMetadata(MetaKeys.MIN.name, axis.range.start)
+        property.addMetadata(MetaKeys.MAX.name, axis.range.endInclusive)
+        property.addMetadata(MetaKeys.STEP.name, 0.01f)
+        return property
+    }
+
+    private fun vector3Properties(value: Value<*>): List<Property<*>> {
+        @Suppress("UNCHECKED_CAST")
+        val target = value as? Value<Vec3> ?: return listOf(infoProperty(value))
+        return VEC3_AXES.indices.map { axis -> vector3AxisProperty(target, axis) }
+    }
+
+    private fun vector3AxisProperty(value: Value<Vec3>, axis: Int): Property<Float> {
+        val property = Properties.functional(
+            Supplier {
+                val vec = value.get()
+                when (axis) {
+                    0 -> vec.x.toFloat()
+                    1 -> vec.y.toFloat()
+                    else -> vec.z.toFloat()
+                }
+            },
+            Consumer { number: Float ->
+                val vec = value.get()
+                val next = number.toDouble()
+                value.set(
+                    when (axis) {
+                        0 -> Vec3(next, vec.y, vec.z)
+                        1 -> Vec3(vec.x, next, vec.z)
+                        else -> Vec3(vec.x, vec.y, next)
+                    },
+                )
+                Unit
+            },
+            id("vec3${VEC3_AXES[axis]}", value.name),
+            "${LbText.valueName(value)} ${VEC3_AXES[axis]}",
+            LbText.description(value) ?: "",
+            Float::class.javaObjectType,
+        )
+        property.addMetadata(MetaKeys.VISUALIZER.name, Visualizer.SliderVisualizer::class.java)
+        property.addMetadata(MetaKeys.MIN.name, -16f)
+        property.addMetadata(MetaKeys.MAX.name, 16f)
+        property.addMetadata(MetaKeys.STEP.name, 0.01f)
+        return property
     }
 
     private fun floatProperty(value: Value<*>): Property<Float> {

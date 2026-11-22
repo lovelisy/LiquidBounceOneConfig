@@ -195,7 +195,6 @@ import net.ccbluex.liquidbounce.features.module.modules.render.ModuleBlockESP
 import net.ccbluex.liquidbounce.features.module.modules.render.ModuleBlockOutline
 import net.ccbluex.liquidbounce.features.module.modules.render.ModuleBreadcrumbs
 import net.ccbluex.liquidbounce.features.module.modules.render.ModuleChams
-import net.ccbluex.liquidbounce.features.module.modules.render.ModuleClickGui
 import net.ccbluex.liquidbounce.features.module.modules.render.ModuleCombineMobs
 import net.ccbluex.liquidbounce.features.module.modules.render.ModuleCrystalView
 import net.ccbluex.liquidbounce.features.module.modules.render.customambience.ModuleCustomAmbience
@@ -205,7 +204,6 @@ import net.ccbluex.liquidbounce.features.module.modules.render.ModuleFreeCam
 import net.ccbluex.liquidbounce.features.module.modules.render.ModuleFreeLook
 import net.ccbluex.liquidbounce.features.module.modules.render.ModuleFullBright
 import net.ccbluex.liquidbounce.features.module.modules.render.ModuleHoleESP
-import net.ccbluex.liquidbounce.features.module.modules.render.ModuleHud
 import net.ccbluex.liquidbounce.features.module.modules.render.ModuleItemChams
 import net.ccbluex.liquidbounce.features.module.modules.render.ModuleItemESP
 import net.ccbluex.liquidbounce.features.module.modules.render.ModuleItemTags
@@ -630,7 +628,6 @@ object ModuleManager : EventListener, Collection<ClientModule> by modules {
             ModuleBlockOutline,
             ModuleBreadcrumbs,
             ModuleCameraClip,
-            ModuleClickGui,
             ModuleDamageParticles,
             ModuleParticles,
             ModuleESP,
@@ -640,7 +637,6 @@ object ModuleManager : EventListener, Collection<ClientModule> by modules {
             ModuleFreeLook,
             ModuleFullBright,
             ModuleHoleESP,
-            ModuleHud,
             ModuleHats,
             ModuleItemESP,
             ModuleItemTags,

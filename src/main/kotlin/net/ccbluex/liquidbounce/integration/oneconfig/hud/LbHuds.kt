@@ -20,7 +20,6 @@
 
 package net.ccbluex.liquidbounce.integration.oneconfig.hud
 
-import net.ccbluex.liquidbounce.features.module.modules.render.ModuleHud
 import net.ccbluex.liquidbounce.utils.client.logger
 import org.polyfrost.oneconfig.api.hud.v1.HudManager
 import org.polyfrost.oneconfig.api.ui.v1.ExperimentalOneConfigUiApi
@@ -34,18 +33,19 @@ import org.polyfrost.oneconfig.api.ui.v1.ExperimentalOneConfigUiApi
 object LbHuds {
 
     private val elements: List<LbHud> = listOf(
-        WatermarkHud,
+        TargetHud,
         ArrayListHud,
+        NotificationsHud,
     )
 
-    /** Whether the HUD elements should be visible. Follows the HUD module, so disabling it clears the screen. */
-    private val enabledSupplier: () -> Boolean = { ModuleHud.running }
+    /** Whether the HUD elements should be visible. OneConfig already hides them outside of a world. */
+    private val enabledSupplier: () -> Boolean = { true }
 
     /** OneConfig queues the registration until its own HUD registry is ready, which is when the client boots. */
     fun init() {
         elements.forEach { element ->
             runCatching {
-                HudManager.register(element, element.id, null, enabledSupplier)
+                HudManager.register(element, element.id, CATEGORY_ICON, enabledSupplier)
             }.onFailure {
                 logger.error("Unable to register the '${element.title}' HUD element", it)
             }
@@ -54,5 +54,8 @@ object LbHuds {
 
     /** Saves every pending HUD setting, called while the client shuts down. */
     fun flush() = LbHudStore.flushAll()
+
+    /** Card icon every LiquidBounce HUD unit shows in OneConfig's HUD browser. */
+    private const val CATEGORY_ICON: String = "/assets/liquidbounce/lb_logo_preview.png"
 
 }

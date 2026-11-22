@@ -18,14 +18,17 @@
  */
 package net.ccbluex.liquidbounce.integration.oneconfig.hud
 
-import net.minecraft.network.chat.Component
+import net.minecraft.resources.Identifier
+import net.minecraft.world.item.ItemStack
 import org.polyfrost.compose.layout.PolyAlign
+import org.polyfrost.compose.minecraft.mc.McItemIcons
 import org.polyfrost.compose.render.FilterQuality
 import org.polyfrost.compose.render.PolyBitmap
 import org.polyfrost.compose.render.PolyColor
 import org.polyfrost.compose.render.PolyFont
-import org.polyfrost.compose.render.PolyShadow
+import org.polyfrost.compose.render.PolyPath
 import org.polyfrost.compose.render.RenderContext
+import kotlin.math.min
 
 /**
  * Drawing surface handed to a LiquidBounce HUD element.
@@ -55,9 +58,20 @@ class LbHudCanvas internal constructor(
 
     fun scale(x: Float, y: Float) = context.scale(x, y)
 
-    fun clip(x: Float, y: Float, w: Float, h: Float) {
-        if (w <= 0f || h <= 0f) return
-        context.clipRect(x, y, x + w, y + h)
+    /** Runs [block] with its whole output scaled to [factor] opacity. */
+    fun alpha(factor: Float, block: () -> Unit) {
+        if (factor <= 0f) return
+        if (factor >= 1f) {
+            block()
+            return
+        }
+
+        context.saveLayerAlpha(factor)
+        try {
+            block()
+        } finally {
+            context.restore()
+        }
     }
 
     fun fill(x: Float, y: Float, w: Float, h: Float, color: PolyColor, radius: Float = 0f) {
@@ -67,63 +81,6 @@ class LbHudCanvas internal constructor(
 
     fun fill(x: Float, y: Float, w: Float, h: Float, argb: Int, radius: Float = 0f) =
         fill(x, y, w, h, PolyColor(argb), radius)
-
-    fun stroke(
-        x: Float, y: Float, w: Float, h: Float,
-        color: PolyColor,
-        radius: Float = 0f,
-        thickness: Float = 1f,
-    ) {
-        if (w <= 0f || h <= 0f || thickness <= 0f || color.alpha == 0) return
-        context.rectStroke(x, y, w, h, color, radius, thickness)
-    }
-
-    fun stroke(
-        x: Float, y: Float, w: Float, h: Float,
-        argb: Int,
-        radius: Float = 0f,
-        thickness: Float = 1f,
-    ) = stroke(x, y, w, h, PolyColor(argb), radius, thickness)
-
-    fun line(x0: Float, y0: Float, x1: Float, y1: Float, color: PolyColor, thickness: Float = 1f) {
-        if (thickness <= 0f || color.alpha == 0) return
-        context.line(x0, y0, x1, y1, color, thickness)
-    }
-
-    fun line(x0: Float, y0: Float, x1: Float, y1: Float, argb: Int, thickness: Float = 1f) =
-        line(x0, y0, x1, y1, PolyColor(argb), thickness)
-
-    fun shadow(
-        x: Float, y: Float, w: Float, h: Float,
-        color: PolyColor,
-        radius: Float = 0f,
-        blur: Float = 6f,
-    ) {
-        if (w <= 0f || h <= 0f || color.alpha == 0 || blur <= 0f) return
-        context.shadow(x, y, w, h, radius, PolyShadow(color, blur, 0f, 0f, 0f))
-    }
-
-    fun shadow(
-        x: Float, y: Float, w: Float, h: Float,
-        argb: Int,
-        radius: Float = 0f,
-        blur: Float = 6f,
-    ) = shadow(x, y, w, h, PolyColor(argb), radius, blur)
-
-    fun image(bitmap: PolyBitmap, x: Float, y: Float, w: Float, h: Float) {
-        if (w <= 0f || h <= 0f) return
-        context.image(bitmap, x, y, w, h, FilterQuality.Medium)
-    }
-
-    fun image(
-        bitmap: PolyBitmap,
-        u0: Float, v0: Float, u1: Float, v1: Float,
-        x: Float, y: Float, w: Float, h: Float,
-        tint: PolyColor = PolyColor(0xFFFFFFFF.toInt()),
-    ) {
-        if (w <= 0f || h <= 0f) return
-        context.image(bitmap, x, y, w, h, u0, v0, u1, v1, tint, FilterQuality.Medium)
-    }
 
     fun text(
         text: String,
@@ -159,94 +116,125 @@ class LbHudCanvas internal constructor(
         return text(text, x, y, font, PolyColor(argb), align)
     }
 
-    /**
-     * Draws [text] with a one pixel drop shadow.
-     *
-     * The game font has its own shadow pass, which is what the vanilla interface uses; every other font gets the same
-     * text painted once at an offset in the shadow colour before the real text is drawn on top.
-     */
-    fun textShadow(
-        text: String,
-        x: Float,
-        y: Float,
-        font: PolyFont,
-        argb: Int,
-        align: PolyAlign = PolyAlign.TopLeft,
-    ): Float {
-        if (text.isEmpty() || (argb ushr 24) == 0) return 0f
-        val w = measure(text, font)
-        val dx = alignedX(x, w, align)
-        val dy = alignedY(y, font.size, align)
-
-        if (isGameFont(font)) {
-            context.mcText(text, dx, dy, argb, true, gameFontScale(font))
-            return w
-        }
-
-        context.text(text, dx + SHADOW_OFFSET, dy + SHADOW_OFFSET, PolyColor(SHADOW_ARGB), font)
-        context.text(text, dx, dy, PolyColor(argb), font)
-        return w
-    }
-
-    /** Draws [text] with an outline in [outline], used where a shadow is not readable enough. */
-    fun textOutline(
-        text: String,
-        x: Float,
-        y: Float,
-        font: PolyFont,
-        color: PolyColor,
-        outline: Int,
-        thickness: Float = 1f,
-    ): Float {
-        if (text.isEmpty()) return 0f
-        val w = measure(text, font)
-        val dx = alignedX(x, w, PolyAlign.TopLeft)
-        val outlineColor = if ((outline ushr 24) == 0) PolyColor(0xFF000000.toInt()) else PolyColor(outline)
-
-        if (isGameFont(font)) {
-            context.mcTextOutline(text, dx, y, color.argb, outlineColor.argb, gameFontScale(font))
-            return w
-        }
-
-        context.textOutline(text, dx, y, outlineColor, font, thickness)
-        context.text(text, dx, y, color, font)
-        return w
-    }
-
-    fun textComponent(
-        component: Component,
-        x: Float,
-        y: Float,
-        font: PolyFont,
-        argb: Int,
-        shadow: Boolean = true,
-    ): Float {
-        val text = component.string
-        if (text.isEmpty() || (argb ushr 24) == 0) return 0f
-        return if (shadow) textShadow(text, x, y, font, argb) else text(text, x, y, font, argb)
-    }
-
     /** Width of [text] in [font], usable with or without a render context. */
     fun measure(text: String, font: PolyFont): Float =
         if (text.isEmpty()) 0f else font.measureTextWidth(text)
 
-    fun measure(component: Component, font: PolyFont): Float = measure(component.string, font)
+    /**
+     * Fills a rectangle with an independent corner radius on every corner.
+     *
+     * The native HUD uses this for the accent bar of the array list and for the health bar of the target HUD, where
+     * only one side is rounded.
+     */
+    fun fillCssBox(
+        x: Float,
+        y: Float,
+        w: Float,
+        h: Float,
+        topLeft: Float,
+        topRight: Float,
+        bottomRight: Float,
+        bottomLeft: Float,
+        argb: Int,
+    ) {
+        if (w <= 0f || h <= 0f || (argb ushr 24) == 0) return
 
-    /** Line height of [font], based on the metrics the font engine reports. */
-    fun lineHeight(font: PolyFont): Float {
-        val metrics = font.metrics
-        val extent = kotlin.math.abs(metrics.ascent) + kotlin.math.abs(metrics.descent) + metrics.leading
-        return extent.coerceAtLeast(font.size)
+        val maxRadius = min(w, h) * 0.5f
+        val tl = topLeft.coerceIn(0f, maxRadius)
+        val tr = topRight.coerceIn(0f, maxRadius)
+        val br = bottomRight.coerceIn(0f, maxRadius)
+        val bl = bottomLeft.coerceIn(0f, maxRadius)
+
+        if (tl == 0f && tr == 0f && br == 0f && bl == 0f) {
+            context.rect(x, y, w, h, PolyColor(argb), 0f)
+            return
+        }
+
+        val path = PolyPath()
+        path.moveTo(x + tl, y)
+        path.lineTo(x + w - tr, y)
+        if (tr > 0f) path.tangentArcTo(x + w, y, x + w, y + tr, tr)
+        path.lineTo(x + w, y + h - br)
+        if (br > 0f) path.tangentArcTo(x + w, y + h, x + w - br, y + h, br)
+        path.lineTo(x + bl, y + h)
+        if (bl > 0f) path.tangentArcTo(x, y + h, x, y + h - bl, bl)
+        path.lineTo(x, y + tl)
+        if (tl > 0f) path.tangentArcTo(x, y, x + tl, y, tl)
+        path.close()
+
+        context.fillPath(path, PolyColor(argb))
     }
 
-    /** A colour cycling through the hue wheel, used by the rainbow options. */
-    fun rainbow(speed: Float): PolyColor {
-        val cycle = (System.currentTimeMillis() % 100_000L) / 100_000f * speed
-        val hue = (cycle % 1f) * 360f
-        return PolyColor(hsvToArgb(hue, 0.65f, 1f))
+    /** Draws an item stack with its three dimensional model, scaled into the given box. */
+    fun item(stack: ItemStack, x: Float, y: Float, w: Float, h: Float, alpha: Float = 1f) {
+        if (w <= 0f || h <= 0f || alpha <= 0f) return
+
+        runCatching {
+            McItemIcons.open(stack).use { handle ->
+                handle.draw(context, x, y, w, h, alpha.coerceIn(0f, 1f))
+            }
+        }
     }
 
-    fun font(size: Float, name: String = GAME_FONT): PolyFont = PolyFont(name, size)
+    /** Draws the icon [id] aspect fitted and centred inside the given box. */
+    fun icon(id: Identifier, x: Float, y: Float, boxW: Float, boxH: Float, argb: Int = -1) {
+        if (boxW <= 0f || boxH <= 0f || (argb ushr 24) == 0) return
+
+        val bitmap = LbHudTextures.get(id) ?: return
+        if (bitmap.height <= 0) return
+
+        val aspect = bitmap.width.toFloat() / bitmap.height.toFloat()
+        val drawW: Float
+        val drawH: Float
+        if (boxW / boxH > aspect) {
+            drawH = boxH
+            drawW = boxH * aspect
+        } else {
+            drawW = boxW
+            drawH = boxW / aspect
+        }
+
+        val centerX = x + boxW * 0.5f
+        val centerY = y + boxH * 0.5f
+        context.image(
+            bitmap,
+            centerX - drawW * 0.5f,
+            centerY - drawH * 0.5f,
+            drawW,
+            drawH,
+            PolyColor(argb),
+            FilterQuality.Medium,
+        )
+    }
+
+    /**
+     * Draws a rounded cut-out of [bitmap].
+     *
+     * The texture coordinates are expressed in pixels of the bitmap, matching the native rounded texture helper.
+     */
+    fun roundedTexture(
+        bitmap: PolyBitmap,
+        x: Float,
+        y: Float,
+        w: Float,
+        h: Float,
+        radius: Float,
+        u0: Float,
+        v0: Float,
+        u1: Float,
+        v1: Float,
+        argb: Int = -1,
+    ) {
+        if (w <= 0f || h <= 0f || (argb ushr 24) == 0) return
+
+        context.save()
+        try {
+            context.clipRRect(x, y, w, h, radius.coerceIn(0f, min(w, h) * 0.5f))
+            context.image(bitmap, x, y, w, h, u0, v0, u1, v1, PolyColor(argb), FilterQuality.Medium)
+        } finally {
+            context.restore()
+        }
+    }
 
     private fun isGameFont(font: PolyFont): Boolean =
         font.name == GAME_FONT || font.name == GAME_FONT_BOLD
@@ -266,30 +254,6 @@ class LbHudCanvas internal constructor(
         else -> y
     }
 
-    private fun hsvToArgb(hue: Float, saturation: Float, value: Float): Int {
-        val sector = (hue / 60f)
-        val index = sector.toInt() % 6
-        val fraction = sector - sector.toInt()
-
-        val p = value * (1f - saturation)
-        val q = value * (1f - saturation * fraction)
-        val t = value * (1f - saturation * (1f - fraction))
-
-        val (r, g, b) = when (index) {
-            0 -> Triple(value, t, p)
-            1 -> Triple(q, value, p)
-            2 -> Triple(p, value, t)
-            3 -> Triple(p, q, value)
-            4 -> Triple(t, p, value)
-            else -> Triple(value, p, q)
-        }
-
-        return (0xFF shl 24) or
-            ((r * 255f).toInt() shl 16) or
-            ((g * 255f).toInt() shl 8) or
-            (b * 255f).toInt()
-    }
-
     companion object {
         /** The font key PolyCompose maps onto the game's own font, so text keeps the vanilla look and glyph coverage. */
         const val GAME_FONT: String = "polycompose:minecraft"
@@ -299,13 +263,6 @@ class LbHudCanvas internal constructor(
 
         /** Size of one game font glyph cell, in logical units. */
         const val GAME_FONT_BASE_SIZE: Float = 8f
-
-        /** Smallest font size an element is allowed to ask for, so a stray option value cannot vanish the text. */
-        const val MIN_FONT_SIZE: Float = 4f
-
-        /** Offset and colour of the drop shadow used by [textShadow] for fonts without a shadow pass of their own. */
-        private const val SHADOW_OFFSET: Float = 1f
-        private const val SHADOW_ARGB: Int = 0x80000000.toInt()
     }
 
 }
