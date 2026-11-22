@@ -22,14 +22,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.ccbluex.liquidbounce.api.core.HttpException
 import net.ccbluex.liquidbounce.api.models.auth.ClientAccount.Companion.EMPTY_ACCOUNT
-import net.ccbluex.liquidbounce.api.services.auth.OAuthClient.startAuth
 import net.ccbluex.liquidbounce.config.ConfigSystem
 import net.ccbluex.liquidbounce.event.EventManager
-import net.ccbluex.liquidbounce.event.events.UserLoggedInEvent
 import net.ccbluex.liquidbounce.event.events.UserLoggedOutEvent
 import net.ccbluex.liquidbounce.features.command.brigadier.CmdLiteralScope
 import net.ccbluex.liquidbounce.features.cosmetic.ClientAccountManager
-import net.ccbluex.liquidbounce.utils.client.browseUrl
 import net.ccbluex.liquidbounce.utils.client.chat
 import net.ccbluex.liquidbounce.utils.client.markAsError
 import net.ccbluex.liquidbounce.utils.client.regular
@@ -40,11 +37,6 @@ import net.ccbluex.liquidbounce.utils.text.joinToText
 object CommandClientAccountSubcommand {
     fun CmdLiteralScope.account() {
         literal("account") {
-            literal("login") {
-                execSuspend {
-                    login()
-                }
-            }
             literal("logout") {
                 execSuspend {
                     logout()
@@ -93,19 +85,5 @@ object CommandClientAccountSubcommand {
             EventManager.callEvent(UserLoggedOutEvent)
             chat(regular("Successfully logged out."))
         }
-    }
-
-    private suspend fun login() {
-        if (ClientAccountManager.clientAccount != EMPTY_ACCOUNT) {
-            chat(regular("You are already logged in."))
-            return
-        }
-
-        chat(regular("Starting OAuth authorization process..."))
-        val account = startAuth(::browseUrl)
-        ClientAccountManager.clientAccount = account
-        ConfigSystem.store(ClientAccountManager)
-        EventManager.callEvent(UserLoggedInEvent)
-        chat(regular("Successfully authorized client."))
     }
 }

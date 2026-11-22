@@ -21,7 +21,6 @@ package net.ccbluex.liquidbounce.event.events
 
 import com.google.gson.annotations.SerializedName
 import net.ccbluex.liquidbounce.annotations.Tag
-import net.ccbluex.liquidbounce.config.gson.accessibleInteropGson
 import net.ccbluex.liquidbounce.config.types.Value
 import net.ccbluex.liquidbounce.config.types.group.ValueGroup
 import net.ccbluex.liquidbounce.config.types.list.Tagged
@@ -30,10 +29,8 @@ import net.ccbluex.liquidbounce.event.Event
 import net.ccbluex.liquidbounce.features.addon.AddonApi
 import net.ccbluex.liquidbounce.features.chat.packet.AxoUser
 import net.ccbluex.liquidbounce.features.misc.proxy.Proxy
-import net.ccbluex.liquidbounce.integration.interop.protocol.event.WebSocketEvent
-import net.ccbluex.liquidbounce.integration.interop.protocol.rest.v1.game.PlayerData
-import net.ccbluex.liquidbounce.integration.screen.CustomScreenType
-import net.ccbluex.liquidbounce.integration.theme.component.HudComponent
+import net.ccbluex.liquidbounce.event.WebSocketEvent
+import net.ccbluex.liquidbounce.utils.data.PlayerData
 import net.ccbluex.liquidbounce.render.engine.type.Color4b
 import net.ccbluex.liquidbounce.utils.block.bed.BedState
 import net.ccbluex.liquidbounce.utils.inventory.InventoryAction
@@ -173,47 +170,8 @@ class AccountManagerRemovalResultEvent(val username: String?) : Event(), WebSock
 @Tag("proxyCheckResult")
 class ProxyCheckResultEvent(val proxy: Proxy? = null, val error: String? = null) : Event(), WebSocketEvent
 
-@Tag("browserReady")
-object BrowserReadyEvent : Event()
-
-@Tag("virtualScreen")
-class VirtualScreenEvent(
-    val type: CustomScreenType,
-    @Deprecated("Use `type` instead") val screenName: String = type.routeName,
-    val action: Action
-) : Event(), WebSocketEvent {
-
-    enum class Action {
-        @SerializedName("open")
-        OPEN,
-
-        @SerializedName("close")
-        CLOSE
-    }
-
-}
-
 @Tag("serverPinged")
 class ServerPingedEvent(val server: ServerData) : Event(), WebSocketEvent
-
-@Tag("componentsUpdate")
-class ComponentsUpdateEvent(
-    val source: Source,
-    val components: List<HudComponent>,
-    val themeId: String? = null,
-) : Event(), WebSocketEvent {
-    enum class Source {
-        @SerializedName("native")
-        NATIVE,
-
-        @SerializedName("theme")
-        THEME,
-    }
-
-    override val serializer get() = accessibleInteropGson
-
-    override val serializeAsync get() = false
-}
 
 @Tag("rotationUpdate")
 object RotationUpdateEvent : Event()
@@ -254,9 +212,6 @@ class ScheduleInventoryActionEvent(val schedule: MutableList<InventoryAction.Cha
 
 @Tag("selectHotbarSlotSilently")
 class SelectHotbarSlotSilentlyEvent(val requester: Any?, val slot: Int): CancellableEvent()
-
-@Tag("browserUrlChange")
-class BrowserUrlChangeEvent(val index: Int, val url: String) : Event(), WebSocketEvent
 
 @Tag("userLoggedIn")
 object UserLoggedInEvent : Event(), WebSocketEvent

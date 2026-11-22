@@ -33,7 +33,6 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import net.ccbluex.liquidbounce.api.core.ApiConfig
 import net.ccbluex.liquidbounce.api.core.httpException
-import net.ccbluex.liquidbounce.api.core.ioScope
 import net.ccbluex.liquidbounce.api.models.auth.ClientAccount
 import net.ccbluex.liquidbounce.api.services.auth.isInvalidGrant
 import net.ccbluex.liquidbounce.api.services.client.ClientUpdate
@@ -64,12 +63,7 @@ import net.ccbluex.liquidbounce.features.misc.FriendManager
 import net.ccbluex.liquidbounce.features.misc.proxy.ProxyManager
 import net.ccbluex.liquidbounce.features.module.ModuleManager
 import net.ccbluex.liquidbounce.features.spoofer.SpooferManager
-import net.ccbluex.liquidbounce.integration.backend.BrowserBackendManager
-import net.ccbluex.liquidbounce.integration.interop.ClientInteropServer
-import net.ccbluex.liquidbounce.integration.interop.protocol.rest.v1.game.ActiveServerList
-import net.ccbluex.liquidbounce.integration.screen.ScreenManager
-import net.ccbluex.liquidbounce.integration.task.TaskManager
-import net.ccbluex.liquidbounce.integration.theme.ThemeManager
+import net.ccbluex.liquidbounce.integration.oneconfig.OneConfigIntegration
 import net.ccbluex.liquidbounce.lang.LanguageManager
 import net.ccbluex.liquidbounce.render.FontManager
 import net.ccbluex.liquidbounce.render.HAS_AMD_VEGA_APU
@@ -158,8 +152,6 @@ object LiquidBounce : EventListener {
      * Client logger to print out console messages
      */
     val logger get() = net.ccbluex.liquidbounce.utils.client.logger
-
-    var taskManager: TaskManager? = null
 
     var isInitialized = false
         private set
@@ -281,7 +273,6 @@ object LiquidBounce : EventListener {
         FriendManager
         InventoryManager
         EnderChestInventoryTracker
-        ActiveServerList
         ConfigSystem.root(ClientAccountManager)
         ConfigSystem.root(SpooferManager)
         ConfigSystem.root(GlobalManager)
@@ -376,15 +367,14 @@ object LiquidBounce : EventListener {
 
     /**
      * Prepares the GUI stage of the client.
-     * This will load [ThemeManager], as well as the [BrowserBackendManager] and [ClientInteropServer].
+     *
+     * The WebUI (browser backend, interop server, theme engine and startup progress screens)
+     * has been removed. Only non-WebUI work remains: marketplace preloading and font setup.
      */
     private suspend fun prepareGuiStage(
         dispatcher: CoroutineDispatcher
     ) = withContext(dispatcher) {
         RenderSystem.assertOnRenderThread()
-
-        BrowserBackendManager.init()
-        ClientInteropServer.start()
 
         // Preload marketplace items
         ConfigSystem.load(MarketplaceManager)
@@ -392,25 +382,10 @@ object LiquidBounce : EventListener {
         AddonInstaller.stageSubscribedAddons()
         MarketplaceManager.reloadHandlers()
 
-        if (!ClientInteropServer.isSkipping) {
-            ThemeManager.init()
-            ConfigSystem.load(ThemeManager)
-            ThemeManager.load()
-        }
-
         BlurEffectRenderer
-        ScreenManager
 
-        // Holds the chosen browser backend
-        ConfigSystem.load(GlobalManager)
-
-        // WebUI dependency downloads, the AI/deep-learning engine and the marketplace
-        // updater have been removed. No browser backend is requested and nothing is
-        // downloaded on startup, so there is no loading screen to display.
-        // Keep a completed TaskManager for API compatibility with code that reads it.
-        taskManager = TaskManager(ioScope).apply {
-            launch("No-op") { task -> task.isCompleted = true }
-        }
+        // Hand the module list and the player information HUD over to OneConfig.
+        OneConfigIntegration.init()
 
         // Prepare glyph manager
         val duration = measureTime {
@@ -435,18 +410,10 @@ object LiquidBounce : EventListener {
         FontManager.closeGlyphManager()
         EventManager.unregisterAll()
 
-        // Shutdown HTTP server
-        ioScope.launch {
-            ClientInteropServer.stop()
-        }
-
         AddonManager.notifyStopping()
 
         // Save all configurations
         ConfigSystem.storeAll()
-
-        // Shutdown browser
-        BrowserBackendManager.stop()
     }
 
     /**
@@ -471,7 +438,6 @@ object LiquidBounce : EventListener {
             val resourceManager = mc.resourceManager
             if (resourceManager is ReloadableResourceManager) {
                 resourceManager.registerReloadListener(ClientResourceReloader)
-                resourceManager.registerReloadListener(ThemeManager.reloader)
             } else {
                 logger.warn("Failed to register resource reloader!")
 
@@ -479,9 +445,7 @@ object LiquidBounce : EventListener {
                 initializeClient(
                     workerDispatcher = Dispatchers.Default,
                     renderThreadDispatcher = Dispatchers.Main,
-                ).thenCompose {
-                    ThemeManager.reloader.reload()
-                }
+                )
             }
         }.onFailure {
             ErrorHandler.fatal(it, additionalMessage = "Client start")

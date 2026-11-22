@@ -30,16 +30,12 @@ import net.ccbluex.liquidbounce.event.events.AccountManagerRemovalResultEvent
 import net.ccbluex.liquidbounce.event.events.SessionEvent
 import net.ccbluex.liquidbounce.injection.mixins.realms.MixinRealmsAvailabilityAccessor
 import net.ccbluex.liquidbounce.injection.mixins.realms.MixinRealmsClientAccessor
-import net.ccbluex.liquidbounce.integration.backend.BrowserBackendManager
-import net.ccbluex.liquidbounce.integration.screen.impl.MicrosoftLoginScreen
 import net.ccbluex.liquidbounce.utils.client.logger
 import net.ccbluex.liquidbounce.utils.client.mc
 import net.ccbluex.liquidbounce.utils.client.with
 import net.minecraft.client.multiplayer.ProfileKeyPairManager
 import java.net.Proxy
-import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.concurrent.thread
 
 @Suppress("TooManyFunctions")
 object AccountManager : Config("Accounts"), EventListener {
@@ -157,129 +153,6 @@ object AccountManager : Config("Accounts"), EventListener {
         }
 
         loginDirectAccount(account)
-    }
-
-    /**
-     * Re-triggering the device code flow while one is running re-shows this URL instead of asking
-     * Microsoft for a new code.
-     */
-    private var activeDeviceCodeUrl: String? = null
-
-    /**
-     * Guards the WebView and credentials flows only - the device code flow uses [activeDeviceCodeUrl].
-     */
-    private val microsoftLoginInProgress = AtomicBoolean(false)
-
-    /**
-     * Blocks only until the verification URL is known and hands it to [url]; the account itself is created
-     * once the user signs in elsewhere, surfaced via [AccountManagerAdditionResultEvent].
-     */
-    fun newMicrosoftAccountViaDeviceCode(url: (String) -> Unit) {
-        val existingUrl = activeDeviceCodeUrl
-        if (existingUrl != null) {
-            url(existingUrl)
-            return
-        }
-
-        val urlReady = CountDownLatch(1)
-
-        thread(name = "microsoft-account-device-code", isDaemon = true) {
-            runCatching {
-                MicrosoftAccount.buildFromDeviceCode(onDeviceCode = { code ->
-                    activeDeviceCodeUrl = code.directVerificationUri
-                    url(code.directVerificationUri)
-                    urlReady.countDown()
-                })
-            }.onSuccess { account ->
-                activeDeviceCodeUrl = null
-                handleNewMicrosoftAccount(account)
-            }.onFailure {
-                activeDeviceCodeUrl = null
-                logger.error("Failed to create new account", it)
-                EventManager.callEvent(AccountManagerAdditionResultEvent(error = it.message ?: "Unknown error"))
-            }
-
-            // In case buildFromDeviceCode failed before ever reaching the onDeviceCode callback
-            urlReady.countDown()
-        }
-
-        urlReady.await()
-    }
-
-    /**
-     * Runs asynchronously; the result is surfaced via [AccountManagerAdditionResultEvent].
-     */
-    fun newMicrosoftAccountViaWebView() {
-        if (!microsoftLoginInProgress.compareAndSet(false, true)) {
-            EventManager.callEvent(
-                AccountManagerAdditionResultEvent(error = "A Microsoft sign-in is already in progress!")
-            )
-            return
-        }
-
-        // The login has to run in a browser we control, both to read the redirect back and to keep the
-        // Microsoft session out of the client's cookie store.
-        if (BrowserBackendManager.backend?.takeIf { it.isInitialized && it.supportsIncognito } == null) {
-            microsoftLoginInProgress.set(false)
-            EventManager.callEvent(
-                AccountManagerAdditionResultEvent(error = "The browser is not available, use another sign-in method")
-            )
-            return
-        }
-
-        thread(name = "microsoft-account-webview", isDaemon = true) {
-            runCatching {
-                MicrosoftAccount.buildFromWebView(
-                    onOpen = { service ->
-                        val url = service.authenticationUrl.toString()
-                        mc.execute {
-                            mc.gui.setScreen(MicrosoftLoginScreen(url, service, mc.gui.screen()))
-                        }
-                    },
-                    onClose = {
-                        mc.execute { (mc.gui.screen() as? MicrosoftLoginScreen)?.onClose() }
-                    },
-                )
-            }.onSuccess {
-                handleNewMicrosoftAccount(it)
-            }.onFailure {
-                logger.error("Failed to create new account", it)
-                EventManager.callEvent(AccountManagerAdditionResultEvent(error = it.message ?: "Unknown error"))
-            }
-
-            microsoftLoginInProgress.set(false)
-        }
-    }
-
-    /**
-     * Does not support accounts with two-factor authentication enabled. Runs asynchronously; the result is
-     * surfaced via [AccountManagerAdditionResultEvent].
-     */
-    fun newMicrosoftAccountViaCredentials(email: String, password: String) {
-        if (email.isEmpty() || password.isEmpty()) {
-            EventManager.callEvent(AccountManagerAdditionResultEvent(error = "Email and password are required!"))
-            return
-        }
-
-        if (!microsoftLoginInProgress.compareAndSet(false, true)) {
-            EventManager.callEvent(
-                AccountManagerAdditionResultEvent(error = "A Microsoft sign-in is already in progress!")
-            )
-            return
-        }
-
-        thread(name = "microsoft-account-credentials", isDaemon = true) {
-            runCatching {
-                MicrosoftAccount.buildFromCredentials(email, password)
-            }.onSuccess {
-                handleNewMicrosoftAccount(it)
-            }.onFailure {
-                logger.error("Failed to create new account", it)
-                EventManager.callEvent(AccountManagerAdditionResultEvent(error = it.message ?: "Unknown error"))
-            }
-
-            microsoftLoginInProgress.set(false)
-        }
     }
 
     private fun handleNewMicrosoftAccount(account: MicrosoftAccount) {

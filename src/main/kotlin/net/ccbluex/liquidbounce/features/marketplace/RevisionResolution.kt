@@ -23,7 +23,7 @@ import net.ccbluex.liquidbounce.api.models.marketplace.MarketplaceItemStatus
 import net.ccbluex.liquidbounce.api.models.marketplace.MarketplaceItemType
 import net.ccbluex.liquidbounce.api.services.marketplace.MarketplaceApi
 import net.ccbluex.liquidbounce.features.addon.AddonInstaller
-import net.ccbluex.liquidbounce.integration.task.type.ResourceTask
+import net.ccbluex.liquidbounce.utils.data.ResourceTask
 import net.ccbluex.liquidbounce.lang.translation
 import net.ccbluex.liquidbounce.utils.client.variable
 import net.minecraft.network.chat.MutableComponent

@@ -40,8 +40,6 @@ import net.ccbluex.liquidbounce.features.module.ModuleCategories
 import net.ccbluex.liquidbounce.features.module.ModuleCategory
 import net.ccbluex.liquidbounce.features.module.ModuleManager
 import net.ccbluex.liquidbounce.features.module.modules.render.ModuleClickGui
-import net.ccbluex.liquidbounce.integration.backend.BrowserBackendManager
-import net.ccbluex.liquidbounce.integration.backend.BrowserBackendProvider
 import net.ccbluex.liquidbounce.utils.client.clientLogger
 import net.ccbluex.liquidbounce.utils.client.error.QuickFix
 import net.ccbluex.liquidbounce.utils.client.error.QuickFixes
@@ -98,7 +96,6 @@ abstract class LiquidBounceAddon : EventListener, MinecraftShortcuts {
     internal val registeredModes = mutableListOf<Pair<ModeValueGroup<*>, Mode>>()
     internal val registeredConfigs = mutableListOf<Config>()
     internal val registeredItemHandlers = mutableListOf<Pair<MarketplaceItemType, MarketplaceItemHandler>>()
-    internal val registeredBrowserBackends = mutableListOf<BrowserBackendProvider>()
     internal val registeredQuickFixes = mutableListOf<QuickFix>()
 
     /**
@@ -190,14 +187,6 @@ abstract class LiquidBounceAddon : EventListener, MinecraftShortcuts {
     fun registerMarketplaceHandler(type: MarketplaceItemType, handler: MarketplaceItemHandler) {
         MarketplaceManager.registerHandler(type, handler)
         registeredItemHandlers += type to handler
-    }
-
-    /**
-     * Offers a browser backend the player can choose when the client starts.
-     */
-    fun registerBrowserBackend(provider: BrowserBackendProvider) {
-        BrowserBackendManager.registerBackend(provider)
-        registeredBrowserBackends += provider
     }
 
     /**

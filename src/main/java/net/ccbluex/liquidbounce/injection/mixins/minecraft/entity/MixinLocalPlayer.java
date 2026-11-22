@@ -38,9 +38,8 @@ import net.ccbluex.liquidbounce.features.module.modules.render.DoRender;
 import net.ccbluex.liquidbounce.features.module.modules.render.ModuleAntiBlind;
 import net.ccbluex.liquidbounce.features.module.modules.render.ModuleFreeCam;
 import net.ccbluex.liquidbounce.features.module.modules.world.ModuleLiquidPlace;
-import net.ccbluex.liquidbounce.integration.interop.protocol.rest.v1.game.PlayerData;
-import net.ccbluex.liquidbounce.integration.interop.protocol.rest.v1.game.PlayerInventoryData;
-import net.ccbluex.liquidbounce.integration.screen.ScreenManager;
+import net.ccbluex.liquidbounce.utils.data.PlayerData;
+import net.ccbluex.liquidbounce.utils.data.PlayerInventoryData;
 import net.ccbluex.liquidbounce.interfaces.LocalPlayerAddition;
 import net.ccbluex.liquidbounce.utils.aiming.RotationManager;
 import net.ccbluex.liquidbounce.utils.aiming.data.Rotation;
@@ -485,12 +484,6 @@ public abstract class MixinLocalPlayer extends MixinPlayer implements LocalPlaye
         var event = new SprintEvent(new DirectionalInput(input), original, SprintEvent.Source.NETWORK);
         EventManager.INSTANCE.callEvent(event);
         return event.getSprint();
-    }
-
-    @WrapWithCondition(method = "clientSideCloseContainer", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;setScreen(Lnet/minecraft/client/gui/screens/Screen;)V"))
-    private boolean preventCloseScreen(Gui instance, Screen screen) {
-        // Prevent closing screen if the current screen is a client screen
-        return !ScreenManager.isClientScreen(screen);
     }
 
 }

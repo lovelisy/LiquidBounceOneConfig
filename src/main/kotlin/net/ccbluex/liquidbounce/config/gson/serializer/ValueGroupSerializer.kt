@@ -67,10 +67,7 @@ class ValueGroupSerializer(
         )
 
         /**
-         * Serialize a [ValueGroup] to a read-only [JsonObject]
-         *
-         * Used for interop communication by [ReadOnlyComponentSerializer]
-         * and [ReadOnlyThemeSerializer].
+         * Serialize a [ValueGroup] to a read-only [JsonObject].
          */
         @JvmStatic
         fun serializeReadOnly(

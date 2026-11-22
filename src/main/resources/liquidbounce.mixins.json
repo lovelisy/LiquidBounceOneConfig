@@ -10,7 +10,7 @@
     "authlib.MixinMinecraftServicesSessionService",
     "blaze3d.MixinInputConstants",
     "blaze3d.MixinWindow",
-    "djl.MixinUtils",
+    
     "lithium.MixinChunkAwareBlockCollisionSweeperBlockPos",
     "lithium.MixinChunkAwareBlockCollisionSweeperVoxelShape",
     "minecraft.block.FallingParticlesLeavesBlock",
@@ -86,12 +86,12 @@
     "minecraft.gui.MixinHudAccessor",
     "minecraft.gui.MixinKeyBindsScreen",
     "minecraft.gui.MixinLoadingOverlay",
-    "minecraft.gui.MixinLocatorBar",
+    
     "minecraft.gui.MixinPlayerTabOverlay",
     "minecraft.gui.MixinScoreboard",
     "minecraft.gui.MixinScreen",
     "minecraft.gui.MixinScreenRectangle",
-    "minecraft.gui.MixinSubtitleOverlay",
+    
     "minecraft.gui.custom.MixinConnectScreen",
     "minecraft.gui.custom.MixinDisconnectedScreen",
     "minecraft.gui.custom.MixinLevelLoadingScreen",
