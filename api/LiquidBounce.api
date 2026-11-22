@@ -916,10 +916,7 @@ public final class net/ccbluex/liquidbounce/features/module/modules/player/autos
 public final class net/ccbluex/liquidbounce/features/module/modules/render/ModuleClickGui : net/ccbluex/liquidbounce/features/module/ClientModule {
 	public static final field INSTANCE Lnet/ccbluex/liquidbounce/features/module/modules/render/ModuleClickGui;
 	public fun getRunning ()Z
-	public final fun invalidate ()V
-	public final fun isInSearchBar ()Z
 	public fun onEnabled ()V
-	public final fun sync ()V
 }
 
 public final class net/ccbluex/liquidbounce/lang/LanguageKt {
@@ -1003,14 +1000,6 @@ public final class net/ccbluex/liquidbounce/render/WorldRenderEnvironment {
 }
 
 public final class net/ccbluex/liquidbounce/render/atlas/ItemImageAtlas : net/ccbluex/liquidbounce/event/EventListener {
-	public fun after (ILjava/lang/Runnable;)Ljava/lang/AutoCloseable;
-	public fun every (ILjava/lang/Runnable;)Ljava/lang/AutoCloseable;
-	public fun on (Ljava/lang/Class;Ljava/util/function/Consumer;)Ljava/lang/AutoCloseable;
-	public fun on (Ljava/lang/Class;SLjava/util/function/Consumer;)Ljava/lang/AutoCloseable;
-	public fun onTick (Ljava/lang/Runnable;)Ljava/lang/AutoCloseable;
-}
-
-public final class net/ccbluex/liquidbounce/render/engine/BlurEffectRenderer : net/ccbluex/liquidbounce/event/EventListener, net/ccbluex/liquidbounce/features/module/MinecraftShortcuts {
 	public fun after (ILjava/lang/Runnable;)Ljava/lang/AutoCloseable;
 	public fun every (ILjava/lang/Runnable;)Ljava/lang/AutoCloseable;
 	public fun on (Ljava/lang/Class;Ljava/util/function/Consumer;)Ljava/lang/AutoCloseable;
@@ -1595,14 +1584,6 @@ public final class net/ccbluex/liquidbounce/utils/input/InputTracker : net/ccblu
 }
 
 public final class net/ccbluex/liquidbounce/utils/inventory/AnchoredHotbarSwapController : net/ccbluex/liquidbounce/event/EventListener {
-	public fun after (ILjava/lang/Runnable;)Ljava/lang/AutoCloseable;
-	public fun every (ILjava/lang/Runnable;)Ljava/lang/AutoCloseable;
-	public fun on (Ljava/lang/Class;Ljava/util/function/Consumer;)Ljava/lang/AutoCloseable;
-	public fun on (Ljava/lang/Class;SLjava/util/function/Consumer;)Ljava/lang/AutoCloseable;
-	public fun onTick (Ljava/lang/Runnable;)Ljava/lang/AutoCloseable;
-}
-
-public final class net/ccbluex/liquidbounce/utils/inventory/EnderChestInventoryTracker : net/ccbluex/liquidbounce/event/EventListener, net/ccbluex/liquidbounce/features/module/MinecraftShortcuts {
 	public fun after (ILjava/lang/Runnable;)Ljava/lang/AutoCloseable;
 	public fun every (ILjava/lang/Runnable;)Ljava/lang/AutoCloseable;
 	public fun on (Ljava/lang/Class;Ljava/util/function/Consumer;)Ljava/lang/AutoCloseable;

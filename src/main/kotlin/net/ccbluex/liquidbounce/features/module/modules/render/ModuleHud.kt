@@ -26,8 +26,8 @@ import net.ccbluex.liquidbounce.features.module.ModuleCategories
 /**
  * Module HUD
  *
- * The HUD is rendered by OneConfig (see `LbPlayerInfoHud`), which also lets the user move, scale and
- * restyle it in OneConfig's HUD editor. This module only stays as the master switch.
+ * The HUD itself is provided by the native LiquidBounce HUD component system, while the module settings
+ * are edited through the LiquidBounce entry of the OneConfig sidebar like every other module.
  */
 object ModuleHud : ClientModule("HUD", ModuleCategories.RENDER, state = true, hide = true) {
 

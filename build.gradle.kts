@@ -27,6 +27,7 @@ import org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation
 plugins {
     alias(libs.plugins.fabric.loom)
     alias(libs.plugins.kotlin.jvm)
+    alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.gradleGitProperties)
     alias(libs.plugins.detekt)
     alias(libs.plugins.dokka)
