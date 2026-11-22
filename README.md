@@ -21,6 +21,24 @@ there is no embedded browser, no web server and no bundled front end.
   server.
 - **No Node.js** is required to build, the theme is no longer compiled during `build`.
 
+## License
+
+This project is subject to the [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.en.html) (see
+[LICENSE](LICENSE)). This applies only to source code located in this repository. During the development and
+compilation process, additional source code may be used to which no rights have been obtained; such code is not
+covered by the GPL license.
+
+In short, under the GPL you are allowed to use, share and modify this source code, but if you decide to use any code
+from it, you must disclose the source code of your modified work and license it under the GPL as well. This summary is
+no legal advice nor legally binding.
+
+The runtime dependencies are not bundled into this jar and keep their own licenses:
+
+- [OneConfig](https://github.com/Polyfrost/OneConfig) is licensed under the GNU Lesser General Public License v3
+  together with the Polyfrost additional terms.
+- [PolyCompose](https://github.com/Polyfrost/PolyCompose) is licensed under the GNU Lesser General Public License v3
+  together with the Polyfrost additional terms; OneConfig already depends on it.
+
 ## Requirements
 
 - Minecraft 26.3 with Fabric Loader and Fabric Language Kotlin.
