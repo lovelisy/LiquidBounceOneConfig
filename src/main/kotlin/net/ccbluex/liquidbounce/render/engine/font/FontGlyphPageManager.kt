@@ -21,22 +21,13 @@ package net.ccbluex.liquidbounce.render.engine.font
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.ensureActive
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import net.ccbluex.liquidbounce.annotations.ValueClassCandidate
-import net.ccbluex.liquidbounce.api.core.ioScope
 import net.ccbluex.liquidbounce.event.EventListener
 import net.ccbluex.liquidbounce.event.events.GameRenderEvent
 import net.ccbluex.liquidbounce.event.handler
 import net.ccbluex.liquidbounce.render.FontFace
 import net.ccbluex.liquidbounce.render.engine.font.dynamic.DynamicFontCacheManager
 import net.ccbluex.liquidbounce.render.engine.font.dynamic.DynamicGlyphPage
-import net.ccbluex.liquidbounce.utils.client.logger
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.math.ceil
 
@@ -62,7 +53,6 @@ class FontGlyphPageManager(
     private val dynamicallyLoadedGlyphs = Object2ObjectOpenHashMap<FontGlyph, GlyphDescriptor>()
     private val closed = AtomicBoolean(false)
     private val staticPagesLock = Any()
-    private var commonHanWarmupJob: Job? = null
 
     init {
         val eagerGlyphs = FontCharacterSet.createEagerGlyphs(registeredFonts, primaryFace, fallbackFonts)
@@ -76,7 +66,6 @@ class FontGlyphPageManager(
         }
 
         this.dynamicFontManager.startThread()
-        startCommonHanWarmup()
     }
 
     @Suppress("unused")
@@ -103,39 +92,6 @@ class FontGlyphPageManager(
         }
         staticPage.addAll(glyphPages)
         true
-    }
-
-    private fun startCommonHanWarmup() {
-        commonHanWarmupJob = ioScope.launch(Dispatchers.Default) {
-            try {
-                warmCommonHanGlyphs()
-            } catch (exception: CancellationException) {
-                throw exception
-            } catch (exception: Throwable) {
-                logger.error("Failed to warm common Han glyphs", exception)
-            }
-        }
-    }
-
-    private suspend fun warmCommonHanGlyphs() {
-        val glyphs = FontCharacterSet.createCommonHanGlyphs(primaryFace, fallbackFonts)
-        if (glyphs.isEmpty()) {
-            logger.info("Skipping common Han warmup because no configured font can display it")
-            return
-        }
-
-        val preparedPages = StaticGlyphPage.prepareGlyphPages(glyphs)
-        currentCoroutineContext().ensureActive()
-        if (closed.get()) {
-            return
-        }
-
-        val registered = withContext(Dispatchers.Main) {
-            materializeAndRegister(preparedPages)
-        }
-        if (registered) {
-            logger.info("Finished warming ${glyphs.size} common Han glyphs")
-        }
     }
 
     private fun materializeAndRegister(preparedPages: List<PreparedStaticGlyphPage>): Boolean {
@@ -204,8 +160,6 @@ class FontGlyphPageManager(
         if (!closed.compareAndSet(false, true)) {
             return
         }
-        commonHanWarmupJob?.cancel()
-        commonHanWarmupJob = null
         unregister()
         this.dynamicFontManager.close()
         this.dynamicPage.texture.close()

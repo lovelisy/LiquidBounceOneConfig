@@ -172,6 +172,8 @@ dependencies {
     // OneConfig - provides the config screen (mod card & categories) and the HUD system.
     // Compile-only: OneConfig is a required mod dependency at runtime, it is not bundled.
     compileOnly(libs.oneconfig)
+    // PolyCompose - OneConfig's immediate-mode renderer, driving the HUD font and shapes.
+    compileOnly(libs.polycompose)
 
     // HTTP library
     jij(libs.bundles.okhttp)

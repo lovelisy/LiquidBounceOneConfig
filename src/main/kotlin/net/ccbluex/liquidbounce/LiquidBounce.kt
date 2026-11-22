@@ -407,6 +407,9 @@ object LiquidBounce : EventListener {
 
         AddonManager.notifyStopping()
 
+        // Persist the HUD settings that were still waiting for their deferred write
+        OneConfigIntegration.shutdown()
+
         // Save all configurations
         ConfigSystem.storeAll()
     }

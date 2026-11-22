@@ -32,6 +32,9 @@ there is no embedded browser, no web server and no bundled front end.
 - Minecraft 26.3 with Fabric Loader and Fabric Language Kotlin.
 - [OneConfig](https://github.com/Polyfrost/OneConfig) 1.9.1 or newer must be installed, it provides the settings screen
   and the HUD renderer.
+- [PolyCompose](https://github.com/Polyfrost/PolyCompose) 3.0.0 or newer must be installed. OneConfig ships it as a
+  dependency of its own, so it is normally already present; LiquidBounce uses its immediate mode renderer to draw the
+  HUD with OneConfig's font engine.
 
 ## Setting up a Workspace
 
@@ -56,6 +59,11 @@ its [Documentation](https://docs.spongepowered.org/5.1.0/en/plugin/internals/mix
 
 OneConfig is licensed under the GNU Lesser General Public License v3 together with the Polyfrost additional terms. It is
 a required mod at runtime and is not bundled into this jar.
+
+### PolyCompose
+
+PolyCompose is licensed under the GNU Lesser General Public License v3 together with the Polyfrost additional terms. It
+is a required mod at runtime and is not bundled into this jar; OneConfig already depends on it.
 
 ## License
 

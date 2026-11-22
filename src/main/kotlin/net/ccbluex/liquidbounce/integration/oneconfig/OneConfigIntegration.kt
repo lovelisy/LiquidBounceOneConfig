@@ -20,6 +20,7 @@
 
 package net.ccbluex.liquidbounce.integration.oneconfig
 
+import net.ccbluex.liquidbounce.integration.oneconfig.hud.LbHuds
 import org.polyfrost.oneconfig.api.ui.v1.ExperimentalOneConfigUiApi
 import org.polyfrost.oneconfig.api.ui.v1.page.OneConfigPages
 
@@ -27,12 +28,17 @@ import org.polyfrost.oneconfig.api.ui.v1.page.OneConfigPages
  * Bootstraps the OneConfig integration.
  *
  * The module list and its settings live on the LiquidBounce entry of the OneConfig sidebar, rendered by
- * [LbModulesPage] with OneConfig's own config screen.
+ * [LbModulesPage] with OneConfig's own config screen, while the HUD elements are registered as individual
+ * OneConfig HUD units by [LbHuds].
  */
 object OneConfigIntegration {
 
     fun init() {
         OneConfigPages.registerIfAbsent(LbModulesPage)
+        LbHuds.init()
     }
+
+    /** Persists every HUD setting that is still waiting for its deferred write. */
+    fun shutdown() = LbHuds.flush()
 
 }

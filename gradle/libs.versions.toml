@@ -5,6 +5,7 @@ jdk = "25"
 
 # OneConfig
 oneconfig = "1.9.1"
+polycompose = "3.0.2"
 
 # Fabric Properties
 # Check these on https://fabricmc.net/versions.html
@@ -97,6 +98,8 @@ iris = { group = "maven.modrinth", name = "iris", version.ref = "iris" }
 
 # OneConfig - config screen and HUD system
 oneconfig = { group = "org.polyfrost.oneconfig", name = "26.3-fabric", version.ref = "oneconfig" }
+# PolyCompose - immediate-mode render context and font engine used by the OneConfig HUDs
+polycompose = { group = "org.polyfrost", name = "polycompose-26.3-fabric", version.ref = "polycompose" }
 
 [plugins]
 fabric-loom = { id = "net.fabricmc.fabric-loom", version.ref = "fabric-loom" }

@@ -23,13 +23,8 @@ import it.unimi.dsi.fastutil.ints.IntOpenHashSet
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet
 import net.ccbluex.fastutil.mapToIntArray
 import net.ccbluex.liquidbounce.render.FontFace
-import net.ccbluex.liquidbounce.utils.io.readText
-import java.awt.Font
 
 internal object FontCharacterSet {
-
-    private const val COMMON_HAN_RESOURCE = "/resources/liquidbounce/font/common_zh_cn.txt"
-    private const val COMMON_HAN_COUNT = 3500
 
     val eagerCodepoints: IntArray = IntOpenHashSet(2048).apply {
         // Common western scripts and their precomposed/combining variants.
@@ -42,7 +37,6 @@ internal object FontCharacterSet {
         addRange(0x2000..0x206F) // General Punctuation
         addRange(0x20A0..0x20CF) // Currency Symbols
 
-        // Japanese syllabaries and punctuation. Han glyphs are warmed separately.
         addRange(0x3000..0x303F) // CJK Symbols and Punctuation
         addRange(0x3040..0x30FF) // Hiragana and Katakana
         addRange(0x31F0..0x31FF) // Katakana Phonetic Extensions
@@ -50,30 +44,6 @@ internal object FontCharacterSet {
 
         add(0xFFFD) // Replacement Character
     }.toIntArray().apply(IntArray::sort)
-
-    /**
-     * First-level characters from the 2013 Table of General Standard Chinese Characters.
-     *
-     * Source data: https://github.com/jaywcjlove/table-of-general-standard-chinese-characters
-     */
-    val commonHanCodepoints: IntArray by lazy(LazyThreadSafetyMode.PUBLICATION) {
-        val text = requireNotNull(FontCharacterSet::class.java.getResourceAsStream(COMMON_HAN_RESOURCE)) {
-            "Missing common Han character resource $COMMON_HAN_RESOURCE"
-        }.use { it.readText().trim() }
-
-        val codepoints = text.codePoints().toArray()
-        require(codepoints.size == COMMON_HAN_COUNT) {
-            "Expected $COMMON_HAN_COUNT common Han characters, got ${codepoints.size}"
-        }
-        require(IntOpenHashSet(codepoints).size == codepoints.size) {
-            "Common Han character resource contains duplicates"
-        }
-        require(codepoints.all(Character::isIdeographic)) {
-            "Common Han character resource contains non-ideographic codepoints"
-        }
-
-        codepoints
-    }
 
     fun createEagerGlyphs(
         registeredFaces: Collection<FontFace>,
@@ -98,19 +68,6 @@ internal object FontCharacterSet {
 
         return result.sortedWith(FONT_GLYPH_COMPARATOR)
     }
-
-    fun createCommonHanGlyphs(
-        primaryFace: FontFace,
-        fallbackFaces: List<FontFace>,
-    ): List<FontGlyph> = ObjectOpenHashSet<FontGlyph>().also { result ->
-        resolveGlyphs(
-            destination = result,
-            requestedFace = primaryFace,
-            fallbackFaces = fallbackFaces,
-            styles = intArrayOf(Font.PLAIN),
-            codepoints = commonHanCodepoints,
-        )
-    }.sortedWith(FONT_GLYPH_COMPARATOR)
 
     private fun resolveGlyphs(
         destination: MutableSet<FontGlyph>,
