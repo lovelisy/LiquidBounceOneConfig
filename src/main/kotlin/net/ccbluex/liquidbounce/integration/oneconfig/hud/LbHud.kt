@@ -212,6 +212,7 @@ abstract class LbHud(
                     height = height,
                     deltaSeconds = deltaSeconds(),
                     inEditor = HudManager.isEditing,
+                    textScale = textScale,
                 ),
             )
         } catch (throwable: Throwable) {

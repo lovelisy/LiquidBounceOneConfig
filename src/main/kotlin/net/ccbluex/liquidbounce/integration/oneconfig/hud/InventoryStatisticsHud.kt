@@ -106,16 +106,17 @@ object InventoryStatisticsHud :
     override fun measure(): HudSize {
         val count = entries().size
         if (count == 0) {
-            return HudSize(FALLBACK, FALLBACK)
+            val fallback = LbHudScale.px(HEADLESS_SIZE) * textScale
+            return HudSize(fallback, fallback)
         }
-        return LbInventoryGrid.size(count, columns, GAP)
+        return LbInventoryGrid.size(count, columns, GAP, textScale)
     }
 
     override fun paint(canvas: LbHudCanvas) {
         val entries = entries()
         if (entries.isEmpty()) {
             if (canvas.inEditor) {
-                LbInventoryGrid.draw(canvas, sampleStacks(), 1, GAP, surfaceArgb())
+                LbInventoryGrid.draw(canvas, OWNER, sampleStacks(), 1, GAP, surfaceArgb())
             }
             return
         }
@@ -127,11 +128,15 @@ object InventoryStatisticsHud :
             labels[index] = total.toString()
         }
 
-        LbInventoryGrid.draw(canvas, stacks, columns, GAP, surfaceArgb(), labels)
+        LbInventoryGrid.draw(canvas, OWNER, stacks, columns, GAP, surfaceArgb(), labels)
     }
 
+    private const val OWNER: String = "inventory_statistics"
+
     private const val GAP: Float = 2f
-    private const val FALLBACK: Float = 40f
+
+    /** Extent of the editor preview while nothing is tracked. */
+    private const val HEADLESS_SIZE: Float = 40f
 
     /**
      * Sample icon drawn by the editor while nothing is tracked yet.

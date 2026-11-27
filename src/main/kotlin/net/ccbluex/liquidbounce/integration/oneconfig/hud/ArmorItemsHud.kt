@@ -24,7 +24,6 @@ import net.minecraft.world.item.ItemStack
 import org.polyfrost.oneconfig.api.config.v1.annotations.Dropdown
 import org.polyfrost.oneconfig.api.hud.v1.Hud
 
-/** Transparent surface, used by the elements the native client draws without a plate. */
 private const val TRANSPARENT: Int = 0
 
 /**
@@ -54,11 +53,13 @@ object ArmorItemsHud :
         )
     }
 
-    override fun measure(): HudSize = LbInventoryGrid.size(SLOT_COUNT, columns, GAP)
+    override fun measure(): HudSize = LbInventoryGrid.size(SLOT_COUNT, columns, GAP, textScale)
 
     override fun paint(canvas: LbHudCanvas) {
-        LbInventoryGrid.draw(canvas, stacks(), columns, GAP, surfaceArgb())
+        LbInventoryGrid.draw(canvas, OWNER, stacks(), columns, GAP, surfaceArgb())
     }
+
+    private const val OWNER: String = "armor_items"
 
     private const val SLOT_COUNT: Int = 4
     private const val GAP: Float = 2f

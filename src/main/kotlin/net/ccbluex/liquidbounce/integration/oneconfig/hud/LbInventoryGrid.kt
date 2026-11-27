@@ -30,28 +30,36 @@ import kotlin.math.max
  *
  * The plate is only painted when [surface] is not fully transparent, so an element without a background stays free of
  * a plate instead of drawing one in the transparent colour.
+ *
+ * Every slot is reported to [LbItemIcons] with a key of `[owner]:[index]`, so the icon handles are reused across frames
+ * instead of being recreated and closed on every paint pass.
  */
 internal object LbInventoryGrid {
 
     /** Extent a grid of [count] stacks occupies with [columns] columns and the given [gap]. */
-    fun size(count: Int, columns: Int, gap: Float): HudSize {
+    fun size(count: Int, columns: Int, gap: Float, textScale: Float = 1f): HudSize {
         val cols = max(1, columns)
         val rows = ceil(max(1, count).toFloat() / cols.toFloat()).toInt().coerceAtLeast(1)
 
-        val width = PLATE_PADDING * 2f + cols * CELL_SIZE + max(0, cols - 1) * gap
-        val height = PLATE_PADDING * 2f + rows * CELL_SIZE + max(0, rows - 1) * gap
+        val cell = cellSize(textScale)
+        val padding = padding(textScale)
+        val spacing = spacing(gap, textScale)
+
+        val width = padding * 2f + cols * cell + max(0, cols - 1) * spacing
+        val height = padding * 2f + rows * cell + max(0, rows - 1) * spacing
         return HudSize(width, height)
     }
 
     /**
      * Paints [stacks] into a grid.
      *
-     * Every stack is drawn at [CELL_SIZE] and keeps its own decorations, so the item count and the durability bar show
-     * up exactly like they do in the vanilla inventory. [countLabels] overrides the printed number per index, which the
-     * statistics element uses to show a total across the whole inventory.
+     * Every stack keeps its own decorations, so the item count and the durability bar show up exactly like they do in
+     * the vanilla inventory. [countLabels] overrides the printed number per index, which the statistics element uses to
+     * show a total across the whole inventory.
      */
     fun draw(
         canvas: LbHudCanvas,
+        owner: String,
         stacks: List<ItemStack>,
         columns: Int,
         gap: Float,
@@ -59,10 +67,14 @@ internal object LbInventoryGrid {
         countLabels: Map<Int, String> = emptyMap(),
     ) {
         val cols = max(1, columns)
-        val extent = size(stacks.size, cols, gap)
+        val scale = canvas.textScale
+        val extent = size(stacks.size, cols, gap, scale)
+        val cell = cellSize(scale)
+        val padding = padding(scale)
+        val spacing = spacing(gap, scale)
 
         if ((surface ushr 24) != 0) {
-            canvas.fill(0f, 0f, extent.width, extent.height, surface, PLATE_RADIUS)
+            canvas.fill(0f, 0f, extent.width, extent.height, surface, radius(scale))
         }
 
         stacks.forEachIndexed { index, stack ->
@@ -72,17 +84,29 @@ internal object LbInventoryGrid {
 
             val column = index % cols
             val row = index / cols
-            val x = PLATE_PADDING + column * (CELL_SIZE + gap)
-            val y = PLATE_PADDING + row * (CELL_SIZE + gap)
+            val x = padding + column * (cell + spacing)
+            val y = padding + row * (cell + spacing)
 
-            canvas.itemWithDecorations(stack, x, y, CELL_SIZE, CELL_SIZE, countLabels[index])
+            canvas.itemWithDecorations(stack, "$owner:$index", x, y, cell, cell, countLabels[index])
         }
     }
 
-    /** Size of one item slot, matching the native grid. */
+    /** Removes the icon handles of an element that no longer draws its grid. */
+    fun release(owner: String) = LbItemIcons.release(owner)
+
+    private fun cellSize(textScale: Float): Float = LbHudScale.px(CELL_SIZE) * textScale
+
+    private fun padding(textScale: Float): Float = LbHudScale.px(PLATE_PADDING) * textScale
+
+    private fun radius(textScale: Float): Float = LbHudScale.px(PLATE_RADIUS) * textScale
+
+    private fun spacing(gap: Float, textScale: Float): Float = LbHudScale.px(gap) * textScale
+
+    /** Size of one item slot, in the design units of the native grid. */
     private const val CELL_SIZE: Float = 32f
 
     private const val PLATE_PADDING: Float = 4f
     private const val PLATE_RADIUS: Float = 5f
 
 }
+

@@ -20,7 +20,6 @@ package net.ccbluex.liquidbounce.integration.oneconfig.hud
 
 import net.minecraft.world.item.ItemStack
 import org.polyfrost.compose.layout.PolyAlign
-import org.polyfrost.compose.minecraft.mc.McItemIcons
 import org.polyfrost.compose.render.FilterQuality
 import org.polyfrost.compose.render.PolyBitmap
 import org.polyfrost.compose.render.PolyColor
@@ -47,6 +46,8 @@ class LbHudCanvas internal constructor(
     @JvmField val height: Float,
     @JvmField val deltaSeconds: Float = 0f,
     @JvmField val inEditor: Boolean = false,
+    /** Size multiplier of the HUD text, so the item plates follow the same scale as the labels. */
+    @JvmField val textScale: Float = 1f,
 ) {
 
     fun save() = context.save()
@@ -164,15 +165,105 @@ class LbHudCanvas internal constructor(
         context.fillPath(path, PolyColor(argb))
     }
 
-    /** Draws an item stack with its three dimensional model, scaled into the given box. */
-    fun item(stack: ItemStack, x: Float, y: Float, w: Float, h: Float, alpha: Float = 1f) {
-        if (w <= 0f || h <= 0f || alpha <= 0f) return
+    /**
+     * Fills a rounded ring, the shape the native key display grows while a key is held.
+     *
+     * The ring is the area between the outer rounded rectangle and the same rectangle inset by [thickness]. It is built
+     * as one even-odd path so the hole stays transparent and the plate behind it keeps showing, which a filled
+     * rectangle shrinking towards the centre could not do.
+     */
+    fun fillRing(
+        x: Float,
+        y: Float,
+        w: Float,
+        h: Float,
+        radius: Float,
+        thickness: Float,
+        argb: Int,
+    ) {
+        if (w <= 0f || h <= 0f || (argb ushr 24) == 0) return
 
-        runCatching {
-            McItemIcons.open(stack).use { handle ->
-                handle.draw(context, x, y, w, h, alpha.coerceIn(0f, 1f))
-            }
+        val maxRadius = min(w, h) * 0.5f
+        val outerRadius = radius.coerceIn(0f, maxRadius)
+        val inset = thickness.coerceIn(0f, maxRadius)
+        if (inset <= 0f) return
+
+        val innerW = w - inset * 2f
+        val innerH = h - inset * 2f
+        if (innerW <= 0f || innerH <= 0f) {
+            context.rect(x, y, w, h, PolyColor(argb), outerRadius)
+            return
         }
+
+        val innerRadius = (outerRadius - inset).coerceIn(0f, min(innerW, innerH) * 0.5f)
+
+        val path = PolyPath()
+        appendRoundedRect(path, x, y, w, h, outerRadius)
+        // The hole is traced the other way round, so it stays a hole for a renderer that fills by winding rule, and the
+        // even-odd flag covers the ones that fill by crossing count.
+        appendRoundedRectReversed(path, x + inset, y + inset, innerW, innerH, innerRadius)
+        path.evenOdd = true
+
+        context.fillPath(path, PolyColor(argb))
+    }
+
+    /** Appends one closed rounded rectangle to [path], traced clockwise. */
+    private fun appendRoundedRect(
+        path: PolyPath,
+        x: Float,
+        y: Float,
+        w: Float,
+        h: Float,
+        radius: Float,
+    ) {
+        val maxRadius = min(w, h) * 0.5f
+        val r = radius.coerceIn(0f, maxRadius)
+
+        path.moveTo(x + r, y)
+        path.lineTo(x + w - r, y)
+        if (r > 0f) path.tangentArcTo(x + w, y, x + w, y + r, r)
+        path.lineTo(x + w, y + h - r)
+        if (r > 0f) path.tangentArcTo(x + w, y + h, x + w - r, y + h, r)
+        path.lineTo(x + r, y + h)
+        if (r > 0f) path.tangentArcTo(x, y + h, x, y + h - r, r)
+        path.lineTo(x, y + r)
+        if (r > 0f) path.tangentArcTo(x, y, x + r, y, r)
+        path.close()
+    }
+
+    /** Appends one closed rounded rectangle to [path], traced counter-clockwise so it punches a hole. */
+    private fun appendRoundedRectReversed(
+        path: PolyPath,
+        x: Float,
+        y: Float,
+        w: Float,
+        h: Float,
+        radius: Float,
+    ) {
+        val maxRadius = min(w, h) * 0.5f
+        val r = radius.coerceIn(0f, maxRadius)
+
+        path.moveTo(x + r, y + h)
+        path.lineTo(x + w - r, y + h)
+        if (r > 0f) path.tangentArcTo(x + w, y + h, x + w, y + h - r, r)
+        path.lineTo(x + w, y + r)
+        if (r > 0f) path.tangentArcTo(x + w, y, x + w - r, y, r)
+        path.lineTo(x + r, y)
+        if (r > 0f) path.tangentArcTo(x, y, x, y + r, r)
+        path.lineTo(x, y + h - r)
+        if (r > 0f) path.tangentArcTo(x, y + h, x + r, y + h, r)
+        path.close()
+    }
+
+    /**
+     * Draws an item stack with its three dimensional model, scaled into the given box.
+     *
+     * [slot] identifies the position the stack is drawn at and must stay the same while the element lives, for example
+     * `inventory:14`. OneConfig samples the icons from an atlas rendered on a frame hook, so the handle has to be reused
+     * across frames; see [LbItemIcons].
+     */
+    fun item(stack: ItemStack, slot: String, x: Float, y: Float, w: Float, h: Float, alpha: Float = 1f) {
+        LbItemIcons.draw(context, slot, stack, x, y, w, h, alpha)
     }
 
     /**
@@ -183,20 +274,14 @@ class LbHudCanvas internal constructor(
      */
     fun itemWithDecorations(
         stack: ItemStack,
+        slot: String,
         x: Float,
         y: Float,
         w: Float,
         h: Float,
         countLabel: String? = null,
     ) {
-        if (w <= 0f || h <= 0f) return
-
-        runCatching {
-            McItemIcons.open(stack).use { handle ->
-                handle.draw(context, x, y, w, h, 1f)
-                handle.drawDecorations(context, x, y, h, countLabel ?: "")
-            }
-        }
+        LbItemIcons.draw(context, slot, stack, x, y, w, h, 1f, countLabel)
     }
 
     /** Draws the icon at the classpath [path] aspect fitted and centred inside the given box. */

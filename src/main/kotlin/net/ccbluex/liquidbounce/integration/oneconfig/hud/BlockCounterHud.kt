@@ -23,6 +23,7 @@ import net.ccbluex.liquidbounce.event.handler
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.block.Block
 import org.polyfrost.oneconfig.api.config.v1.annotations.Dropdown
+import org.polyfrost.oneconfig.api.config.v1.annotations.Switch
 import org.polyfrost.oneconfig.api.hud.v1.Hud
 import org.polyfrost.oneconfig.api.hud.v1.HudManager
 import java.awt.Color
@@ -32,8 +33,11 @@ import kotlin.math.max
  * Native bridging block counter.
  *
  * The scaffold module reports the block it is about to place and how many of them are left, and the element prints
- * that number next to the block icon. The colour runs from red at zero to green at a full stack, so a single glance
- * tells whether bridging is about to run out of blocks.
+ * that number next to the block icon.
+ *
+ * The number follows the text colour of the style panel, like every other label of the client. [colorByCount] keeps
+ * the native warning on top of that: while it is on, the number runs from red at zero to green at a full stack, so a
+ * single glance tells whether bridging is about to run out of blocks. Turning it off leaves the panel colour in charge.
  */
 object BlockCounterHud :
     LbHudSurface("block_counter", "Block Counter", Hud.Category.INFO, LbHudPalette.surface(0.68f)) {
@@ -41,6 +45,10 @@ object BlockCounterHud :
     @Dropdown(title = "Icon Position", options = ["None", "Left", "Right", "Top", "Bottom"])
     @JvmField
     var iconPosition: String = "Left"
+
+    @Switch(title = "Color By Count")
+    @JvmField
+    var colorByCount: Boolean = false
 
     private var currentBlock: Block? = null
 
@@ -63,12 +71,17 @@ object BlockCounterHud :
         get() = iconPosition == "Top" || iconPosition == "Bottom"
 
     /**
-     * Colour of the number, running from red at an empty inventory to green at a full stack.
+     * Colour of the number.
      *
-     * This mirrors the native `mapToColor` helper, which walks the hue circle up to 120 degrees, the point where the
-     * hue turns green.
+     * With [colorByCount] on this mirrors the native `mapToColor` helper, which walks the hue circle up to 120 degrees,
+     * the point where the hue turns green. Otherwise the text colour of the style panel is used, so the colour control
+     * of the HUD settings governs it like it governs every other label.
      */
-    private fun countColor(count: Int): Int {
+    private fun countArgb(count: Int): Int {
+        if (!colorByCount) {
+            return textColor
+        }
+
         val hue = (count.coerceIn(0, FULL_STACK) / FULL_STACK.toFloat()) * (MAX_HUE / 360f)
         return Color.HSBtoRGB(hue, 1f, 0.85f) or ALPHA_OPAQUE
     }
@@ -82,14 +95,14 @@ object BlockCounterHud :
         val textLine = lineHeight(VALUE_SIZE, LbHudFonts.Weight.MEDIUM)
 
         val width = when {
-            !withIcon -> PADDING_X * 2f + textWidth
-            verticalIcon -> PADDING_X * 2f + max(ICON_SIZE, textWidth)
-            else -> PADDING_X * 2f + ICON_SIZE + GAP + textWidth
+            !withIcon -> paddingX() * 2f + textWidth
+            verticalIcon -> paddingX() * 2f + max(iconSize(), textWidth)
+            else -> paddingX() * 2f + iconSize() + gap() + textWidth
         }
         val height = when {
-            !withIcon -> PADDING_Y * 2f + textLine
-            verticalIcon -> PADDING_Y * 2f + ICON_SIZE + GAP + textLine
-            else -> PADDING_Y * 2f + max(ICON_SIZE, textLine)
+            !withIcon -> paddingY() * 2f + textLine
+            verticalIcon -> paddingY() * 2f + iconSize() + gap() + textLine
+            else -> paddingY() * 2f + max(iconSize(), textLine)
         }
 
         return HudSize(width, height)
@@ -113,10 +126,11 @@ object BlockCounterHud :
         val lineHeight = lineHeight(VALUE_SIZE, LbHudFonts.Weight.MEDIUM)
         val width = plate.width
         val height = plate.height
+        val icon = iconSize()
 
-        canvas.fill(0f, 0f, width, height, surfaceArgb(), SURFACE_RADIUS)
+        canvas.fill(0f, 0f, width, height, surfaceArgb(), surfaceRadius())
 
-        val colour = countColor(count)
+        val colour = countArgb(count)
 
         if (!withIcon || stack == null) {
             drawText(
@@ -137,37 +151,49 @@ object BlockCounterHud :
         val textY: Float
         when (iconPosition) {
             "Left" -> {
-                iconX = PADDING_X
-                iconY = (height - ICON_SIZE) * 0.5f
-                textX = PADDING_X + ICON_SIZE + GAP
+                iconX = paddingX()
+                iconY = (height - icon) * 0.5f
+                textX = paddingX() + icon + gap()
                 textY = (height - lineHeight) * 0.5f
             }
 
             "Right" -> {
-                textX = PADDING_X
+                textX = paddingX()
                 textY = (height - lineHeight) * 0.5f
-                iconX = PADDING_X + textWidth + GAP
-                iconY = (height - ICON_SIZE) * 0.5f
+                iconX = paddingX() + textWidth + gap()
+                iconY = (height - icon) * 0.5f
             }
 
             "Top" -> {
-                iconX = (width - ICON_SIZE) * 0.5f
-                iconY = PADDING_Y
+                iconX = (width - icon) * 0.5f
+                iconY = paddingY()
                 textX = (width - textWidth) * 0.5f
-                textY = PADDING_Y + ICON_SIZE + GAP
+                textY = paddingY() + icon + gap()
             }
 
             else -> {
                 textX = (width - textWidth) * 0.5f
-                textY = PADDING_Y
-                iconX = (width - ICON_SIZE) * 0.5f
-                iconY = PADDING_Y + lineHeight + GAP
+                textY = paddingY()
+                iconX = (width - icon) * 0.5f
+                iconY = paddingY() + lineHeight + gap()
             }
         }
 
-        canvas.item(stack, iconX, iconY, ICON_SIZE, ICON_SIZE)
+        canvas.item(stack, SLOT, iconX, iconY, icon, icon)
         drawText(canvas, countText, textX, textY, VALUE_SIZE, colour, LbHudFonts.Weight.MEDIUM)
     }
+
+    private fun iconSize(): Float = ICON_SIZE * textScale
+
+    private fun paddingX(): Float = PADDING_X * textScale
+
+    private fun paddingY(): Float = PADDING_Y * textScale
+
+    private fun gap(): Float = GAP * textScale
+
+    private fun surfaceRadius(): Float = SURFACE_RADIUS * textScale
+
+    private const val SLOT: String = "block_counter"
 
     private const val VALUE_SIZE: Float = 15f
     private const val ICON_SIZE: Float = 24f

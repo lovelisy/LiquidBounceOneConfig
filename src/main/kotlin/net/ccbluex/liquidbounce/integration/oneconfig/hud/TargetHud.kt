@@ -30,6 +30,8 @@ import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.item.ItemStack
 import org.polyfrost.compose.minecraft.mc.McPlayerFaces
 import org.polyfrost.compose.render.FilterQuality
+import org.polyfrost.compose.render.PolyColor
+import org.polyfrost.oneconfig.api.config.v1.annotations.Color
 import org.polyfrost.oneconfig.api.hud.v1.Hud
 import org.polyfrost.oneconfig.api.hud.v1.HudManager
 import kotlin.math.ceil
@@ -44,6 +46,18 @@ import kotlin.math.max
  * tracking, or the last entity that was attacked within the last 1.2 seconds. Outside of combat nothing is drawn.
  */
 object TargetHud : LbHudSurface("target_hud", "Target HUD", Hud.Category.COMBAT, LbHudPalette.surface(0.68f)) {
+
+    /**
+     * Colour of the health bar under the card.
+     *
+     * The bar keeps the native red by default, but it is an ordinary colour control, so it can be themed together with
+     * the accent and the background of the element.
+     */
+    @Color(title = "Health Bar Color", alpha = true, gradient = true)
+    @JvmField
+    var healthBarColor: PolyColor = PolyColor(LbHudPalette.HOTBAR_HEALTH_COLOR)
+
+    private fun healthBarArgb(): Int = healthBarColor.rawArgb
 
     private const val AVATAR_SIZE: Float = 50f
     private const val PADDING: Float = 15f
@@ -159,8 +173,8 @@ object TargetHud : LbHudSurface("target_hud", "Target HUD", Hud.Category.COMBAT,
 
         if (slots.isNotEmpty()) {
             var armourX = PADDING + AVATAR_SIZE + GAP + midWidth + GAP
-            for (stack in slots) {
-                drawArmourStatus(canvas, stack, armourX, AVATAR_TOP)
+            for ((index, stack) in slots.withIndex()) {
+                drawArmourStatus(canvas, "target_hud:armour:$index", stack, armourX, AVATAR_TOP)
                 armourX += armourSlotWidth()
             }
         }
@@ -178,7 +192,7 @@ object TargetHud : LbHudSurface("target_hud", "Target HUD", Hud.Category.COMBAT,
                 0f,
                 if (animHealthRatio > 0.98f) 5f else 0f,
                 5f,
-                LbHudPalette.HOTBAR_HEALTH_COLOR,
+                healthBarArgb(),
             )
         }
     }
@@ -221,7 +235,7 @@ object TargetHud : LbHudSurface("target_hud", "Target HUD", Hud.Category.COMBAT,
             0f,
             0f,
             5f,
-            LbHudPalette.HOTBAR_HEALTH_COLOR,
+            healthBarArgb(),
         )
     }
 
@@ -255,17 +269,17 @@ object TargetHud : LbHudSurface("target_hud", "Target HUD", Hud.Category.COMBAT,
 
     private fun drawStat(canvas: LbHudCanvas, x: Float, y: Float, value: String, icon: String): Float {
         val valueWidth = max(STAT_VALUE_MIN_WIDTH, textWidth(value, STAT_SIZE))
-        drawText(canvas, value, x, y, STAT_SIZE, LbHudPalette.TEXT_DIMMED_COLOR)
+        drawText(canvas, value, x, y, STAT_SIZE, dimTextArgb())
         canvas.icon(icon, x + valueWidth + STAT_ICON_GAP, y + 1.5f, STAT_ICON_SIZE, STAT_ICON_SIZE, textColor)
         return valueWidth + STAT_ICON_GAP + STAT_ICON_SIZE
     }
 
-    private fun drawArmourStatus(canvas: LbHudCanvas, stack: ItemStack, x: Float, y: Float) {
+    private fun drawArmourStatus(canvas: LbHudCanvas, slot: String, stack: ItemStack, x: Float, y: Float) {
         canvas.save()
         canvas.translate(x, y + 3f)
         val itemScale = ARMOUR_SLOT_SIZE / 16f
         canvas.scale(itemScale, itemScale)
-        canvas.item(stack, 0f, 0f, 16f, 16f)
+        canvas.item(stack, slot, 0f, 0f, 16f, 16f)
         canvas.restore()
 
         val activePoints = if (stack.maxDamage > 0) {
@@ -278,7 +292,7 @@ object TargetHud : LbHudSurface("target_hud", "Target HUD", Hud.Category.COMBAT,
         for (index in 0 until 10) {
             val pointIndex = 10 - index
             val colour = if (pointIndex <= activePoints) {
-                LbHudPalette.accent(1f)
+                accentArgb()
             } else {
                 surfaceArgb(0.44f)
             }

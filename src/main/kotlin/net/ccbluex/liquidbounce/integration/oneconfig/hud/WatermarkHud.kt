@@ -39,7 +39,7 @@ object WatermarkHud : LbHudSurface("watermark", "Watermark", Hud.Category.INFO, 
 
     override fun paint(canvas: LbHudCanvas) {
         canvas.fill(0f, 0f, BASE_WIDTH, BASE_HEIGHT, surfaceArgb(), SURFACE_RADIUS)
-        canvas.stretchedIcon(BADGE, 0f, 0f, BASE_WIDTH, BASE_HEIGHT, LbHudPalette.accent(1f))
+        canvas.stretchedIcon(BADGE, 0f, 0f, BASE_WIDTH, BASE_HEIGHT, accentArgb())
         canvas.stretchedIcon(FOREGROUND, 0f, 0f, BASE_WIDTH, BASE_HEIGHT, textColor)
     }
 

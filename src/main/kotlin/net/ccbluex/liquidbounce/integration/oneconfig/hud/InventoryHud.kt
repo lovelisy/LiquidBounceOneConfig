@@ -39,11 +39,13 @@ object InventoryHud : LbHudSurface("inventory", "Inventory", Hud.Category.INFO, 
         return EMPTY_STACKS
     }
 
-    override fun measure(): HudSize = LbInventoryGrid.size(GRID_SLOTS, COLUMNS, GAP)
+    override fun measure(): HudSize = LbInventoryGrid.size(GRID_SLOTS, COLUMNS, GAP, textScale)
 
     override fun paint(canvas: LbHudCanvas) {
-        LbInventoryGrid.draw(canvas, stacks(), COLUMNS, GAP, surfaceArgb())
+        LbInventoryGrid.draw(canvas, OWNER, stacks(), COLUMNS, GAP, surfaceArgb())
     }
+
+    private const val OWNER: String = "inventory"
 
     private const val COLUMNS: Int = 9
     private const val GAP: Float = 8f

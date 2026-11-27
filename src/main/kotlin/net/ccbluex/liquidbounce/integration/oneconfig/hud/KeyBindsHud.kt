@@ -112,7 +112,7 @@ object KeyBindsHud : LbHudSurface("keybinds", "KeyBinds", Hud.Category.INFO, LbH
                 horizontalPadding(),
                 header + BODY_PADDING * textScale,
                 EMPTY_SIZE,
-                LbHudPalette.TEXT_DIMMED_COLOR,
+                dimTextArgb(),
             )
             return
         }
@@ -131,7 +131,7 @@ object KeyBindsHud : LbHudSurface("keybinds", "KeyBinds", Hud.Category.INFO, LbH
                 horizontalPadding(),
                 rowY,
                 ROW_FONT_SIZE,
-                if (row.enabled) LbHudPalette.SUCCESS_COLOR else textColor,
+                if (row.enabled) textColor else dimTextArgb(),
                 if (row.enabled) LbHudFonts.Weight.MEDIUM else LbHudFonts.Weight.REGULAR,
             )
             drawText(
@@ -140,7 +140,7 @@ object KeyBindsHud : LbHudSurface("keybinds", "KeyBinds", Hud.Category.INFO, LbH
                 boxWidth - horizontalPadding() - row.keyWidth,
                 rowY,
                 KEY_FONT_SIZE,
-                if (row.enabled) LbHudPalette.accent(1f) else LbHudPalette.withAlphaFactor(LbHudPalette.TEXT_COLOR, 0.65f),
+                if (row.enabled) accentArgb() else faintTextArgb(),
                 LbHudFonts.Weight.MEDIUM,
             )
         }

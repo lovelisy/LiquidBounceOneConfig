@@ -186,7 +186,7 @@ object NotificationsHud : LbHudSurface("notifications", "Notifications", Hud.Cat
                 NotificationEvent.Severity.ENABLED -> LbHudPalette.SUCCESS_COLOR
                 NotificationEvent.Severity.ERROR,
                 NotificationEvent.Severity.DISABLED -> LbHudPalette.ERROR_COLOR
-                NotificationEvent.Severity.INFO -> LbHudPalette.accent(1f)
+                NotificationEvent.Severity.INFO -> accentArgb()
             }
             canvas.fill(iconBoxX, iconBoxY, ICON_BOX_SIZE, ICON_BOX_SIZE, badgeColour, 4f)
 
@@ -217,7 +217,7 @@ object NotificationsHud : LbHudSurface("notifications", "Notifications", Hud.Cat
                 textX,
                 textTop + titleLine + TEXT_GAP,
                 MESSAGE_SIZE,
-                LbHudPalette.TEXT_DIMMED_COLOR,
+                dimTextArgb(),
                 LbHudFonts.Weight.REGULAR,
             )
         }

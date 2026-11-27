@@ -25,14 +25,11 @@ import kotlin.math.roundToInt
 /**
  * Colour tokens and animation helpers of the native LiquidBounce HUD.
  *
- * These are the exact values the native client derives from its `_colors.scss` tokens: the surfaces are a black tint,
- * the accent is the LiquidBounce blue and the semantic colours match the native notification and target HUD cards.
+ * Only the semantic colours of the native design live here. The text colours are not listed: every element derives its
+ * primary text from `Hud.textColor` and its secondary text from that same colour at a lower alpha, so the colour control
+ * of the style panel governs all of them, and the accent of an element comes from its own `accentColor` unit option.
  */
 object LbHudPalette {
-
-    const val TEXT_COLOR: Int = 0xFFFFFFFF.toInt()
-    const val TEXT_DIMMED_COLOR: Int = 0xFFCBD5E1.toInt()
-    const val ARRAYLIST_TAG_COLOR: Int = 0xFFAAAAAA.toInt()
 
     const val SUCCESS_COLOR: Int = 0xFF4DAC68.toInt()
     const val ERROR_COLOR: Int = 0xFFFC4130.toInt()
@@ -40,9 +37,6 @@ object LbHudPalette {
 
     const val DEFAULT_ACCENT: Int = 0xFF4677FF.toInt()
     const val DEFAULT_TINT: Int = 0xFF000000.toInt()
-
-    /** Accent colour, scaled to [alpha]. */
-    fun accent(alpha: Float = 1f): Int = withAlphaFactor(DEFAULT_ACCENT, alpha)
 
     /** Native surface colour, scaled to [alpha]. */
     fun surface(alpha: Float): Int = withAlphaFactor(DEFAULT_TINT, alpha)

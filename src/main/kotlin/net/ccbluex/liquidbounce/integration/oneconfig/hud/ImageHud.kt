@@ -167,7 +167,7 @@ object ImageHud : LbHudSurface("image", "Image", Hud.Category.INFO, TRANSPARENT)
             return
         }
 
-        canvas.stretchedIcon(LOGO_BADGE, 0f, 0f, width, height, LbHudPalette.withAlphaFactor(LbHudPalette.accent(1f), alpha))
+        canvas.stretchedIcon(LOGO_BADGE, 0f, 0f, width, height, accentArgb(alpha))
         canvas.stretchedIcon(LOGO_FOREGROUND, 0f, 0f, width, height, tint)
     }
 

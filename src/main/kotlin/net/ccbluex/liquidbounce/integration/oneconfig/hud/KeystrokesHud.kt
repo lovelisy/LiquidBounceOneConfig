@@ -27,7 +27,10 @@ import org.polyfrost.oneconfig.api.hud.v1.HudManager
  * Native keystroke display.
  *
  * The four movement keys sit in a cross with the jump key as a wide bar below them, which is the layout of the native
- * client. A pressed key fills with the accent colour, animated so the plate follows the key instead of snapping.
+ * client. A held key fills with the accent colour: the native client draws an inset shadow whose spread grows to half
+ * the cell, which `UiDraw.fillCssBox` turns into a border that thickens until the ring closes over the whole plate. That
+ * ring is what [LbHudCanvas.fillRing] reproduces, so the key stays lit for as long as it is held instead of flashing
+ * once and going dark.
  */
 object KeystrokesHud : LbHudSurface("keystrokes", "Keystrokes", Hud.Category.INFO, LbHudPalette.surface(0.68f)) {
 
@@ -40,26 +43,51 @@ object KeystrokesHud : LbHudSurface("keystrokes", "Keystrokes", Hud.Category.INF
     }
 
     /** Plates of the five keys, as `x`, `y`, `width` and `height` in the content area. */
-    private fun plates(): Array<FloatArray> {
-        val step = CELL_SIZE + GAP
+    private fun plates(cell: Float, gap: Float, totalWidth: Float): Array<FloatArray> {
+        val step = cell + gap
         return arrayOf(
-            floatArrayOf(step, 0f, CELL_SIZE, CELL_SIZE),
-            floatArrayOf(0f, step, CELL_SIZE, CELL_SIZE),
-            floatArrayOf(step, step, CELL_SIZE, CELL_SIZE),
-            floatArrayOf(step * 2f, step, CELL_SIZE, CELL_SIZE),
-            floatArrayOf(0f, step * 2f, TOTAL_WIDTH, CELL_SIZE),
+            floatArrayOf(step, 0f, cell, cell),
+            floatArrayOf(0f, step, cell, cell),
+            floatArrayOf(step, step, cell, cell),
+            floatArrayOf(step * 2f, step, cell, cell),
+            floatArrayOf(0f, step * 2f, totalWidth, cell),
         )
     }
 
-    override fun measure(): HudSize = HudSize(TOTAL_WIDTH, TOTAL_HEIGHT)
+    /** One key cell of the native design, converted to GUI units and scaled by the text option. */
+    private fun cellSize(): Float = LbHudScale.px(CELL_SIZE) * textScale
+
+    private fun gap(): Float = LbHudScale.px(GAP) * textScale
+
+    /** Label size, converted to GUI units; [hudFont] applies the text scale on its own. */
+    private fun labelFont(): Float = LbHudScale.px(LABEL_SIZE)
+
+    private fun totalWidth(): Float = cellSize() * 3f + gap() * 2f
+
+    override fun measure(): HudSize {
+        val total = totalWidth()
+        return HudSize(total, total)
+    }
 
     override fun paint(canvas: LbHudCanvas) {
         val mapping = keys()
-        val rects = plates()
+        val cell = cellSize()
+        val spacing = gap()
+        val total = totalWidth()
+        val rects = plates(cell, spacing, total)
+        val radius = LbHudScale.px(SURFACE_RADIUS) * textScale
+        val labelFont = labelFont()
 
         mapping.forEachIndexed { index, key ->
+            // A held key reports true for as long as it is down; the editor never reports a press so the preview stays
+            // readable. The progress is clamped to one immediately on press, so a frame that only repaints once still
+            // leaves the key fully lit while it is held.
             val pressed = !HudManager.isEditing && key.isDown
-            animProgress[index] = LbHudPalette.expLerp(animProgress[index], if (pressed) 1f else 0f, 16f, canvas.deltaSeconds)
+            animProgress[index] = if (pressed) {
+                1f
+            } else {
+                LbHudPalette.expLerp(animProgress[index], 0f, 16f, canvas.deltaSeconds)
+            }
 
             val rect = rects[index]
             val x = rect[0]
@@ -67,30 +95,23 @@ object KeystrokesHud : LbHudSurface("keystrokes", "Keystrokes", Hud.Category.INF
             val width = rect[2]
             val height = rect[3]
 
-            canvas.fill(x, y, width, height, surfaceArgb(), SURFACE_RADIUS)
+            canvas.fill(x, y, width, height, surfaceArgb(), radius)
 
             val progress = animProgress[index]
             if (progress > 0.01f) {
-                val inset = (height * 0.5f) * progress
-                canvas.fill(
-                    x + inset,
-                    y + inset,
-                    width - inset * 2f,
-                    height - inset * 2f,
-                    LbHudPalette.accent(progress),
-                    (SURFACE_RADIUS - inset * 0.5f).coerceAtLeast(0f),
-                )
+                // Native look: an inset ring that thickens towards the centre while the key is held.
+                canvas.fillRing(x, y, width, height, radius, height * 0.5f * progress, accentArgb())
             }
 
-            val label = key.translatedKeyMessage.string.uppercase()
-            val labelWidth = textWidth(label, LABEL_SIZE, LbHudFonts.Weight.MEDIUM)
-            val labelLine = lineHeight(LABEL_SIZE, LbHudFonts.Weight.MEDIUM)
+            val text = key.translatedKeyMessage.string.uppercase()
+            val labelWidth = textWidth(text, labelFont, LbHudFonts.Weight.MEDIUM)
+            val labelLine = lineHeight(labelFont, LbHudFonts.Weight.MEDIUM)
             drawText(
                 canvas,
-                label,
+                text,
                 x + (width - labelWidth) * 0.5f,
                 y + (height - labelLine) * 0.5f,
-                LABEL_SIZE,
+                labelFont,
                 textColor,
                 LbHudFonts.Weight.MEDIUM,
             )
@@ -98,10 +119,10 @@ object KeystrokesHud : LbHudSurface("keystrokes", "Keystrokes", Hud.Category.INF
     }
 
     private const val KEY_COUNT: Int = 5
+
+    /** Cell edge, gap, label size and corner radius of the native key grid. */
     private const val CELL_SIZE: Float = 50f
     private const val GAP: Float = 5f
-    private const val TOTAL_WIDTH: Float = CELL_SIZE * 3f + GAP * 2f
-    private const val TOTAL_HEIGHT: Float = CELL_SIZE * 3f + GAP * 2f
     private const val LABEL_SIZE: Float = 14f
     private const val SURFACE_RADIUS: Float = 5f
 

@@ -98,6 +98,20 @@ abstract class LbHudBase(id: String, title: String, category: Hud.Category) : Lb
         weight: LbHudFonts.Weight = LbHudFonts.Weight.REGULAR,
     ): Float = canvas.text(text, x, y, hudFont(size, weight), PolyColor(argb))
 
+    /**
+     * Secondary text colour.
+     *
+     * It is the text colour of the style panel with reduced opacity instead of a fixed grey, so changing the colour in
+     * the panel moves every label of the element, not just the primary ones. The native design expresses the same
+     * hierarchy with `text-muted` and `text-dimmed` tokens, which are also a tint of the primary text.
+     */
+    protected fun dimTextArgb(factor: Float = DIM_TEXT_FACTOR): Int =
+        LbHudPalette.withAlphaFactor(textColor, factor)
+
+    /** Tertiary text colour, for the tag of the array list and other faint annotations. */
+    protected fun faintTextArgb(factor: Float = FAINT_TEXT_FACTOR): Int =
+        LbHudPalette.withAlphaFactor(textColor, factor)
+
     /** Shortens [text] with an ellipsis until it fits into [maxWidth]. */
     protected fun ellipsize(
         text: String,
@@ -139,6 +153,8 @@ abstract class LbHudBase(id: String, title: String, category: Hud.Category) : Lb
         const val ELLIPSIS: String = "..."
         const val MIN_FONT_SIZE: Float = 1f
         const val MAX_FONT_SIZE: Float = 256f
+        const val DIM_TEXT_FACTOR: Float = 0.78f
+        const val FAINT_TEXT_FACTOR: Float = 0.67f
         val SPACED_WORD_REGEX: Regex = Regex("[A-Z]?[a-z]+|[A-Z]+[0-9]+|[0-9]+|[A-Z]+(?![a-z])")
     }
 

@@ -53,10 +53,28 @@ abstract class LbHudSurface(
     @JvmField
     var surfaceColor: PolyColor = PolyColor(defaultColor)
 
+    /**
+     * Colour of the accents the element paints itself, such as the bar of the array list, the fill of a held key or the
+     * badge of the watermark.
+     *
+     * It is a regular OneConfig colour control, so the chroma cycle and the gradient work here exactly like they do on
+     * a panel surface. The text colour is not repeated: it comes from [textColor], which the style panel already edits
+     * for every HUD element, and the secondary labels are that colour at a lower alpha.
+     */
+    @Color(title = "Accent Color", alpha = true, gradient = true)
+    @JvmField
+    var accentColor: PolyColor = PolyColor(LbHudPalette.DEFAULT_ACCENT)
+
     /** The surface colour in use, fully transparent while the surface is switched off. */
     protected fun surfaceArgb(): Int = if (showSurface) surfaceColor.rawArgb else 0
 
     /** The surface colour at [factor] of its transparency, for surfaces made of several layers. */
     protected fun surfaceArgb(factor: Float): Int = LbHudPalette.withAlphaFactor(surfaceArgb(), factor)
+
+    /** The accent colour in use. */
+    protected fun accentArgb(): Int = accentColor.rawArgb
+
+    /** The accent colour at [factor] opacity. */
+    protected fun accentArgb(factor: Float): Int = LbHudPalette.withAlphaFactor(accentArgb(), factor)
 
 }
