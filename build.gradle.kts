@@ -77,6 +77,10 @@ repositories {
         url = uri("https://repo.opencollab.dev/maven-snapshots/")
     }
     maven {
+        name = "TerraformersMC"
+        url = uri("https://maven.terraformersmc.com/releases")
+    }
+    maven {
         name = "Polyfrost"
         url = uri("https://repo.polyfrost.org/releases")
     }
