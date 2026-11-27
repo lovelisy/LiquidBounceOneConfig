@@ -30,6 +30,7 @@ import org.polyfrost.oneconfig.api.config.v1.Tree
 import org.polyfrost.oneconfig.api.hud.v1.Font
 import org.polyfrost.oneconfig.api.hud.v1.Hud
 import org.polyfrost.oneconfig.api.hud.v1.HudManager
+import org.polyfrost.oneconfig.api.ui.v1.ExperimentalOneConfigUiApi
 
 /**
  * Base class of every LiquidBounce HUD element.
@@ -41,6 +42,7 @@ import org.polyfrost.oneconfig.api.hud.v1.HudManager
  * Content is drawn through a Compose canvas, so text and shapes go through OneConfig's font engine and PolyCompose's
  * renderer. Nothing here measures or rasterises a font on its own.
  */
+@OptIn(ExperimentalOneConfigUiApi::class)
 abstract class LbHud(
     id: String,
     title: String,
