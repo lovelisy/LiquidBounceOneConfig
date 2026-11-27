@@ -191,19 +191,19 @@ object NotificationsHud : LbHudBase("notifications", "Notifications", Hud.Catego
                 NotificationEvent.Severity.ENABLED,
                 NotificationEvent.Severity.DISABLED -> NOTIFY_TOGGLE
             }
-            canvas.icon(iconId, iconBoxX + 9f, iconBoxY + 9f, 22f, 22f, LbHudPalette.TEXT_COLOR)
+            canvas.icon(iconId, iconBoxX + 9f, iconBoxY + 9f, 22f, 22f, textColor)
 
             if (severity == NotificationEvent.Severity.ENABLED || severity == NotificationEvent.Severity.DISABLED) {
                 val knobX = iconBoxX + ICON_BOX_SIZE * knobRatio - 5f
                 val knobY = iconBoxY + ICON_BOX_SIZE * 0.5f - 5f
-                canvas.fill(knobX, knobY, 10f, 10f, LbHudPalette.TEXT_COLOR, 5f)
+                canvas.fill(knobX, knobY, 10f, 10f, textColor, 5f)
             }
 
             val textX = iconBoxX + ICON_BOX_SIZE + 10f
             val maxTextWidth = CARD_WIDTH - (textX - x) - 10f
             val clippedTitle = ellipsize(title, maxTextWidth, 14f, LbHudFonts.Weight.SEMIBOLD)
             val clippedMessage = ellipsize(message, maxTextWidth, 12f, LbHudFonts.Weight.REGULAR)
-            drawText(canvas, clippedTitle, textX, y + 12f, 14f, LbHudPalette.TEXT_COLOR, LbHudFonts.Weight.SEMIBOLD)
+            drawText(canvas, clippedTitle, textX, y + 12f, 14f, textColor, LbHudFonts.Weight.SEMIBOLD)
             drawText(canvas, clippedMessage, textX, y + 31f, 12f, LbHudPalette.TEXT_DIMMED_COLOR, LbHudFonts.Weight.REGULAR)
         }
     }

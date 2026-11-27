@@ -39,7 +39,7 @@ private const val PAGE_ID = "liquidbounce:modules"
 object LbModulesPage : OneConfigPage(
     PAGE_ID,
     PageText.literal("LiquidBounce"),
-    "settings",
+    "/assets/liquidbounce/lb_logo_preview.png",
     PageGroup.MODS_AND_OPTIONS,
 ) {
 

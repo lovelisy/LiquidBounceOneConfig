@@ -18,33 +18,20 @@
  */
 package net.ccbluex.liquidbounce.integration.oneconfig.hud
 
-import org.polyfrost.compose.render.PolyFont
-
 /**
- * Hands out [PolyFont] instances for the native LiquidBounce HUD elements.
+ * Font weight keys of the Poppins family that ships with OneConfig.
  *
- * The native HUD draws every line with Inter, so the four weights of PolyCompose's own Inter family are used directly;
- * they are always present because PolyCompose registers them on startup. No glyph level fallback is applied, matching
- * OneConfig's own rendering where the stb font engine simply paints whatever the selected face carries.
+ * The font family itself is chosen in the HUD settings of every element, where the game font is the default. When
+ * Poppins is selected, these keys pick the face of the matching weight; the native LiquidBounce layout keeps using
+ * its own weight for every line, so names stay medium and labels stay semibold.
  */
 object LbHudFonts {
 
-    /**
-     * Font engine keys of PolyCompose's own Inter family. The mod ships the same four TTF files and registers them
-     * on startup, so they are always present and the client does not have to bundle them again.
-     */
     enum class Weight(val key: String) {
-        REGULAR("inter"),
-        MEDIUM("inter-medium"),
-        SEMIBOLD("inter-semibold"),
-        BOLD("inter-bold"),
+        REGULAR("poppins"),
+        MEDIUM("poppins-medium"),
+        SEMIBOLD("poppins-semibold"),
+        BOLD("poppins-bold"),
     }
-
-    /** Inter at [size] logical pixels, in [weight]. */
-    fun font(size: Float, weight: Weight = Weight.REGULAR): PolyFont = PolyFont(weight.key, size)
-
-    /** Width of [text] in [weight] at [size], without needing a render context. */
-    fun measure(text: String, size: Float, weight: Weight = Weight.REGULAR): Float =
-        if (text.isEmpty()) 0f else font(size, weight).measureTextWidth(text)
 
 }

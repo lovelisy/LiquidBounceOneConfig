@@ -45,7 +45,7 @@ object LbHuds {
     fun init() {
         elements.forEach { element ->
             runCatching {
-                HudManager.register(element, element.id, CATEGORY_ICON, enabledSupplier)
+                HudManager.register(element, CONFIG_ID, CATEGORY_ICON, enabledSupplier)
             }.onFailure {
                 logger.error("Unable to register the '${element.title}' HUD element", it)
             }
@@ -54,6 +54,12 @@ object LbHuds {
 
     /** Saves every pending HUD setting, called while the client shuts down. */
     fun flush() = LbHudStore.flushAll()
+
+    /**
+     * Config id shared by every element, the way Evergreen groups all of its HUD units: OneConfig stores the card
+     * icon once per config id, so the whole LiquidBounce family shares a single icon entry.
+     */
+    private const val CONFIG_ID: String = "liquidbounce"
 
     /** Card icon every LiquidBounce HUD unit shows in OneConfig's HUD browser. */
     private const val CATEGORY_ICON: String = "/assets/liquidbounce/lb_logo_preview.png"

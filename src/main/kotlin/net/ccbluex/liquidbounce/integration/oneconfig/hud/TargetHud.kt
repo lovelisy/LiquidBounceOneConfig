@@ -29,6 +29,7 @@ import net.minecraft.world.entity.EquipmentSlot
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.item.ItemStack
 import org.polyfrost.compose.minecraft.mc.McPlayerFaces
+import org.polyfrost.compose.render.FilterQuality
 import org.polyfrost.oneconfig.api.hud.v1.Hud
 import org.polyfrost.oneconfig.api.hud.v1.HudManager
 import kotlin.math.ceil
@@ -92,7 +93,7 @@ object TargetHud : LbHudBase("target_hud", "Target HUD", Hud.Category.COMBAT) {
 
     private fun midWidth(target: LivingEntity): Float {
         val nameWidth = textWidth(target.name.string, NAME_SIZE, LbHudFonts.Weight.MEDIUM)
-        val statsWidth = (if (absorption(target) > 0f) 3 else 2) * 42f
+        val statsWidth = (if (absorption(target) > 0f) 3 else 2) * (25f * textScale + 17f)
         return max(nameWidth, statsWidth)
     }
 
@@ -132,7 +133,7 @@ object TargetHud : LbHudBase("target_hud", "Target HUD", Hud.Category.COMBAT) {
 
         drawAvatar(canvas, target)
 
-        drawText(canvas, name, PADDING + AVATAR_SIZE + GAP, 14f, NAME_SIZE, LbHudPalette.TEXT_COLOR, LbHudFonts.Weight.MEDIUM)
+        drawText(canvas, name, PADDING + AVATAR_SIZE + GAP, 14f, NAME_SIZE, textColor, LbHudFonts.Weight.MEDIUM)
 
         var statX = PADDING + AVATAR_SIZE + GAP
         val statY = 40f
@@ -185,10 +186,11 @@ object TargetHud : LbHudBase("target_hud", "Target HUD", Hud.Category.COMBAT) {
                 PADDING, 10f, AVATAR_SIZE, AVATAR_SIZE, 5f,
                 0f, 0f, fallback.width.toFloat(), fallback.height.toFloat(),
                 -1,
+                FilterQuality.None,
             )
         }
 
-        drawText(canvas, LbText.hudString("liquidbounce.hud.target_hud.sample.name", "Player"), PADDING + AVATAR_SIZE + GAP, 14f, NAME_SIZE, LbHudPalette.TEXT_COLOR, LbHudFonts.Weight.MEDIUM)
+        drawText(canvas, LbText.hudString("liquidbounce.hud.target_hud.sample.name", "Player"), PADDING + AVATAR_SIZE + GAP, 14f, NAME_SIZE, textColor, LbHudFonts.Weight.MEDIUM)
 
         var statX = PADDING + AVATAR_SIZE + GAP
         val statY = 40f
@@ -214,23 +216,15 @@ object TargetHud : LbHudBase("target_hud", "Target HUD", Hud.Category.COMBAT) {
         val tint = ARGB.color(255, 255, dim, dim)
 
         val layers = runCatching { McPlayerFaces.layers(target.uuid) }.getOrNull()
-        val bitmap = layers?.flattened
-        if (layers != null && bitmap != null) {
-            val unit = layers.size.toFloat().coerceAtLeast(64f) / 64f
+        val face = layers?.flattened
+        if (face != null && face.width > 0 && face.height > 0) {
             canvas.roundedTexture(
-                bitmap,
+                face,
                 PADDING, 10f, AVATAR_SIZE, AVATAR_SIZE, 5f,
-                8f * unit, 8f * unit, 16f * unit, 16f * unit,
+                0f, 0f, face.width.toFloat(), face.height.toFloat(),
                 tint,
+                FilterQuality.None,
             )
-            if (layers.hasHat) {
-                canvas.roundedTexture(
-                    bitmap,
-                    PADDING, 10f, AVATAR_SIZE, AVATAR_SIZE, 5f,
-                    40f * unit, 8f * unit, 48f * unit, 16f * unit,
-                    tint,
-                )
-            }
             return
         }
 
@@ -240,13 +234,14 @@ object TargetHud : LbHudBase("target_hud", "Target HUD", Hud.Category.COMBAT) {
             PADDING, 10f, AVATAR_SIZE, AVATAR_SIZE, 5f,
             0f, 0f, fallback.width.toFloat(), fallback.height.toFloat(),
             tint,
+            FilterQuality.None,
         )
     }
 
     private fun drawStat(canvas: LbHudCanvas, x: Float, y: Float, value: String, icon: String): Float {
         val valueWidth = max(18f, textWidth(value, STAT_SIZE))
         drawText(canvas, value, x, y, STAT_SIZE, LbHudPalette.TEXT_DIMMED_COLOR)
-        canvas.icon(icon, x + valueWidth + 3f, y + 1.5f, 14f, 14f, LbHudPalette.TEXT_COLOR)
+        canvas.icon(icon, x + valueWidth + 3f, y + 1.5f, 14f, 14f, textColor)
         return valueWidth + 17f
     }
 

@@ -97,7 +97,7 @@ class LbHudCanvas internal constructor(
         if (isGameFont(font)) {
             context.mcText(text, dx, dy, color.argb, false, gameFontScale(font))
         } else {
-            context.text(text, dx, dy, color, font)
+            context.text(text, dx, dy - font.metrics.ascent, color, font)
         }
 
         return w
@@ -214,7 +214,8 @@ class LbHudCanvas internal constructor(
      * Draws a rounded cut-out of [bitmap].
      *
      * The texture coordinates are expressed in pixels of the bitmap and normalized internally, because the renderer
-     * samples the whole bitmap with the unit square.
+     * samples the whole bitmap with the unit square. [quality] defaults to smooth filtering for the downscaled icons;
+     * pixel art such as the player face has to pass [FilterQuality.None] to stay crisp.
      */
     fun roundedTexture(
         bitmap: PolyBitmap,
@@ -228,6 +229,7 @@ class LbHudCanvas internal constructor(
         u1: Float,
         v1: Float,
         argb: Int = -1,
+        quality: FilterQuality = FilterQuality.Medium,
     ) {
         if (w <= 0f || h <= 0f || (argb ushr 24) == 0) return
         if (bitmap.width <= 0 || bitmap.height <= 0) return
@@ -248,7 +250,7 @@ class LbHudCanvas internal constructor(
                 u1 / uMax,
                 v1 / vMax,
                 PolyColor(argb),
-                FilterQuality.Medium,
+                quality,
             )
         } finally {
             context.restore()

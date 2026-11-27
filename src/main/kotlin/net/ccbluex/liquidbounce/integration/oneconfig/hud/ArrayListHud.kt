@@ -152,7 +152,7 @@ object ArrayListHud : LbHudBase("arraylist", "Array List", Hud.Category.INFO) {
 
         val textX = x + ACCENT_WIDTH + HORIZONTAL_PADDING
         val textY = y + (rowHeight - rowLineHeight) * 0.5f
-        val nameWidth = drawText(canvas, name, textX, textY, ROW_FONT_SIZE, LbHudPalette.TEXT_COLOR, LbHudFonts.Weight.MEDIUM)
+        val nameWidth = drawText(canvas, name, textX, textY, ROW_FONT_SIZE, textColor, LbHudFonts.Weight.MEDIUM)
         if (!tag.isNullOrEmpty()) {
             drawText(
                 canvas,

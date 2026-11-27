@@ -20,34 +20,43 @@ package net.ccbluex.liquidbounce.integration.oneconfig.hud
 
 import org.polyfrost.compose.render.PolyColor
 import org.polyfrost.compose.render.PolyFont
+import org.polyfrost.oneconfig.api.hud.v1.Font
 import org.polyfrost.oneconfig.api.hud.v1.Hud
-import kotlin.math.abs
 
 /**
  * Shared drawing helpers for the native LiquidBounce HUD elements.
  *
- * Every element is drawn with the Inter family and the fixed native colour tokens, so the helpers here only take a
- * size, a weight and an ARGB colour. The background, the border and the padding of OneConfig's generic HUD units are
- * not used: the native cards paint their own surface.
+ * The font family, the size multiplier, the weight and the text colour all come from the HUD settings panel of
+ * OneConfig, where the game font is the default. The native layout only decides which weight a line uses, so names
+ * stay medium and labels stay semibold while the family stays under the user's control. The background, the border
+ * and the padding of OneConfig's generic HUD units are not used: the native cards paint their own surface.
  */
 abstract class LbHudBase(id: String, title: String, category: Hud.Category) : LbHud(id, title, category) {
 
     protected fun hudFont(size: Float, weight: LbHudFonts.Weight = LbHudFonts.Weight.REGULAR): PolyFont =
-        LbHudFonts.font(size, weight)
+        PolyFont(fontKey(weight), (size * textScale).coerceIn(MIN_FONT_SIZE, MAX_FONT_SIZE))
+
+    private fun fontKey(weight: LbHudFonts.Weight): String {
+        if (font != Font.Poppins) {
+            return LbHudCanvas.GAME_FONT
+        }
+
+        val base = if (textBold) LbHudFonts.Weight.BOLD.key else weight.key
+        return if (textItalic) "$base-italic" else base
+    }
 
     protected fun textWidth(
         text: String,
         size: Float,
         weight: LbHudFonts.Weight = LbHudFonts.Weight.REGULAR,
-    ): Float = LbHudFonts.measure(text, size, weight)
+    ): Float = if (text.isEmpty()) 0f else hudFont(size, weight).measureTextWidth(text)
 
     protected fun lineHeight(
         size: Float,
         weight: LbHudFonts.Weight = LbHudFonts.Weight.REGULAR,
     ): Float {
         val metrics = hudFont(size, weight).metrics
-        val extent = abs(metrics.ascent) + abs(metrics.descent) + metrics.leading
-        return extent.coerceAtLeast(size)
+        return (metrics.descent - metrics.ascent).coerceAtLeast(size)
     }
 
     /** Draws one line of [text] at [size] and returns the width that was painted. */
@@ -57,9 +66,9 @@ abstract class LbHudBase(id: String, title: String, category: Hud.Category) : Lb
         x: Float,
         y: Float,
         size: Float,
-        argb: Int,
+        argb: Int = textColor,
         weight: LbHudFonts.Weight = LbHudFonts.Weight.REGULAR,
-    ): Float = canvas.text(text, x, y, LbHudFonts.font(size, weight), PolyColor(argb))
+    ): Float = canvas.text(text, x, y, hudFont(size, weight), PolyColor(argb))
 
     /** Shortens [text] with an ellipsis until it fits into [maxWidth]. */
     protected fun ellipsize(
@@ -90,6 +99,8 @@ abstract class LbHudBase(id: String, title: String, category: Hud.Category) : Lb
 
     private companion object {
         const val ELLIPSIS: String = "..."
+        const val MIN_FONT_SIZE: Float = 1f
+        const val MAX_FONT_SIZE: Float = 256f
     }
 
 }
