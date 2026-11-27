@@ -48,6 +48,7 @@ public abstract class MixinTextColor implements TextColorAddition {
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public TextColor liquid_bounce$withNameProtectionBypass() {
         var textColor = new TextColor(this.value, this.name);
 
@@ -57,6 +58,7 @@ public abstract class MixinTextColor implements TextColorAddition {
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public void liquid_bounce$setBypassingNameProtection(boolean bypassesNameProtect) {
         this.bypassesNameProtect = bypassesNameProtect;
     }

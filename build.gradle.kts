@@ -241,7 +241,6 @@ tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
 
     options.release = libs.versions.jdk.get().toInt()
-    options.compilerArgs.add("-Xlint:deprecation")
 }
 
 tasks.test {
