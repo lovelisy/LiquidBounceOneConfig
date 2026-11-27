@@ -4,8 +4,8 @@
 jdk = "25"
 
 # OneConfig
-oneconfig = "1.9.1"
-polycompose = "3.0.2"
+oneconfig = "1.9.2"
+polycompose = "3.0.4"
 
 # Fabric Properties
 # Check these on https://fabricmc.net/versions.html
@@ -39,7 +39,6 @@ lithium = "mc26.3-0.26.2-fabric"
 viafabricplus = "5.1.1"
 # Mods for compatibility test (runtime only)
 immediatelyFast = "1.17.1+26.3-fabric"
-iris = "1.11.7+26.3-fabric"
 
 # Kotlin
 # https://kotlinlang.org/releases.html
@@ -60,7 +59,6 @@ lwjgl = "3.4.3"
 # Other plugins
 detekt = "2.0.0-alpha.6"
 gradleGitProperties = "4.0.1"
-dokka = "2.2.0"
 
 [libraries]
 minecraft = { group = "com.mojang", name = "minecraft", version.ref = "minecraft" }
@@ -94,7 +92,6 @@ vfp = { group = "com.viaversion", name = "viafabricplus", version.ref = "viafabr
 exploitPreventer-api = { group = "com.nikoverflow", name = "exploit-preventer-api", version.ref = "exploit_preventer_api" }
 exploitPreventer = { group = "maven.modrinth", name = "exploitpreventer", version.ref = "exploit_preventer_mod" }
 immediatelyFast = { group = "maven.modrinth", name = "ImmediatelyFast", version.ref = "immediatelyFast" }
-iris = { group = "maven.modrinth", name = "iris", version.ref = "iris" }
 
 # OneConfig - config screen and HUD system
 oneconfig = { group = "org.polyfrost.oneconfig", name = "26.3-fabric", version.ref = "oneconfig" }
@@ -107,7 +104,6 @@ kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 gradleGitProperties = { id = "com.gorylenko.gradle-git-properties", version.ref = "gradleGitProperties" }
 detekt = { id = "dev.detekt", version.ref = "detekt" }
-dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 
 [bundles]
 okhttp = ["okhttp", "okhttp-coroutines"]

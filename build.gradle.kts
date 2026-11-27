@@ -21,7 +21,6 @@ import dev.detekt.gradle.DetektCreateBaselineTask
 import groovy.json.JsonOutput
 import java.time.Duration
 import org.gradle.jvm.tasks.Jar
-import org.jetbrains.dokka.gradle.workers.ProcessIsolation
 import org.jetbrains.kotlin.gradle.dsl.abi.ExperimentalAbiValidation
 
 plugins {
@@ -30,8 +29,6 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.gradleGitProperties)
     alias(libs.plugins.detekt)
-    alias(libs.plugins.dokka)
-    `maven-publish`
 }
 
 base {
@@ -40,67 +37,48 @@ base {
     group = project.property("maven_group") as String
 }
 
-dokka {
-    // Dokka Generator runs in its own worker process, so org.gradle.jvmargs does not apply here.
-    (dokkaGeneratorIsolation.get() as ProcessIsolation).maxHeapSize = "4g"
-}
-
 /** Includes dependency recursively in the JAR file */
 val jij = configurations.create("jij")
 
 jij.excludeProvidedLibs()
 
-allprojects {
-    repositories {
-        mavenCentral()
-        mavenLocal()
-        maven {
-            name = "Google"
-            url = uri("https://dl.google.com/dl/android/maven2")
-        }
-        maven {
-            name = "CCBlueX Releases"
-            url = uri("https://maven.ccbluex.net/releases")
-        }
-        maven {
-            name = "CCBlueX Snapshots"
-            url = uri("https://maven.ccbluex.net/snapshots")
-        }
-        maven {
-            name = "Fabric"
-            url = uri("https://maven.fabricmc.net/")
-        }
-        maven {
-            name = "Jitpack"
-            url = uri("https://jitpack.io")
-        }
-        maven {
-            name = "ViaVersion"
-            url = uri("https://repo.viaversion.com/")
-        }
-        maven {
-            name = "modrinth"
-            url = uri("https://api.modrinth.com/maven")
-        }
-        maven {
-            name = "OpenCollab Snapshots"
-            url = uri("https://repo.opencollab.dev/maven-snapshots/")
-        }
-        maven {
-            name = "Lenni0451"
-            url = uri("https://maven.lenni0451.net/everything")
-        }
-        maven {
-            url = uri("https://maven.shedaniel.me/")
-        }
-        maven {
-            name = "Polyfrost"
-            url = uri("https://repo.polyfrost.org/releases")
-        }
-        maven {
-            name = "TerraformersMC"
-            url = uri("https://maven.terraformersmc.com/releases")
-        }
+repositories {
+    mavenCentral()
+    maven {
+        name = "Google"
+        url = uri("https://dl.google.com/dl/android/maven2")
+    }
+    maven {
+        name = "CCBlueX Releases"
+        url = uri("https://maven.ccbluex.net/releases")
+    }
+    maven {
+        name = "CCBlueX Snapshots"
+        url = uri("https://maven.ccbluex.net/snapshots")
+    }
+    maven {
+        name = "Fabric"
+        url = uri("https://maven.fabricmc.net/")
+    }
+    maven {
+        name = "Jitpack"
+        url = uri("https://jitpack.io")
+    }
+    maven {
+        name = "ViaVersion"
+        url = uri("https://repo.viaversion.com/")
+    }
+    maven {
+        name = "modrinth"
+        url = uri("https://api.modrinth.com/maven")
+    }
+    maven {
+        name = "OpenCollab Snapshots"
+        url = uri("https://repo.opencollab.dev/maven-snapshots/")
+    }
+    maven {
+        name = "Polyfrost"
+        url = uri("https://repo.polyfrost.org/releases")
     }
 }
 
@@ -147,7 +125,6 @@ dependencies {
     api(libs.sodium)
     api(libs.lithium)
     runtimeOnly(libs.immediatelyFast)
-    runtimeOnly(libs.iris)
 
     // ViaFabricPlus
     api(libs.vfp.api)
@@ -373,61 +350,6 @@ tasks.jar {
     from("LICENSE") {
         rename {
             "${it}_${archivesBaseName.get()}"
-        }
-    }
-}
-
-val publishVersion: String = providers.gradleProperty("publish.version").orNull ?: run {
-    val base = "${providers.gradleProperty("mod_version").get()}+${libs.versions.minecraft.get()}"
-    val isRelease = providers.environmentVariable("GITHUB_EVENT_NAME").orNull == "release"
-
-    if (isRelease) base else "$base-SNAPSHOT"
-}
-
-publishing {
-    publications {
-        create<MavenPublication>("mod") {
-            groupId = providers.gradleProperty("maven_group").get()
-            artifactId = providers.gradleProperty("archives_base_name").get()
-            version = publishVersion
-
-            // Dev and production are both Mojang names here, so there is no remapJar to publish.
-            artifact(tasks.jar)
-            artifact(tasks.named("sourcesJar")) { classifier = "sources" }
-
-            // No from(components["java"]): the POM would list com.mojang:minecraft, which no
-            // public repository serves.
-            pom {
-                name = "LiquidBounce"
-                description = "A free mixin-based injection hacked-client for Minecraft " +
-                    "using the Fabric modding toolchain."
-                url = "https://liquidbounce.net/"
-
-                licenses {
-                    license {
-                        name = "GNU General Public License v3.0"
-                        url = "https://www.gnu.org/licenses/gpl-3.0.txt"
-                    }
-                }
-
-                scm {
-                    url = "https://github.com/CCBlueX/LiquidBounce"
-                    connection = "scm:git:https://github.com/CCBlueX/LiquidBounce.git"
-                }
-            }
-        }
-    }
-
-    repositories {
-        maven {
-            name = "CCBlueX"
-            val channel = if (publishVersion.endsWith("-SNAPSHOT")) "snapshots" else "releases"
-            url = uri("https://maven.ccbluex.net/$channel")
-
-            credentials {
-                username = providers.environmentVariable("MAVEN_USERNAME").orNull
-                password = providers.environmentVariable("MAVEN_PASSWORD").orNull
-            }
         }
     }
 }
