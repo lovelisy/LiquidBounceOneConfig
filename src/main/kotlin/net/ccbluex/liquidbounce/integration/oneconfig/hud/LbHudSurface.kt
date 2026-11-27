@@ -3,6 +3,7 @@ package net.ccbluex.liquidbounce.integration.oneconfig.hud
 import org.polyfrost.compose.render.PolyColor
 import org.polyfrost.oneconfig.api.config.v1.annotations.Color
 import org.polyfrost.oneconfig.api.hud.v1.Hud
+import org.polyfrost.oneconfig.api.ui.v1.ExperimentalOneConfigUiApi
 
 /**
  * Background handling shared by every LiquidBounce HUD element.
@@ -14,6 +15,7 @@ import org.polyfrost.oneconfig.api.hud.v1.Hud
  *
  * @param defaultColor the background a fresh element starts with, matching the native surface alpha of that element.
  */
+@OptIn(ExperimentalOneConfigUiApi::class)
 abstract class LbHudSurface(
     id: String,
     title: String,
