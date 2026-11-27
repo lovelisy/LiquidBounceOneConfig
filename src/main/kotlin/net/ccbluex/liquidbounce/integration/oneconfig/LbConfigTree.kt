@@ -79,6 +79,17 @@ internal object LbConfigTree {
     @Volatile
     private var cachedRevision: Int = -1
 
+    /** Names of the modules in the tree, keyed by their tree id, filled while the tree is built. */
+    @Volatile
+    private var cachedModules: Map<String, List<String>> = emptyMap()
+
+    /** Tree id of every module, mapped to the names the page search may use to reach it. */
+    val modules: Map<String, List<String>>
+        get() {
+            build()
+            return cachedModules
+        }
+
     @Volatile
     private var languageHookInstalled = false
 
@@ -110,8 +121,21 @@ internal object LbConfigTree {
         return tree
     }
 
+    /**
+     * Builds the tree restricted to the given module keys, used to narrow the search index to the modules the query
+     * actually names.
+     *
+     * OneConfig indexes a submenu module as a single row and, as soon as any of its documents matches, puts the whole
+     * module back into the result (`searchNode` returns the node unchanged for a submenu). Every module of a category
+     * carries that category in its search metadata, so a query naming one module used to match the category itself
+     * and drag the whole tab into the results. Rendering a tree that holds only the wanted modules keeps the index
+     * small enough that the match cannot spill over.
+     */
+    fun buildFor(moduleKeys: Set<String>): Tree = build().filteredTo(moduleKeys)
+
     private fun createTree(): Tree {
         usedIds.clear()
+        val modules = LinkedHashMap<String, List<String>>()
         val root = Tree(CONFIG_ID, "LiquidBounce", null, null)
 
         val known = ModuleCategories.entries.toList()
@@ -120,23 +144,51 @@ internal object LbConfigTree {
             ModuleManager
                 .filter { it.category === moduleCategory }
                 .sortedBy { it.name }
-                .forEach { module(it, root) }
+                .forEach { module(it, root, modules) }
         }
 
         ModuleManager
             .filter { module -> known.none { it === module.category } }
             .sortedBy { it.name }
-            .forEach { module(it, root) }
+            .forEach { module(it, root, modules) }
 
         val global = LbText.categoryName("Global")
         appendGroup(root, GlobalManager, global, emptyList(), "", emptySet())
 
         ConfigRegistry.registerTree(root, ConfigSource.Compat)
 
+        cachedModules = modules
         return root
     }
 
     private val usedIds = HashSet<String>()
+
+    /**
+     * Returns a shallow copy of this tree that keeps only the modules named by [moduleKeys], the way the search query
+     * of the page narrowed them down.
+     *
+     * The clone shares the very same property instances, so the values, the callbacks and the metadata stay untouched;
+     * only the module entries of the render tree are dropped. Searching in a tree of one module cannot reach the
+     * documents of a sibling, which is what used to turn a search into the whole category.
+     */
+    private fun Tree.filteredTo(moduleKeys: Set<String>): Tree {
+        val clone = Tree(getID(), getTitle(), null, null)
+        clone.description = description
+        getMetadata()?.let { metadata ->
+            for ((key, value) in metadata) {
+                clone.addMetadata(key, value)
+            }
+        }
+
+        for ((key, node) in map) {
+            if (node !is Tree || key !in moduleKeys) {
+                continue
+            }
+            clone.put(node)
+        }
+
+        return clone
+    }
 
     private fun id(prefix: String, hint: String): String {
         val base = buildString(prefix.length + hint.length + 1) {
@@ -170,11 +222,12 @@ internal object LbConfigTree {
         return tree
     }
 
-    private fun module(module: ClientModule, root: Tree) {
+    private fun module(module: ClientModule, root: Tree, modules: MutableMap<String, List<String>>) {
         val category = LbText.categoryName(module.category.tag)
         val tree = submenu(module.name, LbText.moduleName(module.name), category)
         tree.description = LbText.moduleDescription(module.descriptionKey)
         tree.addMetadata("searchTags", listOf(module.name, LbText.moduleName(module.name)))
+        modules[tree.getID()] = listOf(module.name, LbText.moduleName(module.name))
 
         val toggle = booleanProperty(module.enabledValue)
         toggle.addMetadata(MetaKeys.CATEGORY.name, category)

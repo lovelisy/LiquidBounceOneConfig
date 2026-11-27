@@ -26,6 +26,7 @@ import org.polyfrost.oneconfig.api.ui.v1.ExperimentalOneConfigUiApi
 import org.polyfrost.oneconfig.api.ui.v1.page.OneConfigPage
 import org.polyfrost.oneconfig.api.ui.v1.page.PageGroup
 import org.polyfrost.oneconfig.api.ui.v1.page.PageText
+import org.polyfrost.oneconfig.api.ui.v1.page.currentPageSearchQueryOrNull
 import org.polyfrost.oneconfig.internal.ui.screens.ConfigScreen
 
 private const val PAGE_ID = "liquidbounce:modules"
@@ -49,7 +50,16 @@ object LbModulesPage : OneConfigPage(
     @Composable
     override fun Content() {
         val revision = LbConfigTree.revision
-        val tree = remember(revision) { LbConfigTree.build() }
+        val query = currentPageSearchQueryOrNull.orEmpty().trim()
+
+        val tree = remember(revision, query) {
+            val modules = LbModuleSearch.matchingModules(query)
+            if (modules == null) {
+                LbConfigTree.build()
+            } else {
+                LbConfigTree.buildFor(modules)
+            }
+        }
 
         ConfigScreen(
             tree = tree,
