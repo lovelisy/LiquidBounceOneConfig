@@ -43,6 +43,6 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
-          name: liquidbounce-${{ steps.versions.outputs.lb }}+${{ steps.versions.outputs.minecraft }}
+          name: LiquidBounceOneConfig-${{ steps.versions.outputs.lb }}+${{ steps.versions.outputs.minecraft }}
           path: build/libs
           if-no-files-found: error
