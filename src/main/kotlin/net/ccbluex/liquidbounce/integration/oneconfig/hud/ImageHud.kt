@@ -151,7 +151,19 @@ object ImageHud : LbHudSurface("image", "Image", Hud.Category.INFO, TRANSPARENT)
 
         val picture = bitmap
         if (picture != null) {
-            canvas.roundedTexture(picture, 0f, 0f, width, height, 0f, 0f, 0f, picture.width.toFloat(), tint)
+            canvas.roundedTexture(
+                picture,
+                0f,
+                0f,
+                width,
+                height,
+                0f,
+                0f,
+                0f,
+                picture.width.toFloat(),
+                picture.height.toFloat(),
+                tint,
+            )
             return
         }
 
