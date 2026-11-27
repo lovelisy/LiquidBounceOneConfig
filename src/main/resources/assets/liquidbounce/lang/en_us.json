@@ -2301,7 +2301,6 @@
   "liquidbounce.hud.target_hud.name": "Target HUD",
   "liquidbounce.hud.arraylist.name": "Array List",
   "liquidbounce.hud.notifications.name": "Notifications",
-  "liquidbounce.hud.target_hud.showTags.name": "Show Tags",
   "liquidbounce.hud.arraylist.showTags.name": "Show Tags",
   "liquidbounce.hud.arraylist.itemAlignment.name": "Item Alignment",
   "liquidbounce.hud.arraylist.itemAlignment.left": "Left",

@@ -26,17 +26,15 @@ import org.polyfrost.oneconfig.api.hud.v1.Hud
  * The badge and the wordmark are two layered textures of the native client. The badge is tinted with the accent colour
  * and the wordmark keeps the text colour, so the logo follows the theme of every other HUD element.
  *
- * It draws no text, so it hides the text styling options of [Hud] and keeps a fixed `165 x 61.89` artwork size. The
- * user still scales it through OneConfig's own HUD scale.
+ * It draws no text, so it drops the text card of OneConfig's style panel and keeps the background card, unlike the
+ * text elements which paint their own card and therefore drop the background card instead. The user still scales it
+ * through OneConfig's own HUD scale.
  */
 object WatermarkHud : LbHudBase("watermark", "Watermark", Hud.Category.INFO) {
 
-    /**
-     * The logo paints two textures and no text, so it hides everything but the background it may want to sit on,
-     * unlike the text elements which paint their own card and therefore hide the background switch too.
-     */
-    override val hiddenOptions: Set<String>
-        get() = LbHudOptions.UNUSED_BY_ARTWORK
+    /** The logo paints two textures and no text, so only the background card of the style panel applies to it. */
+    override val hiddenPanelSections: Set<String>
+        get() = setOf(LbHudPanels.TEXT)
 
     /** The logo has no plate of its own, so OneConfig's background switch stays available for it. */
     override val paintsOwnSurface: Boolean

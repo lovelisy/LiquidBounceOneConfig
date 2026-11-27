@@ -69,22 +69,47 @@ abstract class LbHud(
         staticW = DEFAULT_WIDTH
         staticH = DEFAULT_HEIGHT
 
-        // The native HUD is designed in Poppins; the game font stays selectable for users who want it.
+        // The native HUD is designed in Poppins; the game font stays selectable for users who want it. The family
+        // default declares the same look, so the panel, the reset button and this constructor agree.
         font = Font.Poppins
-
-        // The native elements paint their own card surface, so OneConfig must not draw a second background behind it.
         showBackground = false
     }
 
     /**
      * Whether this element draws the plate behind its content itself.
      *
-     * Every native element paints its own card, so OneConfig must not lay a second background behind it. The stored
-     * value is forced back to `false` on every update, otherwise an old settings file that had the switch on would
-     * keep adding a dark plate behind a card that already has one.
+     * Every native element paints its own card, so OneConfig must not lay a second background behind it.
      */
     internal open val paintsOwnSurface: Boolean
         get() = true
+
+    /**
+     * Tells OneConfig that this element brings its own surface.
+     *
+     * [Hud.hudBackground] returns the bare modifier when this is `false`, so no plate is ever drawn behind the native
+     * card, no matter what an old settings file stored in the background switch.
+     */
+    override fun hasBackground(): Boolean = !paintsOwnSurface
+
+    /**
+     * The native cards never draw a OneConfig frame around their content.
+     *
+     * This also removes the frame properties from the option tree, which is what drops the border row from the style
+     * panel instead of leaving a control that would change nothing.
+     */
+    override fun hasBorder(): Boolean = false
+
+    /** The native cards never fuse their surface with a neighbour, so the merging controls do not apply. */
+    override fun canMergeBackground(): Boolean = false
+
+    /**
+     * The style panel cards this element cannot honour.
+     *
+     * A text element paints its own card, so the background card of the panel would only offer switches that change
+     * nothing. The artwork element does the opposite: it draws no text at all and keeps the background card.
+     */
+    internal open val hiddenPanelSections: Set<String>
+        get() = setOf(LbHudPanels.BACKGROUND)
 
     /**
      * OneConfig asks the element how often it wants to be updated. The content is repainted every frame from the live
@@ -98,23 +123,7 @@ abstract class LbHud(
     override fun update(): Boolean {
         syncSize()
         refreshStyle()
-        suppressGenericSurface()
         return true
-    }
-
-    /** Keeps OneConfig's own plate and frame off an element that paints them itself. */
-    private fun suppressGenericSurface() {
-        if (!paintsOwnSurface) {
-            return
-        }
-
-        if (showBackground) {
-            showBackground = false
-        }
-
-        if (borderEnabled) {
-            borderEnabled = false
-        }
     }
 
     /**
@@ -215,18 +224,6 @@ abstract class LbHud(
     fun invalidate() {
         contentChanged()
     }
-
-    /**
-     * Option ids this element removes from its settings panel.
-     *
-     * Every native element paints its own card, so OneConfig's generic background, border, shadow and text
-     * decoration are dead weight: the background switch in particular would lay a second dark plate behind a card
-     * that already has one. The properties stay in the tree, so OneConfig keeps reading and writing them; only their
-     * display flips to [org.polyfrost.oneconfig.api.config.v1.Property.Display.HIDDEN], which the settings panel and
-     * the search index skip.
-     */
-    internal open val hiddenOptions: Set<String>
-        get() = LbHudOptions.UNUSED_BY_TEXT
 
     /**
      * Routes this element's option tree into LiquidBounce's own configuration folder instead of OneConfig's profile

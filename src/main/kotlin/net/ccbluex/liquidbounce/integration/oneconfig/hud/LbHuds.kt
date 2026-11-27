@@ -45,6 +45,8 @@ object LbHuds {
 
     /** OneConfig queues the registration until its own HUD registry is ready, which is when the client boots. */
     fun init() {
+        LbHudStyles.install()
+
         elements.forEach { element ->
             runCatching {
                 HudManager.register(element, CONFIG_ID, CATEGORY_ICON, enabledSupplier)

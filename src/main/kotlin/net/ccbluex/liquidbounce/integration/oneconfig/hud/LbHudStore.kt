@@ -33,7 +33,6 @@ import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.ScheduledFuture
 import java.util.concurrent.TimeUnit
-import java.util.function.Supplier
 
 /**
  * Keeps the settings of LiquidBounce HUD elements inside LiquidBounce's own configuration folder.
@@ -86,33 +85,6 @@ internal object LbHudStore {
 
         tree.onAllProps { _, property -> localize(owner, property) }
         tree.onAllProps { _, property -> bindSave(owner, property, tree, file) }
-
-        val hidden = owner.hiddenOptions
-        if (hidden.isNotEmpty()) {
-            hideOptions(tree, hidden)
-        }
-    }
-
-    /**
-     * Hides [ids] in [tree], leaving their values and callbacks untouched.
-     *
-     * The properties stay in the tree, so OneConfig keeps reading and writing them without knowing they exist; only
-     * their display flips to [Property.Display.HIDDEN], which is what the settings panel and the search index skip.
-     * The walk is recursive because OneConfig may nest the style options inside a child tree.
-     */
-    @Suppress("UNCHECKED_CAST")
-    private fun hideOptions(tree: Tree, ids: Set<String>) {
-        tree.onAllProps { id, property ->
-            if (id in ids) {
-                (property as Property<Any?>).addDisplayCondition(Supplier { Property.Display.HIDDEN })
-            }
-        }
-
-        tree.onAll { _, node ->
-            if (node is Tree) {
-                hideOptions(node, ids)
-            }
-        }
     }
 
     /**
@@ -121,22 +93,26 @@ internal object LbHudStore {
      * falls back to the annotated English text. The language files of the client are standard Minecraft language
      * resources, which the game loads for every namespace, so the keys resolve without further plumbing.
      *
+     * The key is built from the property id, not from the title: a title such as `Show Tags` would turn into a key
+     * holding a space, which no language file can ever match.
+     *
      * OneConfig marks the title of a node as final once it has been read, so the package private title replace has to
      * be used through reflection.
      */
     private fun localize(owner: LbHud, property: Property<*>) {
+        val id = property.getID()
         val title = property.getTitle()?.toString() ?: return
-        val prefix = "${LbText.HUD_KEY_PREFIX}.${owner.id}"
+        val prefix = "${LbText.HUD_KEY_PREFIX}.${owner.id}.$id"
 
         val options = property.getMetadata(MetaKeys.OPTIONS.name) as? List<*>
         if (!options.isNullOrEmpty()) {
             val labels = options.map { option ->
-                LbText.hudComponent("$prefix.${LbText.lowerFirst(title)}.${LbText.lowerFirst(option.toString())}", option.toString())
+                LbText.hudComponent("$prefix.${LbText.lowerFirst(option.toString())}", option.toString())
             }
             property.addMetadata(MetaKeys.LABELS.name, labels)
         }
 
-        replaceTitle(property, LbText.hudComponent("$prefix.${LbText.lowerFirst(title)}.name", title))
+        replaceTitle(property, LbText.hudComponent("$prefix.name", title))
     }
 
     private fun replaceTitle(node: Node, title: Any) {
