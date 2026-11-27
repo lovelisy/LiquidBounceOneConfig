@@ -19,7 +19,6 @@
 
 package net.ccbluex.liquidbounce.injection.mixins.minecraft.text;
 
-import com.google.common.base.Objects;
 import net.ccbluex.liquidbounce.interfaces.TextColorAddition;
 import net.minecraft.network.chat.TextColor;
 import org.jspecify.annotations.Nullable;
@@ -76,7 +75,7 @@ public abstract class MixinTextColor implements TextColorAddition {
      */
     @Overwrite
     public int hashCode() {
-        return Objects.hashCode(this.name, this.value, this.bypassesNameProtect);
+        return java.util.Objects.hash(this.name, this.value, this.bypassesNameProtect);
     }
 
 }
