@@ -30,6 +30,9 @@ import org.polyfrost.oneconfig.api.config.v1.annotations.Switch
 import org.polyfrost.oneconfig.api.hud.v1.Hud
 import kotlin.math.max
 
+/** Transparent surface, used by the elements the native client draws without a plate. */
+private const val TRANSPARENT: Int = 0
+
 /**
  * Native inventory statistics.
  *
@@ -129,8 +132,6 @@ object InventoryStatisticsHud :
 
     private const val GAP: Float = 2f
     private const val FALLBACK: Float = 40f
-    private const val TRANSPARENT: Int = 0
-
     private val SAMPLE_STACKS: List<ItemStack> = listOf(ItemStack(Items.DIAMOND, 1))
 
 }

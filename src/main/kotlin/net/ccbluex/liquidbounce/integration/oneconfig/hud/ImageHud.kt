@@ -28,6 +28,9 @@ import java.io.File
 import java.net.URI
 import java.util.concurrent.Executors
 
+/** Transparent surface, used by the elements the native client draws without a plate. */
+private const val TRANSPARENT: Int = 0
+
 /**
  * Native custom image element.
  *
@@ -167,6 +170,4 @@ object ImageHud : LbHudSurface("image", "Image", Hud.Category.INFO, TRANSPARENT)
 
     private const val MIN_EXTENT: Float = 16f
     private const val WHITE: Int = -1
-    private const val TRANSPARENT: Int = 0
-
 }

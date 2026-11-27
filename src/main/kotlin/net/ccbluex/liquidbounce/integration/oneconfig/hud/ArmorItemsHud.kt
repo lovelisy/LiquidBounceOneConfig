@@ -24,6 +24,9 @@ import net.minecraft.world.item.ItemStack
 import org.polyfrost.oneconfig.api.config.v1.annotations.Dropdown
 import org.polyfrost.oneconfig.api.hud.v1.Hud
 
+/** Transparent surface, used by the elements the native client draws without a plate. */
+private const val TRANSPARENT: Int = 0
+
 /**
  * Native armour display.
  *
@@ -59,9 +62,6 @@ object ArmorItemsHud :
 
     private const val SLOT_COUNT: Int = 4
     private const val GAP: Float = 2f
-
-    /** The native element starts without a plate, so a fresh unit never covers the screen. */
-    private const val TRANSPARENT: Int = 0
 
     private val EMPTY_STACKS: List<ItemStack> = List(SLOT_COUNT) { ItemStack.EMPTY }
 
