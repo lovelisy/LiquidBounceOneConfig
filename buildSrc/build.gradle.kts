@@ -19,3 +19,12 @@ tasks.test {
 kotlin {
     jvmToolchain(25)
 }
+
+gradlePlugin {
+    plugins {
+        create("buildLogic") {
+            id = "net.ccbluex.liquidbounce.build-logic"
+            implementationClass = "net.ccbluex.LiquidBounceBuildLogicPlugin"
+        }
+    }
+}
