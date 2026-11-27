@@ -155,7 +155,6 @@ internal object LbConfigTree {
         val global = LbText.categoryName("Global")
         appendGroup(root, GlobalManager, global, emptyList(), "", emptySet())
 
-        root.addMetadata("hidden", true)
         ConfigRegistry.registerTree(root, ConfigSource.Compat)
 
         cachedModules = modules
@@ -420,6 +419,11 @@ internal object LbConfigTree {
         if (subcategory.isNotBlank()) {
             property.addMetadata(MetaKeys.SUBCATEGORY.name, subcategory)
         }
+
+        // The global search index skips every node carrying this marker, which keeps the settings of a module out of
+        // the corpus without touching the module rows themselves. The config screen reads another key, so the settings
+        // still render inside their module.
+        property.addMetadata("hidden", true)
 
         if (conditions.isEmpty() && value == null) {
             tree.put(property)
