@@ -39,6 +39,9 @@ import kotlin.math.max
  */
 object ArrayListHud : LbHudSurface("arraylist", "Array List", Hud.Category.INFO, LbHudPalette.surface(0.68f)) {
 
+    override val defaultShown: Boolean
+        get() = true
+
     @Switch(title = "Show Tags")
     @JvmField
     var showTags: Boolean = true

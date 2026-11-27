@@ -76,6 +76,18 @@ abstract class LbHud(
     }
 
     /**
+     * Whether a fresh element appears out of the box, mirroring the `enabledByDefault` flag of the native component.
+     *
+     * OneConfig starts every unknown element hidden, and the editor renders hidden elements at a ghost alpha, which
+     * users read as a broken half transparent card. The native defaults put the common elements on screen instead.
+     */
+    internal open val defaultShown: Boolean
+        get() = false
+
+    /** Implemented on top of the flag, because OneConfig polls it before the instance carries any state. */
+    override fun showByDefault(): Boolean = defaultShown
+
+    /**
      * Whether this element draws the plate behind its content itself.
      *
      * Every native element paints its own card, so OneConfig must not lay a second background behind it.
@@ -105,12 +117,11 @@ abstract class LbHud(
     /**
      * The style panel cards this element cannot honour.
      *
-     * Every LiquidBounce element paints its own surface and offers the colour in its own unit settings, so the
-     * background card of the panel only holds switches that would paint a second plate behind the native one. It is
-     * therefore dropped for all of them.
+     * The background of an element is governed by the background card of the panel, which edits the standard OneConfig
+     * properties the element reads, so both cards stay available.
      */
     internal open val hiddenPanelSections: Set<String>
-        get() = setOf(LbHudPanels.BACKGROUND)
+        get() = emptySet()
 
     /**
      * OneConfig asks the element how often it wants to be updated. The content is repainted every frame from the live

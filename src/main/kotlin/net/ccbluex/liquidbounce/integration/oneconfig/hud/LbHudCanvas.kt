@@ -267,10 +267,13 @@ class LbHudCanvas internal constructor(
     }
 
     /**
-     * Draws an item stack together with its decorations, which is the stack count and the durability bar.
+     * Draws an item stack together with its decorations.
      *
-     * [countLabel] overrides the number shown in the corner, so an element can print a total that differs from the
-     * stack size, such as the number of matching items spread over the whole inventory.
+     * The stack count is printed through OneConfig's text engine in the corner the vanilla inventory uses, so the
+     * numbers of the inventory grids follow the same font as every other label of the client instead of the game font.
+     * The durability bar and the cooldown veil stay native. [countLabel] overrides the number, so an element can print
+     * a total that differs from the stack size, such as the number of matching items spread over the whole inventory;
+     * an empty label leaves the corner blank.
      */
     fun itemWithDecorations(
         stack: ItemStack,
@@ -281,7 +284,27 @@ class LbHudCanvas internal constructor(
         h: Float,
         countLabel: String? = null,
     ) {
-        LbItemIcons.draw(context, slot, stack, x, y, w, h, 1f, countLabel)
+        if (stack.isEmpty) {
+            return
+        }
+
+        LbItemIcons.draw(context, slot, stack, x, y, w, h, 1f, countLabel, ownCount = true)
+
+        val label = countLabel ?: stack.count.let { if (it <= 1) null else it.toString() } ?: return
+        if (label.isEmpty()) {
+            return
+        }
+
+        val font = LbHudFonts.count(h, textScale)
+        val textWidth = measure(label, font)
+        val pad = h * COUNT_PAD_FACTOR
+        context.text(
+            label,
+            x + w - textWidth - pad,
+            y + h - font.metrics.descent - pad,
+            PolyColor(-1),
+            font,
+        )
     }
 
     /** Draws the icon at the classpath [path] aspect fitted and centred inside the given box. */
@@ -403,6 +426,9 @@ class LbHudCanvas internal constructor(
 
         /** Size of one game font glyph cell, in logical units. */
         const val GAME_FONT_BASE_SIZE: Float = 8f
+
+        /** Inset of the stack count from the corner of the icon, as a share of the icon box. */
+        private const val COUNT_PAD_FACTOR: Float = 0.08f
     }
 
 }

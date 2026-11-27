@@ -53,7 +53,7 @@ internal object LbHudStore {
     private const val SAVE_DELAY_MS = 400L
 
     /** Options declared on the shared surface base, so their titles are translated once instead of per element. */
-    private val SHARED_OPTIONS: Set<String> = setOf("showSurface", "surfaceColor", "accentColor")
+    private val SHARED_OPTIONS: Set<String> = setOf("accentColor")
 
     private val scheduler: ScheduledExecutorService =
         Executors.newSingleThreadScheduledExecutor { runnable ->

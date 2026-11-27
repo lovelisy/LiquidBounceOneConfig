@@ -46,6 +46,10 @@ internal object LbItemIcons {
      *
      * [key] has to be stable for a slot across frames, not derived from the stack, or every stack change would leak a
      * handle into the atlas.
+     *
+     * The native decorations draw the stack count with the game font; [ownCount] suppresses that number so the caller
+     * can print it through OneConfig's text engine instead, while the durability bar and the cooldown veil stay
+     * native.
      */
     fun draw(
         context: RenderContext,
@@ -57,6 +61,7 @@ internal object LbItemIcons {
         h: Float,
         alpha: Float = 1f,
         countLabel: String? = null,
+        ownCount: Boolean = false,
     ) {
         if (w <= 0f || h <= 0f || alpha <= 0f) {
             return
@@ -76,7 +81,9 @@ internal object LbItemIcons {
 
             handle.draw(context, x, y, w, h, alpha.coerceIn(0f, 1f))
 
-            if (countLabel != null) {
+            if (ownCount) {
+                handle.drawDecorations(context, x, y, min(w, h), "")
+            } else if (countLabel != null) {
                 handle.drawDecorations(context, x, y, min(w, h), countLabel)
             } else {
                 handle.drawDecorations(context, x, y, min(w, h))

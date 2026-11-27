@@ -155,6 +155,7 @@ internal object LbConfigTree {
         val global = LbText.categoryName("Global")
         appendGroup(root, GlobalManager, global, emptyList(), "", emptySet())
 
+        root.addMetadata("hidden", true)
         ConfigRegistry.registerTree(root, ConfigSource.Compat)
 
         cachedModules = modules
@@ -231,8 +232,14 @@ internal object LbConfigTree {
 
         val toggle = booleanProperty(module.enabledValue, LbText.valueName(module.enabledValue))
         toggle.addMetadata(MetaKeys.CATEGORY.name, category)
-        tree.put(toggle)
         tree.addMetadata("enableToggle", toggle)
+        tree.put(toggle)
+
+        tree.put(
+            booleanProperty(module.enabledValue, LbText.valueName(module.enabledValue)).apply {
+                addMetadata(MetaKeys.CATEGORY.name, category)
+            },
+        )
 
         appendGroup(tree, module, category, emptyList(), "", setOf(module.enabledValue))
 

@@ -2442,8 +2442,6 @@
   "liquidbounce.hud.image.filePath.name": "File Path",
   "liquidbounce.hud.image.imageScale.name": "Scale",
   "liquidbounce.hud.image.opacity.name": "Opacity",
-  "liquidbounce.hud.shared.showSurface.name": "Show Background",
-  "liquidbounce.hud.shared.surfaceColor.name": "Background Color",
   "liquidbounce.hud.shared.accentColor.name": "Accent Color",
   "liquidbounce.setting.blinkEsp.name": "Blink ESP",
   "liquidbounce.setting.mapping.name": "Mapping",

@@ -2443,8 +2443,6 @@
   "liquidbounce.hud.image.filePath.name": "文件路径",
   "liquidbounce.hud.image.imageScale.name": "缩放",
   "liquidbounce.hud.image.opacity.name": "不透明度",
-  "liquidbounce.hud.shared.showSurface.name": "显示背景",
-  "liquidbounce.hud.shared.surfaceColor.name": "背景颜色",
   "liquidbounce.hud.shared.accentColor.name": "强调色",
   "liquidbounce.setting.blinkEsp.name": "瞬闪 ESP",
   "liquidbounce.setting.mapping.name": "映射方式",

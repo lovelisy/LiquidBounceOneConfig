@@ -34,6 +34,9 @@ import kotlin.math.min
  */
 object KeyBindsHud : LbHudSurface("keybinds", "KeyBinds", Hud.Category.INFO, LbHudPalette.surface(0.68f)) {
 
+    override val defaultShown: Boolean
+        get() = true
+
     private class Row(val name: String, val keyText: String, val enabled: Boolean, val keyWidth: Float)
 
     private fun rows(): List<Row> = ModuleManager

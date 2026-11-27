@@ -1,40 +1,18 @@
-/*
- * This file is part of LiquidBounce (https://github.com/CCBlueX/LiquidBounce)
- *
- * Copyright (c) 2015 - 2026 CCBlueX
- *
- * LiquidBounce is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * LiquidBounce is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with LiquidBounce. If not, see <https://www.gnu.org/licenses/>.
- */
 package net.ccbluex.liquidbounce.integration.oneconfig.hud
 
 import org.polyfrost.compose.render.PolyColor
 import org.polyfrost.oneconfig.api.config.v1.annotations.Color
-import org.polyfrost.oneconfig.api.config.v1.annotations.Switch
 import org.polyfrost.oneconfig.api.hud.v1.Hud
 
 /**
- * Background controls every LiquidBounce HUD element carries itself.
+ * Background handling shared by every LiquidBounce HUD element.
  *
- * OneConfig's own background card is not used: it can only paint one flat rectangle behind the whole content area,
- * while the native elements build their surface out of several pieces, such as the split header and body of the key
- * bind list or the per row cards of the array list. Each element therefore paints its own surface and offers the
- * colour right here in its unit settings.
+ * The plate is drawn by the element itself, because the native look is built out of several pieces, such as the split
+ * header and body of the key bind list or the per row cards of the array list. The colour, the visibility and the
+ * radius all come from the standard background card of the OneConfig style panel, which edits the [Hud] properties
+ * directly, so a change in the panel moves every piece at once instead of a separate unit option.
  *
- * The colour is a [PolyColor], which OneConfig's colour control edits with the alpha slider, the chroma cycle and the
- * gradient that every other OneConfig surface already offers.
- *
- * @param defaultColor the colour a fresh element starts with, matching the native surface alpha of that element.
+ * @param defaultColor the background a fresh element starts with, matching the native surface alpha of that element.
  */
 abstract class LbHudSurface(
     id: String,
@@ -43,19 +21,9 @@ abstract class LbHudSurface(
     defaultColor: Int,
 ) : LbHudBase(id, title, category) {
 
-    /** Whether the surface is painted behind the content. */
-    @Switch(title = "Show Background")
-    @JvmField
-    var showSurface: Boolean = true
-
-    /** Fill colour of the surface, including its transparency. */
-    @Color(title = "Background Color", alpha = true, gradient = true)
-    @JvmField
-    var surfaceColor: PolyColor = PolyColor(defaultColor)
-
     /**
-     * Colour of the accents the element paints itself, such as the bar of the array list, the fill of a held key or the
-     * badge of the watermark.
+     * Colour of the accents the element paints itself, such as the bar of the array list, the fill of a held key or
+     * the badge of the watermark.
      *
      * It is a regular OneConfig colour control, so the chroma cycle and the gradient work here exactly like they do on
      * a panel surface. The text colour is not repeated: it comes from [textColor], which the style panel already edits
@@ -65,16 +33,29 @@ abstract class LbHudSurface(
     @JvmField
     var accentColor: PolyColor = PolyColor(LbHudPalette.DEFAULT_ACCENT)
 
-    /** The surface colour in use, fully transparent while the surface is switched off. */
-    protected fun surfaceArgb(): Int = if (showSurface) surfaceColor.rawArgb else 0
+    init {
+        showBackground = (defaultColor ushr 24) != 0
+        bgPolyColor = PolyColor(defaultColor)
+        bgRadius = SURFACE_RADIUS
+    }
 
-    /** The surface colour at [factor] of its transparency, for surfaces made of several layers. */
+    /** The background colour in use, fully transparent while the switch of the style panel is off. */
+    protected fun surfaceArgb(): Int = if (showBackground) bgPolyColor.rawArgb else 0
+
+    /** The background colour at [factor] of its transparency, for surfaces made of several layers. */
     protected fun surfaceArgb(factor: Float): Int = LbHudPalette.withAlphaFactor(surfaceArgb(), factor)
+
+    /** The radius the panel assigns to the background, applied to the pieces the element paints. */
+    protected fun surfaceRadius(): Float = bgRadius
 
     /** The accent colour in use. */
     protected fun accentArgb(): Int = accentColor.rawArgb
 
     /** The accent colour at [factor] opacity. */
     protected fun accentArgb(factor: Float): Int = LbHudPalette.withAlphaFactor(accentArgb(), factor)
+
+    private companion object {
+        const val SURFACE_RADIUS: Float = 5f
+    }
 
 }

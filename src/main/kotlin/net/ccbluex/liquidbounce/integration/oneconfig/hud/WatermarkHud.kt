@@ -26,19 +26,22 @@ import org.polyfrost.oneconfig.api.hud.v1.Hud
  * The badge and the wordmark are two layered textures of the native client. The badge is tinted with the accent colour
  * and the wordmark keeps the text colour, so the logo follows the theme of every other HUD element.
  *
- * It draws no text, so it drops the text card of OneConfig's style panel. The background is painted here rather than by
- * OneConfig, so the surface card of the panel stays hidden and the colour is offered in the unit settings instead.
+ * It draws no text, so it drops the text card of OneConfig's style panel. The background colour, the visibility and
+ * the radius come from the background card of the panel like on every other element.
  */
 object WatermarkHud : LbHudSurface("watermark", "Watermark", Hud.Category.INFO, LbHudPalette.surface(0.68f)) {
 
+    override val defaultShown: Boolean
+        get() = true
+
     /** The logo paints two textures and no text, so only the text card of the style panel is dropped. */
     override val hiddenPanelSections: Set<String>
-        get() = setOf(LbHudPanels.TEXT, LbHudPanels.BACKGROUND)
+        get() = setOf(LbHudPanels.TEXT)
 
     override fun measure(): HudSize = HudSize(BASE_WIDTH, BASE_HEIGHT)
 
     override fun paint(canvas: LbHudCanvas) {
-        canvas.fill(0f, 0f, BASE_WIDTH, BASE_HEIGHT, surfaceArgb(), SURFACE_RADIUS)
+        canvas.fill(0f, 0f, BASE_WIDTH, BASE_HEIGHT, surfaceArgb(), surfaceRadius())
         canvas.stretchedIcon(BADGE, 0f, 0f, BASE_WIDTH, BASE_HEIGHT, accentArgb())
         canvas.stretchedIcon(FOREGROUND, 0f, 0f, BASE_WIDTH, BASE_HEIGHT, textColor)
     }
@@ -48,6 +51,5 @@ object WatermarkHud : LbHudSurface("watermark", "Watermark", Hud.Category.INFO, 
 
     private const val BASE_WIDTH: Float = 165f
     private const val BASE_HEIGHT: Float = 61.8917f
-    private const val SURFACE_RADIUS: Float = 5f
 
 }

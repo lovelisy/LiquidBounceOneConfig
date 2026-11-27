@@ -47,6 +47,9 @@ import kotlin.math.max
  */
 object TargetHud : LbHudSurface("target_hud", "Target HUD", Hud.Category.COMBAT, LbHudPalette.surface(0.68f)) {
 
+    override val defaultShown: Boolean
+        get() = true
+
     /**
      * Colour of the health bar under the card.
      *

@@ -18,6 +18,8 @@
  */
 package net.ccbluex.liquidbounce.integration.oneconfig.hud
 
+import org.polyfrost.compose.render.PolyFont
+
 /**
  * Font weight keys of the Poppins family that ships with OneConfig.
  *
@@ -36,5 +38,18 @@ object LbHudFonts {
         BOLD("poppins-bold"),
         BLACK("poppins-black"),
     }
+
+    /**
+     * Font of the stack count printed in the corner of an item icon.
+     *
+     * The size scales with the box the icon is drawn in, mirroring the way the vanilla count grows with the icon, and
+     * stays legible on the smallest slot.
+     */
+    fun count(boxSize: Float, textScale: Float = 1f): PolyFont =
+        PolyFont(Weight.BOLD.key, (boxSize * COUNT_SIZE_FACTOR * textScale).coerceIn(MIN_SIZE, MAX_SIZE))
+
+    private const val COUNT_SIZE_FACTOR = 0.28f
+    private const val MIN_SIZE = 7f
+    private const val MAX_SIZE = 18f
 
 }

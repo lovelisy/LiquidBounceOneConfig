@@ -42,6 +42,9 @@ import kotlin.math.max
 object BlockCounterHud :
     LbHudSurface("block_counter", "Block Counter", Hud.Category.INFO, LbHudPalette.surface(0.68f)) {
 
+    override val defaultShown: Boolean
+        get() = true
+
     @Dropdown(title = "Icon Position", options = ["None", "Left", "Right", "Top", "Bottom"])
     @JvmField
     var iconPosition: String = "Left"
@@ -191,8 +194,6 @@ object BlockCounterHud :
 
     private fun gap(): Float = GAP * textScale
 
-    private fun surfaceRadius(): Float = SURFACE_RADIUS * textScale
-
     private const val SLOT: String = "block_counter"
 
     private const val VALUE_SIZE: Float = 15f
@@ -200,7 +201,6 @@ object BlockCounterHud :
     private const val PADDING_X: Float = 8f
     private const val PADDING_Y: Float = 5f
     private const val GAP: Float = 5f
-    private const val SURFACE_RADIUS: Float = 5f
 
     private const val FULL_STACK: Int = 64
     private const val MAX_HUE: Float = 120f

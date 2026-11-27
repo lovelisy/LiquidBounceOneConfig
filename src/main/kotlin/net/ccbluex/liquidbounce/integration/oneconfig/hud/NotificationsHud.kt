@@ -34,6 +34,9 @@ import kotlin.math.max
  */
 object NotificationsHud : LbHudSurface("notifications", "Notifications", Hud.Category.INFO, LbHudPalette.surface(0.68f)) {
 
+    override val defaultShown: Boolean
+        get() = true
+
     @Switch(title = "Show Info")
     @JvmField
     var showInfo: Boolean = true
