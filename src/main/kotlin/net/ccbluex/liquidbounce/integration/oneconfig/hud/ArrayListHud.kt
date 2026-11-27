@@ -173,18 +173,6 @@ object ArrayListHud : LbHudBase("arraylist", "Array List", Hud.Category.INFO) {
         }
     }
 
-    /** Matches the native client's word splitting, which turns `KillAura` into `Kill Aura`. */
-    private fun displayName(name: String): String {
-        if (name.isEmpty() || name.contains(' ')) {
-            return name
-        }
-
-        val words = SPACED_WORD_REGEX.findAll(name).map { it.value }.toList()
-        return if (words.isEmpty()) name else words.joinToString(" ")
-    }
-
-    private val SPACED_WORD_REGEX: Regex = Regex("[A-Z]?[a-z]+|[A-Z]+[0-9]+|[0-9]+|[A-Z]+(?![a-z])")
-
     private const val ROW_FONT_SIZE: Float = 14f
     private const val ROW_VERTICAL_PADDING: Float = 10f
     private const val HORIZONTAL_PADDING: Float = 8f

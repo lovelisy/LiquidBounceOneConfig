@@ -210,6 +210,16 @@ class LbHudCanvas internal constructor(
         )
     }
 
+    /** Draws the classpath [path] stretched to the whole box, for artwork that must not keep its aspect ratio. */
+    fun stretchedIcon(path: String, x: Float, y: Float, w: Float, h: Float, argb: Int = -1) {
+        if (w <= 0f || h <= 0f || (argb ushr 24) == 0) return
+
+        val bitmap = LbHudTextures.get(path) ?: return
+        if (bitmap.width <= 0 || bitmap.height <= 0) return
+
+        context.image(bitmap, x, y, w, h, 0f, 0f, 1f, 1f, PolyColor(argb), FilterQuality.Medium)
+    }
+
     /**
      * Draws a rounded cut-out of [bitmap].
      *

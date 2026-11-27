@@ -2316,5 +2316,9 @@
   "liquidbounce.hud.notifications.showDisabled.name": "Show Disabled",
   "liquidbounce.hud.target_hud.sample.name": "Player",
   "liquidbounce.hud.notifications.sample.message": "Client notifications appear here",
-  "liquidbounce.hud.arraylist.sample.name": "Array List"
+  "liquidbounce.hud.arraylist.sample.name": "Array List",
+  "liquidbounce.hud.keybinds.name": "KeyBinds",
+  "liquidbounce.hud.keybinds.title": "Binds",
+  "liquidbounce.hud.keybinds.empty": "No key bindings",
+  "liquidbounce.hud.watermark.name": "Watermark"
 }

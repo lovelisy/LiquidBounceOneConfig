@@ -2316,5 +2316,9 @@
   "liquidbounce.hud.notifications.showDisabled.name": "显示关闭",
   "liquidbounce.hud.target_hud.sample.name": "玩家",
   "liquidbounce.hud.notifications.sample.message": "客户端通知将显示在这里",
-  "liquidbounce.hud.arraylist.sample.name": "模块列表"
+  "liquidbounce.hud.arraylist.sample.name": "模块列表",
+  "liquidbounce.hud.keybinds.name": "按键列表",
+  "liquidbounce.hud.keybinds.title": "按键",
+  "liquidbounce.hud.keybinds.empty": "没有按键绑定",
+  "liquidbounce.hud.watermark.name": "水印"
 }

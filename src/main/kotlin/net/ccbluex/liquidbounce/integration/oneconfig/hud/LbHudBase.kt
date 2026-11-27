@@ -42,7 +42,13 @@ abstract class LbHudBase(id: String, title: String, category: Hud.Category) : Lb
         }
 
         val base = if (textBold) LbHudFonts.Weight.BOLD.key else weight.key
-        return if (textItalic) "$base-italic" else base
+        if (!textItalic) {
+            return base
+        }
+
+        // OneConfig ships no italic cut of SemiBold, so fall back to the italic of the closest weight it does ship.
+        val italicBase = if (base == LbHudFonts.Weight.SEMIBOLD.key) LbHudFonts.Weight.MEDIUM.key else base
+        return "$italicBase-italic"
     }
 
     protected fun textWidth(
@@ -98,10 +104,21 @@ abstract class LbHudBase(id: String, title: String, category: Hud.Category) : Lb
         return text.substring(0, end) + ellipsis
     }
 
+    /** Splits `KillAura` into `Kill Aura`, matching the native client's camel case word splitting. */
+    protected fun displayName(name: String): String {
+        if (name.isEmpty() || name.contains(' ')) {
+            return name
+        }
+
+        val words = SPACED_WORD_REGEX.findAll(name).map { it.value }.toList()
+        return if (words.isEmpty()) name else words.joinToString(" ")
+    }
+
     private companion object {
         const val ELLIPSIS: String = "..."
         const val MIN_FONT_SIZE: Float = 1f
         const val MAX_FONT_SIZE: Float = 256f
+        val SPACED_WORD_REGEX: Regex = Regex("[A-Z]?[a-z]+|[A-Z]+[0-9]+|[0-9]+|[A-Z]+(?![a-z])")
     }
 
 }

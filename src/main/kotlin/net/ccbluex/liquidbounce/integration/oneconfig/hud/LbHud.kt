@@ -102,18 +102,46 @@ abstract class LbHud(
 
     @Composable
     override fun Content() {
+        val styleRevision = hudStyleRevision()
+
         NodeCanvas(
             hudBackground()
                 .size(staticW, staticH)
                 .padding(padLeft, padTop, padRight, padBottom),
             live = true,
         ) { x, y, width, height ->
-            paintSafely(this, x, y, width, height)
+            paintSafely(this, x, y, width, height, styleRevision)
         }
     }
 
+    /**
+     * Reads every font related option during composition.
+     *
+     * The values are only read to subscribe this element to them: the paint pass reads the live state on its own, but
+     * Compose has to know that a changed font, size or weight needs a new composition. Without this the element would
+     * only repaint when [syncSize] happens to report a different size, which is why a font change used to be ignored by
+     * the elements whose text width barely moved.
+     */
+    @Composable
+    private fun hudStyleRevision(): Int {
+        var revision = font.ordinal
+        revision = revision * 31 + textScale.hashCode()
+        revision = revision * 31 + textBold.hashCode()
+        revision = revision * 31 + textItalic.hashCode()
+        revision = revision * 31 + textWeight.ordinal
+        revision = revision * 31 + textColor
+        return revision
+    }
+
     /** Runs the paint pass, logging instead of throwing so one broken element cannot take the HUD down. */
-    private fun paintSafely(context: RenderContext, x: Float, y: Float, width: Float, height: Float) {
+    private fun paintSafely(
+        context: RenderContext,
+        x: Float,
+        y: Float,
+        width: Float,
+        height: Float,
+        @Suppress("UNUSED_PARAMETER") styleRevision: Int,
+    ) {
         context.save()
         context.translate(x, y)
 
@@ -138,6 +166,13 @@ abstract class LbHud(
     fun invalidate() {
         contentChanged()
     }
+
+    /**
+     * Whether the settings panel should offer the font options of [Hud]: family, size, weight, bold, italic and
+     * alignment. Elements that only draw artwork, such as the watermark, hide them because they have no text to style.
+     */
+    internal open val exposesFontOptions: Boolean
+        get() = true
 
     /**
      * Routes this element's option tree into LiquidBounce's own configuration folder instead of OneConfig's profile

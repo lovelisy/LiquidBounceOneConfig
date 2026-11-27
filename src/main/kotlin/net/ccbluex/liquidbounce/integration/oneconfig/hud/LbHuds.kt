@@ -36,6 +36,8 @@ object LbHuds {
         TargetHud,
         ArrayListHud,
         NotificationsHud,
+        KeyBindsHud,
+        WatermarkHud,
     )
 
     /** Whether the HUD elements should be visible. OneConfig already hides them outside of a world. */
