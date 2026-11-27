@@ -61,6 +61,9 @@ import java.util.function.Supplier
  */
 internal object LbConfigTree {
 
+    /** Id the tree is registered under, which is also the id OneConfig's search indexes the tree with. */
+    const val CONFIG_ID: String = "liquidbounce"
+
     private const val SEPARATOR = " / "
 
     private val VEC3_AXES = arrayOf("X", "Y", "Z")
@@ -109,7 +112,7 @@ internal object LbConfigTree {
 
     private fun createTree(): Tree {
         usedIds.clear()
-        val root = Tree("liquidbounce", "LiquidBounce", null, null)
+        val root = Tree(CONFIG_ID, "LiquidBounce", null, null)
 
         val known = ModuleCategories.entries.toList()
 

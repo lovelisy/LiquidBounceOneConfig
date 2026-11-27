@@ -54,6 +54,7 @@ object LbModulesPage : OneConfigPage(
         ConfigScreen(
             tree = tree,
             pageKey = PAGE_ID,
+            configId = LbConfigTree.CONFIG_ID,
         )
     }
 

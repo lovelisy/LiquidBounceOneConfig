@@ -3,7 +3,7 @@
   "id": "liquidbounce",
   "version": "${version}",
   "name": "LiquidBounce",
-  "description": "LiquidBounce with its interface rendered by OneConfig - no embedded browser, no web server. Modules, settings and every HUD element live in OneConfig's own UI, while the configuration stays in LiquidBounce's folders.",
+  "description": "LiquidBounce with its UI, modules and HUD rendered by OneConfig.",
   "authors": [
     "CCBlueX",
     "lovelisy"

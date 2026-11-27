@@ -48,7 +48,6 @@ object TargetHud : LbHudBase("target_hud", "Target HUD", Hud.Category.COMBAT) {
     private const val AVATAR_SIZE: Float = 50f
     private const val PADDING: Float = 15f
     private const val GAP: Float = 10f
-    private const val MAIN_HEIGHT: Float = 70f
     private const val BAR_HEIGHT: Float = 8f
 
     private var lastTarget: LivingEntity? = null
@@ -93,12 +92,26 @@ object TargetHud : LbHudBase("target_hud", "Target HUD", Hud.Category.COMBAT) {
 
     private fun midWidth(target: LivingEntity): Float {
         val nameWidth = textWidth(target.name.string, NAME_SIZE, LbHudFonts.Weight.MEDIUM)
-        val statsWidth = (if (absorption(target) > 0f) 3 else 2) * (25f * textScale + 17f)
+        val statsWidth = (if (absorption(target) > 0f) 3 else 2) *
+            (max(STAT_VALUE_MIN_WIDTH, textWidth("00", STAT_SIZE)) + STAT_ICON_SIZE + STAT_ICON_GAP)
         return max(nameWidth, statsWidth)
     }
 
     private fun armourWidth(slots: List<ItemStack>): Float =
-        if (slots.isEmpty()) 0f else 5f + slots.size * 40f + max(0, slots.size - 1) * 10f
+        if (slots.isEmpty()) {
+            0f
+        } else {
+            5f + (slots.size - 1) * armourSlotWidth() +
+                ARMOUR_SLOT_SIZE + ARMOUR_DOT_OFFSET + ARMOUR_DOT_SPAN
+        }
+
+    private fun armourSlotWidth(): Float = ARMOUR_SLOT_SIZE + ARMOUR_SLOT_GAP
+
+    private fun mainHeight(): Float = max(AVATAR_SIZE + AVATAR_TOP * 2f, NAME_TOP + nameLineHeight() + STAT_TOP_OFFSET)
+
+    private fun nameLineHeight(): Float = lineHeight(NAME_SIZE, LbHudFonts.Weight.MEDIUM)
+
+    private fun cardHeight(): Float = mainHeight() + BAR_HEIGHT
 
     private fun cardWidth(target: LivingEntity): Float {
         val armour = armourWidth(armourSlots(target))
@@ -107,8 +120,8 @@ object TargetHud : LbHudBase("target_hud", "Target HUD", Hud.Category.COMBAT) {
     }
 
     override fun measure(): HudSize {
-        val target = resolveTarget(HudManager.isEditing) ?: return HudSize(SAMPLE_WIDTH, SAMPLE_HEIGHT)
-        return HudSize(cardWidth(target), MAIN_HEIGHT + BAR_HEIGHT)
+        val target = resolveTarget(HudManager.isEditing) ?: return HudSize(sampleWidth(), cardHeight())
+        return HudSize(cardWidth(target), cardHeight())
     }
 
     override fun paint(canvas: LbHudCanvas) {
@@ -127,16 +140,17 @@ object TargetHud : LbHudBase("target_hud", "Target HUD", Hud.Category.COMBAT) {
         val slots = armourSlots(target)
         val midWidth = midWidth(target)
         val cardWidth = cardWidth(target)
-        val cardHeight = MAIN_HEIGHT + BAR_HEIGHT
+        val cardHeight = cardHeight()
+        val mainHeight = mainHeight()
 
         canvas.fill(0f, 0f, cardWidth, cardHeight, LbHudPalette.surface(0.68f), 5f)
 
         drawAvatar(canvas, target)
 
-        drawText(canvas, name, PADDING + AVATAR_SIZE + GAP, 14f, NAME_SIZE, textColor, LbHudFonts.Weight.MEDIUM)
+        drawText(canvas, name, PADDING + AVATAR_SIZE + GAP, NAME_TOP, NAME_SIZE, textColor, LbHudFonts.Weight.MEDIUM)
 
         var statX = PADDING + AVATAR_SIZE + GAP
-        val statY = 40f
+        val statY = NAME_TOP + nameLineHeight() + STAT_TOP_OFFSET
         statX += drawStat(canvas, statX, statY, floor(health).toInt().toString(), TARGET_HEALTH) + GAP
         if (absorption > 0f) {
             statX += drawStat(canvas, statX, statY, floor(absorption).toInt().toString(), TARGET_ABSORPTION) + GAP
@@ -144,10 +158,10 @@ object TargetHud : LbHudBase("target_hud", "Target HUD", Hud.Category.COMBAT) {
         drawStat(canvas, statX, statY, armourValue.toString(), TARGET_ARMOR)
 
         if (slots.isNotEmpty()) {
-            var armourX = PADDING + AVATAR_SIZE + GAP + midWidth + 15f
+            var armourX = PADDING + AVATAR_SIZE + GAP + midWidth + GAP
             for (stack in slots) {
-                drawArmourStatus(canvas, stack, armourX, 20f)
-                armourX += 50f
+                drawArmourStatus(canvas, stack, armourX, AVATAR_TOP)
+                armourX += armourSlotWidth()
             }
         }
 
@@ -157,7 +171,7 @@ object TargetHud : LbHudBase("target_hud", "Target HUD", Hud.Category.COMBAT) {
         if (animHealthRatio > 0.002f) {
             canvas.fillCssBox(
                 0f,
-                MAIN_HEIGHT,
+                mainHeight,
                 cardWidth * animHealthRatio,
                 BAR_HEIGHT,
                 0f,
@@ -174,8 +188,9 @@ object TargetHud : LbHudBase("target_hud", "Target HUD", Hud.Category.COMBAT) {
      * main menu is open. It keeps the fixed sample size so OneConfig can fit it inside the preview box.
      */
     private fun paintSample(canvas: LbHudCanvas) {
-        val cardWidth = SAMPLE_WIDTH
-        val cardHeight = MAIN_HEIGHT + BAR_HEIGHT
+        val cardWidth = sampleWidth()
+        val cardHeight = cardHeight()
+        val mainHeight = mainHeight()
 
         canvas.fill(0f, 0f, cardWidth, cardHeight, LbHudPalette.surface(0.68f), 5f)
 
@@ -183,23 +198,23 @@ object TargetHud : LbHudBase("target_hud", "Target HUD", Hud.Category.COMBAT) {
         if (fallback != null) {
             canvas.roundedTexture(
                 fallback,
-                PADDING, 10f, AVATAR_SIZE, AVATAR_SIZE, 5f,
+                PADDING, AVATAR_TOP, AVATAR_SIZE, AVATAR_SIZE, 5f,
                 0f, 0f, fallback.width.toFloat(), fallback.height.toFloat(),
                 -1,
                 FilterQuality.None,
             )
         }
 
-        drawText(canvas, LbText.hudString("liquidbounce.hud.target_hud.sample.name", "Player"), PADDING + AVATAR_SIZE + GAP, 14f, NAME_SIZE, textColor, LbHudFonts.Weight.MEDIUM)
+        drawText(canvas, LbText.hudString("liquidbounce.hud.target_hud.sample.name", "Player"), PADDING + AVATAR_SIZE + GAP, NAME_TOP, NAME_SIZE, textColor, LbHudFonts.Weight.MEDIUM)
 
         var statX = PADDING + AVATAR_SIZE + GAP
-        val statY = 40f
+        val statY = NAME_TOP + nameLineHeight() + STAT_TOP_OFFSET
         statX += drawStat(canvas, statX, statY, SAMPLE_HEALTH, TARGET_HEALTH) + GAP
         drawStat(canvas, statX, statY, SAMPLE_ARMOUR, TARGET_ARMOR)
 
         canvas.fillCssBox(
             0f,
-            MAIN_HEIGHT,
+            mainHeight,
             cardWidth * SAMPLE_HEALTH_RATIO,
             BAR_HEIGHT,
             0f,
@@ -220,7 +235,7 @@ object TargetHud : LbHudBase("target_hud", "Target HUD", Hud.Category.COMBAT) {
         if (face != null && face.width > 0 && face.height > 0) {
             canvas.roundedTexture(
                 face,
-                PADDING, 10f, AVATAR_SIZE, AVATAR_SIZE, 5f,
+                PADDING, AVATAR_TOP, AVATAR_SIZE, AVATAR_SIZE, 5f,
                 0f, 0f, face.width.toFloat(), face.height.toFloat(),
                 tint,
                 FilterQuality.None,
@@ -231,7 +246,7 @@ object TargetHud : LbHudBase("target_hud", "Target HUD", Hud.Category.COMBAT) {
         val fallback = LbHudTextures.get(STEVE_FACE) ?: return
         canvas.roundedTexture(
             fallback,
-            PADDING, 10f, AVATAR_SIZE, AVATAR_SIZE, 5f,
+            PADDING, AVATAR_TOP, AVATAR_SIZE, AVATAR_SIZE, 5f,
             0f, 0f, fallback.width.toFloat(), fallback.height.toFloat(),
             tint,
             FilterQuality.None,
@@ -239,16 +254,16 @@ object TargetHud : LbHudBase("target_hud", "Target HUD", Hud.Category.COMBAT) {
     }
 
     private fun drawStat(canvas: LbHudCanvas, x: Float, y: Float, value: String, icon: String): Float {
-        val valueWidth = max(18f, textWidth(value, STAT_SIZE))
+        val valueWidth = max(STAT_VALUE_MIN_WIDTH, textWidth(value, STAT_SIZE))
         drawText(canvas, value, x, y, STAT_SIZE, LbHudPalette.TEXT_DIMMED_COLOR)
-        canvas.icon(icon, x + valueWidth + 3f, y + 1.5f, 14f, 14f, textColor)
-        return valueWidth + 17f
+        canvas.icon(icon, x + valueWidth + STAT_ICON_GAP, y + 1.5f, STAT_ICON_SIZE, STAT_ICON_SIZE, textColor)
+        return valueWidth + STAT_ICON_GAP + STAT_ICON_SIZE
     }
 
     private fun drawArmourStatus(canvas: LbHudCanvas, stack: ItemStack, x: Float, y: Float) {
         canvas.save()
         canvas.translate(x, y + 3f)
-        val itemScale = 30f / 16f
+        val itemScale = ARMOUR_SLOT_SIZE / 16f
         canvas.scale(itemScale, itemScale)
         canvas.item(stack, 0f, 0f, 16f, 16f)
         canvas.restore()
@@ -259,7 +274,7 @@ object TargetHud : LbHudBase("target_hud", "Target HUD", Hud.Category.COMBAT) {
             10
         }
 
-        val dotX = x + 35f
+        val dotX = x + ARMOUR_SLOT_SIZE + 5f
         for (index in 0 until 10) {
             val pointIndex = 10 - index
             val colour = if (pointIndex <= activePoints) {
@@ -280,11 +295,24 @@ object TargetHud : LbHudBase("target_hud", "Target HUD", Hud.Category.COMBAT) {
     private const val STAT_SIZE: Float = 14f
     private const val TARGET_CACHE_MS: Long = 1200L
 
-    /** Fixed size of the editor sample card, chosen to stay inside OneConfig's HUD browser preview box. */
-    private const val SAMPLE_WIDTH: Float = 150f
-    private const val SAMPLE_HEIGHT: Float = 78f
+    private const val AVATAR_TOP: Float = 10f
+    private const val NAME_TOP: Float = 14f
+    private const val STAT_TOP_OFFSET: Float = 4f
+    private const val STAT_VALUE_MIN_WIDTH: Float = 18f
+    private const val STAT_ICON_SIZE: Float = 14f
+    private const val STAT_ICON_GAP: Float = 3f
+    private const val ARMOUR_SLOT_SIZE: Float = 30f
+    private const val ARMOUR_SLOT_GAP: Float = 20f
+    private const val ARMOUR_DOT_OFFSET: Float = 5f
+    private const val ARMOUR_DOT_SPAN: Float = 5f
+
     private const val SAMPLE_HEALTH: String = "20"
     private const val SAMPLE_ARMOUR: String = "10"
     private const val SAMPLE_HEALTH_RATIO: Float = 1f
+
+    /** Editor sample card width, scaled with the HUD font so the preview stays inside OneConfig's browser box. */
+    private fun sampleWidth(): Float = SAMPLE_BASE_WIDTH + (textScale - 1f) * SAMPLE_BASE_WIDTH * 0.25f
+
+    private const val SAMPLE_BASE_WIDTH: Float = 150f
 
 }

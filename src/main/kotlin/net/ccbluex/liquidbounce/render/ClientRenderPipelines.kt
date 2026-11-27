@@ -168,13 +168,6 @@ object ClientRenderPipelines {
         }
 
         @JvmField
-        val SmoothTexture = newPipeline("gui/smooth_texture") {
-            withSnippet(RenderPipelines.GUI_TEXTURED_SNIPPET)
-            withColorTargetState(ColorTargetState(BlendFunction.TRANSLUCENT))
-            withDepthStencilState(optional())
-        }
-
-        @JvmField
         val TexQuadNoCull = newPipeline("gui/tex_quad_no_cull") {
             withSnippet(RenderPipelines.GUI_TEXTURED_SNIPPET)
             withCull(false)

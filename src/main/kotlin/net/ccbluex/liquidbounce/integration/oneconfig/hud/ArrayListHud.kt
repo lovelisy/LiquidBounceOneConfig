@@ -81,17 +81,24 @@ object ArrayListHud : LbHudBase("arraylist", "Array List", Hud.Category.INFO) {
         return result
     }
 
-    private fun rowHeight(): Float = lineHeight(ROW_FONT_SIZE, LbHudFonts.Weight.MEDIUM) + ROW_VERTICAL_PADDING
+    private fun rowHeight(): Float = lineHeight(ROW_FONT_SIZE, LbHudFonts.Weight.MEDIUM) + rowVerticalPadding()
+
+    /** Padding follows the HUD text scale, so the rows stay balanced when the font grows. */
+    private fun rowVerticalPadding(): Float = ROW_VERTICAL_PADDING * textScale
+
+    private fun horizontalPadding(): Float = HORIZONTAL_PADDING * textScale
+
+    private fun rowInset(): Float = ACCENT_WIDTH + horizontalPadding()
 
     override fun measure(): HudSize {
         val rows = rows()
         if (rows.isEmpty()) {
-            return HudSize(EMPTY_WIDTH, rowHeight())
+            return HudSize(EMPTY_WIDTH * textScale, rowHeight())
         }
 
         var maxWidth = 0f
         for (row in rows) {
-            val width = ACCENT_WIDTH + HORIZONTAL_PADDING * 2f + row.textWidth
+            val width = rowInset() + horizontalPadding() + row.textWidth
             if (width > maxWidth) maxWidth = width
         }
         return HudSize(maxWidth, rows.size * rowHeight())
@@ -116,7 +123,7 @@ object ArrayListHud : LbHudBase("arraylist", "Array List", Hud.Category.INFO) {
         val lineHeight = lineHeight(ROW_FONT_SIZE, LbHudFonts.Weight.MEDIUM)
         var maxRowWidth = 0f
         for (row in rows) {
-            val width = ACCENT_WIDTH + HORIZONTAL_PADDING * 2f + row.textWidth
+            val width = rowInset() + horizontalPadding() + row.textWidth
             if (width > maxRowWidth) maxRowWidth = width
         }
 
@@ -126,7 +133,7 @@ object ArrayListHud : LbHudBase("arraylist", "Array List", Hud.Category.INFO) {
             anim.y = LbHudPalette.expLerp(anim.y, targetY, 16f, canvas.deltaSeconds)
             anim.slideProgress = LbHudPalette.expLerp(anim.slideProgress, 1f, 15f, canvas.deltaSeconds)
 
-            val rowWidth = ACCENT_WIDTH + HORIZONTAL_PADDING * 2f + row.textWidth
+            val rowWidth = rowInset() + horizontalPadding() + row.textWidth
             val baseX = if (itemAlignment == "Left") 0f else maxRowWidth - rowWidth
             val flyOffset = (1f - anim.slideProgress) * if (itemAlignment == "Left") -36f else 36f
             val x = baseX + flyOffset
@@ -145,12 +152,12 @@ object ArrayListHud : LbHudBase("arraylist", "Array List", Hud.Category.INFO) {
         rowWidth: Float,
         rowLineHeight: Float = lineHeight(ROW_FONT_SIZE, LbHudFonts.Weight.MEDIUM),
     ) {
-        val rowHeight = rowLineHeight + ROW_VERTICAL_PADDING
+        val rowHeight = rowLineHeight + rowVerticalPadding()
 
         canvas.fillCssBox(x, y, rowWidth, rowHeight, 4f, 0f, 0f, 4f, LbHudPalette.surface(0.68f))
         canvas.fillCssBox(x, y, ACCENT_WIDTH, rowHeight, 4f, 0f, 0f, 4f, LbHudPalette.accent(1f))
 
-        val textX = x + ACCENT_WIDTH + HORIZONTAL_PADDING
+        val textX = x + ACCENT_WIDTH + horizontalPadding()
         val textY = y + (rowHeight - rowLineHeight) * 0.5f
         val nameWidth = drawText(canvas, name, textX, textY, ROW_FONT_SIZE, textColor, LbHudFonts.Weight.MEDIUM)
         if (!tag.isNullOrEmpty()) {

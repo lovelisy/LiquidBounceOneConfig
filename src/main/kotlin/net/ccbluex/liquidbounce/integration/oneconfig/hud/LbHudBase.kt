@@ -56,7 +56,8 @@ abstract class LbHudBase(id: String, title: String, category: Hud.Category) : Lb
         weight: LbHudFonts.Weight = LbHudFonts.Weight.REGULAR,
     ): Float {
         val metrics = hudFont(size, weight).metrics
-        return (metrics.descent - metrics.ascent).coerceAtLeast(size)
+        val extent = metrics.descent - metrics.ascent + metrics.leading
+        return extent.coerceAtLeast(size)
     }
 
     /** Draws one line of [text] at [size] and returns the width that was painted. */

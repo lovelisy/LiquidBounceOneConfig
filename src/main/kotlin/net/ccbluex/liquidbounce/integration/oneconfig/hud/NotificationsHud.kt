@@ -103,11 +103,12 @@ object NotificationsHud : LbHudBase("notifications", "Notifications", Hud.Catego
     }
 
     override fun measure(): HudSize {
+        val cardHeight = cardHeight()
         val visible = activeList.size
         if (visible == 0) {
-            return HudSize(CARD_WIDTH, CARD_HEIGHT)
+            return HudSize(cardWidth(), cardHeight)
         }
-        return HudSize(CARD_WIDTH, visible * CARD_HEIGHT + max(0, visible - 1) * CARD_GAP)
+        return HudSize(cardWidth(), visible * cardHeight + max(0, visible - 1) * CARD_GAP)
     }
 
     override fun paint(canvas: LbHudCanvas) {
@@ -130,9 +131,10 @@ object NotificationsHud : LbHudBase("notifications", "Notifications", Hud.Catego
             return
         }
 
+        val cardHeight = cardHeight()
         activeList.forEachIndexed { index, notification ->
             val ageMs = now - notification.createdMs
-            val targetY = index * (CARD_HEIGHT + CARD_GAP)
+            val targetY = index * (cardHeight + CARD_GAP)
             notification.yOffset = LbHudPalette.expLerp(notification.yOffset, targetY, 15f, canvas.deltaSeconds)
 
             val targetSlide = if (ageMs > FADE_START_MS) 35f else 0f
@@ -170,11 +172,15 @@ object NotificationsHud : LbHudBase("notifications", "Notifications", Hud.Catego
         knobRatio: Float,
         alpha: Float,
     ) {
-        canvas.alpha(alpha) {
-            canvas.fill(x, y, CARD_WIDTH, CARD_HEIGHT, LbHudPalette.surface(0.68f), 5f)
+        val cardHeight = cardHeight()
+        val titleLine = titleLineHeight()
+        val messageLine = messageLineHeight()
 
-            val iconBoxX = x + 10f
-            val iconBoxY = y + 10f
+        canvas.alpha(alpha) {
+            canvas.fill(x, y, CARD_WIDTH, cardHeight, LbHudPalette.surface(0.68f), 5f)
+
+            val iconBoxX = x + ICON_MARGIN
+            val iconBoxY = y + (cardHeight - ICON_BOX_SIZE) * 0.5f
             val badgeColour = when (severity) {
                 NotificationEvent.Severity.SUCCESS,
                 NotificationEvent.Severity.ENABLED -> LbHudPalette.SUCCESS_COLOR
@@ -199,14 +205,36 @@ object NotificationsHud : LbHudBase("notifications", "Notifications", Hud.Catego
                 canvas.fill(knobX, knobY, 10f, 10f, textColor, 5f)
             }
 
-            val textX = iconBoxX + ICON_BOX_SIZE + 10f
-            val maxTextWidth = CARD_WIDTH - (textX - x) - 10f
-            val clippedTitle = ellipsize(title, maxTextWidth, 14f, LbHudFonts.Weight.SEMIBOLD)
-            val clippedMessage = ellipsize(message, maxTextWidth, 12f, LbHudFonts.Weight.REGULAR)
-            drawText(canvas, clippedTitle, textX, y + 12f, 14f, textColor, LbHudFonts.Weight.SEMIBOLD)
-            drawText(canvas, clippedMessage, textX, y + 31f, 12f, LbHudPalette.TEXT_DIMMED_COLOR, LbHudFonts.Weight.REGULAR)
+            val textX = iconBoxX + ICON_BOX_SIZE + TEXT_GAP
+            val maxTextWidth = CARD_WIDTH - (textX - x) - ICON_MARGIN
+            val clippedTitle = ellipsize(title, maxTextWidth, TITLE_SIZE, LbHudFonts.Weight.SEMIBOLD)
+            val clippedMessage = ellipsize(message, maxTextWidth, MESSAGE_SIZE, LbHudFonts.Weight.REGULAR)
+            val textTop = y + (cardHeight - (titleLine + TEXT_GAP + messageLine)) * 0.5f
+            drawText(canvas, clippedTitle, textX, textTop, TITLE_SIZE, textColor, LbHudFonts.Weight.SEMIBOLD)
+            drawText(
+                canvas,
+                clippedMessage,
+                textX,
+                textTop + titleLine + TEXT_GAP,
+                MESSAGE_SIZE,
+                LbHudPalette.TEXT_DIMMED_COLOR,
+                LbHudFonts.Weight.REGULAR,
+            )
         }
     }
+
+    private fun titleLineHeight(): Float = lineHeight(TITLE_SIZE, LbHudFonts.Weight.SEMIBOLD)
+
+    private fun messageLineHeight(): Float = lineHeight(MESSAGE_SIZE, LbHudFonts.Weight.REGULAR)
+
+    /** The card follows the HUD font, so the text never spills out of the surface when the size is raised. */
+    private fun cardHeight(): Float {
+        val iconExtent = ICON_BOX_SIZE + ICON_MARGIN * 2f
+        val textExtent = titleLineHeight() + TEXT_GAP + messageLineHeight() + ICON_MARGIN * 2f
+        return max(iconExtent, textExtent)
+    }
+
+    private fun cardWidth(): Float = CARD_WIDTH
 
     private val NOTIFY_SUCCESS = "textures/ui/hud/notification/icon-success.png"
     private val NOTIFY_ERROR = "textures/ui/hud/notification/icon-error.png"
@@ -214,9 +242,12 @@ object NotificationsHud : LbHudBase("notifications", "Notifications", Hud.Catego
     private val NOTIFY_TOGGLE = "textures/ui/hud/notification/icon-toggle.png"
 
     private const val CARD_WIDTH: Float = 300f
-    private const val CARD_HEIGHT: Float = 60f
     private const val CARD_GAP: Float = 10f
     private const val ICON_BOX_SIZE: Float = 40f
+    private const val ICON_MARGIN: Float = 10f
+    private const val TEXT_GAP: Float = 4f
+    private const val TITLE_SIZE: Float = 14f
+    private const val MESSAGE_SIZE: Float = 12f
     private const val MAX_NOTIFICATIONS: Int = 12
     private const val LIFETIME_MS: Long = 3200L
     private const val FADE_START_MS: Long = 3000L

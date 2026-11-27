@@ -19,98 +19,27 @@
 
 package net.ccbluex.liquidbounce.injection.mixins.minecraft.gui;
 
-import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
-import com.llamalad7.mixinextras.sugar.Local;
-import com.mojang.renderpearl.api.pipeline.RenderPipeline;
-import net.ccbluex.liquidbounce.common.ClientLogoTexture;
 import net.ccbluex.liquidbounce.event.EventManager;
 import net.ccbluex.liquidbounce.event.events.ScreenRenderEvent;
-import net.ccbluex.liquidbounce.features.misc.SelfDestruct;
-import net.ccbluex.liquidbounce.render.ClientRenderPipelines;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.LoadingOverlay;
-import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.resources.Identifier;
-import net.minecraft.util.ARGB;
-import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.function.IntSupplier;
-
 /**
- * LiquidBounce Splash Screen
+ * Lets LiquidBounce draw on top of the vanilla loading overlay.
+ * <p>
+ * The vanilla Mojang logo and background are left untouched on purpose: replacing them made the loading screen
+ * unrecognisable and hid the pack progress behind a client banner.
  */
 @Mixin(LoadingOverlay.class)
 public abstract class MixinLoadingOverlay {
 
-    @Unique
-    private static final IntSupplier CLIENT_ARGB = () -> ARGB.color(255, 24, 26, 27);
-
-    @Inject(method = "registerTextures", at = @At("RETURN"))
-    private static void initializeTexture(TextureManager textureManager, CallbackInfo ci) {
-        textureManager.registerAndLoad(ClientLogoTexture.CLIENT_LOGO, new ClientLogoTexture());
-    }
-
     @Inject(method = "extractRenderState", at = @At("RETURN"))
     private void render(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         EventManager.INSTANCE.callEvent(new ScreenRenderEvent(context, delta));
-    }
-
-    @WrapWithCondition(method = "extractRenderState", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/GuiGraphicsExtractor;blit(Lcom/mojang/renderpearl/api/pipeline/RenderPipeline;Lnet/minecraft/resources/Identifier;IIFFIIIIIII)V"))
-    private boolean drawMojangLogo(GuiGraphicsExtractor instance, RenderPipeline renderPipeline, Identifier sprite, int x, int y, float u, float v, int width, int height, int regionWidth, int regionHeight, int textureWidth, int textureHeight, int color) {
-        return SelfDestruct.INSTANCE.isDestructed();
-    }
-
-    @Inject(method = "extractRenderState", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/packs/resources/ReloadInstance;getActualProgress()F"))
-    private void drawClientLogo(
-            GuiGraphicsExtractor graphics,
-            int mouseX,
-            int mouseY,
-            float a,
-            CallbackInfo ci,
-            @Local(name = "color") int color
-    ) {
-        if (SelfDestruct.INSTANCE.isDestructed()) {
-            return;
-        }
-
-        int screenWidth = graphics.guiWidth();
-        int screenHeight = graphics.guiHeight();
-
-        float scaleFactor = Math.min(screenWidth * 0.4f / ClientLogoTexture.WIDTH, screenHeight * 0.25f / ClientLogoTexture.HEIGHT);
-
-        int displayWidth = (int)(ClientLogoTexture.WIDTH * scaleFactor);
-        int displayHeight = (int)(ClientLogoTexture.HEIGHT * scaleFactor);
-
-        int x = (screenWidth - displayWidth) / 2;
-        int y = (screenHeight - displayHeight) / 2;
-
-        // TODO: Draw as SVG instead of PNG
-        graphics.blit(
-            ClientRenderPipelines.GUI.SmoothTexture,
-                ClientLogoTexture.CLIENT_LOGO,
-                x,
-                y,
-                0.0F,
-                0.0F,
-                displayWidth,
-                displayHeight,
-                ClientLogoTexture.WIDTH,
-                ClientLogoTexture.HEIGHT,
-                ClientLogoTexture.WIDTH,
-                ClientLogoTexture.HEIGHT,
-                color
-        );
-    }
-
-    @ModifyExpressionValue(method = "extractRenderState", at = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/screens/LoadingOverlay;BRAND_BACKGROUND:Ljava/util/function/IntSupplier;", opcode = Opcodes.GETSTATIC))
-    private IntSupplier withClientColor(IntSupplier original) {
-        return SelfDestruct.INSTANCE.isDestructed() ? original : CLIENT_ARGB;
     }
 
 }
