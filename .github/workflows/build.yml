@@ -39,3 +39,10 @@ jobs:
           CI: true
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: ./gradlew build -x test -x detekt --console=plain
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: liquidbounce-${{ steps.versions.outputs.lb }}+${{ steps.versions.outputs.minecraft }}
+          path: build/libs
+          if-no-files-found: error
