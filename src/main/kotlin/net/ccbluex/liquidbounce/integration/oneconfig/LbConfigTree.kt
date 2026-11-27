@@ -227,6 +227,7 @@ internal object LbConfigTree {
         val tree = submenu(module.name, LbText.moduleName(module.name), category)
         tree.description = LbText.moduleDescription(module.descriptionKey)
         tree.addMetadata("searchTags", listOf(module.name, LbText.moduleName(module.name)))
+        tree.addMetadata(MetaKeys.ICON.name, categoryIcon(module.category.tag))
         modules[tree.getID()] = listOf(module.name, LbText.moduleName(module.name))
 
         val toggle = booleanProperty(module.enabledValue, LbText.valueName(module.enabledValue))
@@ -442,6 +443,17 @@ internal object LbConfigTree {
     }
 
     private fun join(path: String, name: String): String = if (path.isEmpty()) name else path + SEPARATOR + name
+
+    /**
+     * Resource path of the category icon the native click gui draws in front of a category name. The images are the
+     * ones the native client ships, so the module rows carry the same marks OneConfig shows for its own mods. The
+     * client icon doubles as the fallback for categories without an image of their own.
+     */
+    private fun categoryIcon(tag: String): String {
+        val known = setOf("combat", "player", "movement", "render", "world", "misc", "exploit", "fun")
+        val name = tag.lowercase().takeIf { it in known } ?: "client"
+        return "/assets/liquidbounce/textures/ui/clickgui/icon-$name.png"
+    }
 
     private fun booleanProperty(value: Value<Boolean>, title: String = LbText.valueName(value)): Property<Boolean> {
         val property = Properties.functional(

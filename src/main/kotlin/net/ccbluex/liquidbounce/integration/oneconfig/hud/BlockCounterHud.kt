@@ -22,11 +22,13 @@ import net.ccbluex.liquidbounce.event.events.BlockCountChangeEvent
 import net.ccbluex.liquidbounce.event.handler
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.block.Block
+import org.polyfrost.compose.render.PolyColor
+import org.polyfrost.oneconfig.api.config.v1.annotations.Color
+import org.polyfrost.oneconfig.api.config.v1.annotations.DependsOn
 import org.polyfrost.oneconfig.api.config.v1.annotations.Dropdown
 import org.polyfrost.oneconfig.api.config.v1.annotations.Switch
 import org.polyfrost.oneconfig.api.hud.v1.Hud
 import org.polyfrost.oneconfig.api.hud.v1.HudManager
-import java.awt.Color
 import kotlin.math.max
 
 /**
@@ -36,8 +38,10 @@ import kotlin.math.max
  * that number next to the block icon.
  *
  * The number follows the text colour of the style panel, like every other label of the client. [colorByCount] keeps
- * the native warning on top of that: while it is on, the number runs from red at zero to green at a full stack, so a
- * single glance tells whether bridging is about to run out of blocks. Turning it off leaves the panel colour in charge.
+ * the native warning on top of that: while it is on, the number blends from [lowCountColor] at zero blocks to
+ * [highCountColor] at a full stack, so a single glance tells whether bridging is about to run out of blocks. The two
+ * endpoints default to the hues the native `mapToColor` helper produces and are only shown while the switch is on.
+ * Turning it off leaves the panel colour in charge.
  */
 object BlockCounterHud :
     LbHudSurface("block_counter", "Block Counter", Hud.Category.INFO, LbHudPalette.surface(0.68f)) {
@@ -49,9 +53,19 @@ object BlockCounterHud :
     @JvmField
     var iconPosition: String = "Left"
 
-    @Switch(title = "Color By Count")
+    @Switch(title = "Highlight Color")
     @JvmField
     var colorByCount: Boolean = false
+
+    @Color(title = "Low Count Color", alpha = true, gradient = true)
+    @DependsOn("colorByCount")
+    @JvmField
+    var lowCountColor: PolyColor = PolyColor(LOW_COUNT_DEFAULT)
+
+    @Color(title = "High Count Color", alpha = true, gradient = true)
+    @DependsOn("colorByCount")
+    @JvmField
+    var highCountColor: PolyColor = PolyColor(HIGH_COUNT_DEFAULT)
 
     private var currentBlock: Block? = null
 
@@ -76,17 +90,17 @@ object BlockCounterHud :
     /**
      * Colour of the number.
      *
-     * With [colorByCount] on this mirrors the native `mapToColor` helper, which walks the hue circle up to 120 degrees,
-     * the point where the hue turns green. Otherwise the text colour of the style panel is used, so the colour control
-     * of the HUD settings governs it like it governs every other label.
+     * With [colorByCount] on this blends from [lowCountColor] at zero blocks to [highCountColor] at a full stack, the
+     * warning colour the native element paints with its fixed red-to-green ramp. Otherwise the text colour of the
+     * style panel is used, so the colour control of the HUD settings governs it like it governs every other label.
      */
     private fun countArgb(count: Int): Int {
         if (!colorByCount) {
             return textColor
         }
 
-        val hue = (count.coerceIn(0, FULL_STACK) / FULL_STACK.toFloat()) * (MAX_HUE / 360f)
-        return Color.HSBtoRGB(hue, 1f, 0.85f) or ALPHA_OPAQUE
+        val ratio = count.coerceIn(0, FULL_STACK) / FULL_STACK.toFloat()
+        return LbHudPalette.lerpArgb(lowCountColor.rawArgb, highCountColor.rawArgb, ratio)
     }
 
     private fun iconStack(): ItemStack? =
@@ -203,8 +217,10 @@ object BlockCounterHud :
     private const val GAP: Float = 5f
 
     private const val FULL_STACK: Int = 64
-    private const val MAX_HUE: Float = 120f
-    private const val ALPHA_OPAQUE: Int = 0xFF shl 24
+
+    /** Endpoints of the native `mapToColor` ramp: `HSBtoRGB(0, 1, 0.85)` and `HSBtoRGB(120°, 1, 0.85)`. */
+    private const val LOW_COUNT_DEFAULT: Int = 0xFFD90000.toInt()
+    private const val HIGH_COUNT_DEFAULT: Int = 0xFF00D900.toInt()
 
     private const val SAMPLE_COUNT: Int = 64
     private const val SAMPLE_COUNT_WIDTH: Float = 64f

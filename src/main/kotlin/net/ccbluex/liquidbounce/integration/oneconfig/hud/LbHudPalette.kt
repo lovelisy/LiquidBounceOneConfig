@@ -48,6 +48,19 @@ object LbHudPalette {
         return (alpha shl 24) or (argb and 0x00FFFFFF)
     }
 
+    /** Blends two ARGB colours channel by channel at [ratio] of the way from [from] to [to]. */
+    fun lerpArgb(from: Int, to: Int, ratio: Float): Int {
+        val t = ratio.coerceIn(0f, 1f)
+
+        fun channel(a: Int, b: Int): Int = (a + (b - a) * t).roundToInt().coerceIn(0, 255)
+
+        val alpha = channel(from ushr 24, to ushr 24)
+        val red = channel((from shr 16) and 0xFF, (to shr 16) and 0xFF)
+        val green = channel((from shr 8) and 0xFF, (to shr 8) and 0xFF)
+        val blue = channel(from and 0xFF, to and 0xFF)
+        return (alpha shl 24) or (red shl 16) or (green shl 8) or blue
+    }
+
     /** Frame rate independent exponential interpolation, matching the native HUD animation curve. */
     fun expLerp(current: Float, target: Float, speed: Float, deltaSeconds: Float): Float {
         if (deltaSeconds <= 0f) {
