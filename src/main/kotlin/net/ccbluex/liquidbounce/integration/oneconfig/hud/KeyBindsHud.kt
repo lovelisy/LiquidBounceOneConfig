@@ -32,7 +32,7 @@ import kotlin.math.min
  * Shows every module that has a key bound, with the key on the right and the module name on the left. Enabled modules
  * use the accent colour, disabled ones stay dimmed, exactly like the card of the native client.
  */
-object KeyBindsHud : LbHudBase("keybinds", "KeyBinds", Hud.Category.INFO) {
+object KeyBindsHud : LbHudSurface("keybinds", "KeyBinds", Hud.Category.INFO, LbHudPalette.surface(0.68f)) {
 
     private class Row(val name: String, val keyText: String, val enabled: Boolean, val keyWidth: Float)
 
@@ -83,7 +83,7 @@ object KeyBindsHud : LbHudBase("keybinds", "KeyBinds", Hud.Category.INFO) {
         val header = headerHeight()
         val body = bodyHeight(rows.size)
 
-        canvas.fillCssBox(0f, 0f, boxWidth, header, 5f, 5f, 0f, 0f, LbHudPalette.surface(0.68f))
+        canvas.fillCssBox(0f, 0f, boxWidth, header, 5f, 5f, 0f, 0f, surfaceArgb())
         val titleY = (header - titleLineHeight()) * 0.5f
         drawText(
             canvas,
@@ -103,7 +103,7 @@ object KeyBindsHud : LbHudBase("keybinds", "KeyBinds", Hud.Category.INFO) {
             textColor,
         )
 
-        canvas.fillCssBox(0f, header, boxWidth, body, 0f, 0f, 5f, 5f, LbHudPalette.surface(0.50f))
+        canvas.fillCssBox(0f, header, boxWidth, body, 0f, 0f, 5f, 5f, surfaceArgb(BODY_ALPHA))
 
         if (rows.isEmpty()) {
             drawText(
@@ -232,5 +232,8 @@ object KeyBindsHud : LbHudBase("keybinds", "KeyBinds", Hud.Category.INFO) {
     private const val MIN_NAME_WIDTH: Float = 30f
     private const val MIN_WIDTH: Float = 150f
     private const val MAX_WIDTH: Float = 210f
+
+    /** The native body sits on a lighter plate than the header, so the same colour is used at this alpha. */
+    private const val BODY_ALPHA: Float = 0.74f
 
 }

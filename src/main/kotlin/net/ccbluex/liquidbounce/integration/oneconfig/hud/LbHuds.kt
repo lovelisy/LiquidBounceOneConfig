@@ -20,6 +20,8 @@
 
 package net.ccbluex.liquidbounce.integration.oneconfig.hud
 
+import net.ccbluex.liquidbounce.event.EventListener
+import net.ccbluex.liquidbounce.event.events.ClientLanguageChangedEvent
 import net.ccbluex.liquidbounce.utils.client.logger
 import org.polyfrost.oneconfig.api.hud.v1.HudManager
 import org.polyfrost.oneconfig.api.ui.v1.ExperimentalOneConfigUiApi
@@ -38,6 +40,12 @@ object LbHuds {
         NotificationsHud,
         KeyBindsHud,
         WatermarkHud,
+        BlockCounterHud,
+        KeystrokesHud,
+        InventoryHud,
+        InventoryStatisticsHud,
+        ArmorItemsHud,
+        ImageHud,
     )
 
     /** Whether the HUD elements should be visible. OneConfig already hides them outside of a world. */
@@ -46,6 +54,11 @@ object LbHuds {
     /** OneConfig queues the registration until its own HUD registry is ready, which is when the client boots. */
     fun init() {
         LbHudStyles.install()
+
+        val listener: EventListener = object : EventListener {}
+        listener.on(ClientLanguageChangedEvent::class.java) {
+            LbHudStore.relocalizeAll()
+        }
 
         elements.forEach { element ->
             runCatching {

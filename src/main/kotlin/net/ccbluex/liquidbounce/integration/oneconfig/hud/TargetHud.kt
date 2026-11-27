@@ -43,7 +43,7 @@ import kotlin.math.max
  * equipped armour pieces with their durability and an animated health bar. The target is the one the kill aura is
  * tracking, or the last entity that was attacked within the last 1.2 seconds. Outside of combat nothing is drawn.
  */
-object TargetHud : LbHudBase("target_hud", "Target HUD", Hud.Category.COMBAT) {
+object TargetHud : LbHudSurface("target_hud", "Target HUD", Hud.Category.COMBAT, LbHudPalette.surface(0.68f)) {
 
     private const val AVATAR_SIZE: Float = 50f
     private const val PADDING: Float = 15f
@@ -143,7 +143,7 @@ object TargetHud : LbHudBase("target_hud", "Target HUD", Hud.Category.COMBAT) {
         val cardHeight = cardHeight()
         val mainHeight = mainHeight()
 
-        canvas.fill(0f, 0f, cardWidth, cardHeight, LbHudPalette.surface(0.68f), 5f)
+        canvas.fill(0f, 0f, cardWidth, cardHeight, surfaceArgb(), 5f)
 
         drawAvatar(canvas, target)
 
@@ -192,7 +192,7 @@ object TargetHud : LbHudBase("target_hud", "Target HUD", Hud.Category.COMBAT) {
         val cardHeight = cardHeight()
         val mainHeight = mainHeight()
 
-        canvas.fill(0f, 0f, cardWidth, cardHeight, LbHudPalette.surface(0.68f), 5f)
+        canvas.fill(0f, 0f, cardWidth, cardHeight, surfaceArgb(), 5f)
 
         val fallback = LbHudTextures.get(STEVE_FACE)
         if (fallback != null) {
@@ -280,7 +280,7 @@ object TargetHud : LbHudBase("target_hud", "Target HUD", Hud.Category.COMBAT) {
             val colour = if (pointIndex <= activePoints) {
                 LbHudPalette.accent(1f)
             } else {
-                LbHudPalette.surface(0.30f)
+                surfaceArgb(0.44f)
             }
             canvas.fill(dotX, y - 3f + index * 4f, 5f, 3f, colour, 1f)
         }

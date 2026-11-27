@@ -175,6 +175,30 @@ class LbHudCanvas internal constructor(
         }
     }
 
+    /**
+     * Draws an item stack together with its decorations, which is the stack count and the durability bar.
+     *
+     * [countLabel] overrides the number shown in the corner, so an element can print a total that differs from the
+     * stack size, such as the number of matching items spread over the whole inventory.
+     */
+    fun itemWithDecorations(
+        stack: ItemStack,
+        x: Float,
+        y: Float,
+        w: Float,
+        h: Float,
+        countLabel: String? = null,
+    ) {
+        if (w <= 0f || h <= 0f) return
+
+        runCatching {
+            McItemIcons.open(stack).use { handle ->
+                handle.draw(context, x, y, w, h, 1f)
+                handle.drawDecorations(context, x, y, h, countLabel ?: "")
+            }
+        }
+    }
+
     /** Draws the icon at the classpath [path] aspect fitted and centred inside the given box. */
     fun icon(path: String, x: Float, y: Float, boxW: Float, boxH: Float, argb: Int = -1) {
         if (boxW <= 0f || boxH <= 0f || (argb ushr 24) == 0) return

@@ -52,12 +52,18 @@ internal object LbHudStore {
 
     private const val SAVE_DELAY_MS = 400L
 
+    /** Options declared on the shared surface base, so their titles are translated once instead of per element. */
+    private val SHARED_OPTIONS: Set<String> = setOf("showSurface", "surfaceColor")
+
     private val scheduler: ScheduledExecutorService =
         Executors.newSingleThreadScheduledExecutor { runnable ->
             Thread(runnable, "LiquidBounce HUD Config").apply { isDaemon = true }
         }
 
     private val pending = ConcurrentHashMap<String, Pair<Tree, File>>()
+
+    /** Trees of the registered elements, kept so a language switch can retitle them in place. */
+    private val attached = ConcurrentHashMap<String, Pair<LbHud, Tree>>()
 
     private val scheduled = ConcurrentHashMap<String, ScheduledFuture<*>>()
 
@@ -78,13 +84,24 @@ internal object LbHudStore {
 
         tree.addMetadata(CUSTOM_SAVE, Runnable { save(tree, file) })
 
-        replaceTitle(
-            tree,
-            LbText.hudTitle(owner.id, tree.getTitle()?.toString() ?: owner.id),
-        )
+        localizeTree(owner, tree)
 
-        tree.onAllProps { _, property -> localize(owner, property) }
+        attached[owner.id] = owner to tree
+
         tree.onAllProps { _, property -> bindSave(owner, property, tree, file) }
+    }
+
+    /**
+     * Rewrites the titles of [tree] in the language the client is set to.
+     *
+     * The titles are resolved now instead of being handed to the game's translation system, because LiquidBounce keeps
+     * its own language files: the client can be switched to a language that differs from the game, and only
+     * [LbText] follows that setting. Called again on every language change, so the HUD library follows a switch
+     * without a restart.
+     */
+    fun localizeTree(owner: LbHud, tree: Tree) {
+        replaceTitle(tree, LbText.hudTitle(owner.id, tree.getTitle()?.toString() ?: owner.id))
+        tree.onAllProps { _, property -> localize(owner, property) }
     }
 
     /**
@@ -102,7 +119,11 @@ internal object LbHudStore {
     private fun localize(owner: LbHud, property: Property<*>) {
         val id = property.getID()
         val title = property.getTitle()?.toString() ?: return
-        val prefix = "${LbText.HUD_KEY_PREFIX}.${owner.id}.$id"
+        val prefix = if (id in SHARED_OPTIONS) {
+            "${LbText.HUD_KEY_PREFIX}.shared.$id"
+        } else {
+            "${LbText.HUD_KEY_PREFIX}.${owner.id}.$id"
+        }
 
         val options = property.getMetadata(MetaKeys.OPTIONS.name) as? List<*>
         if (!options.isNullOrEmpty()) {
@@ -261,11 +282,19 @@ internal object LbHudStore {
         scheduled[key] = scheduler.schedule({ flush(key) }, SAVE_DELAY_MS, TimeUnit.MILLISECONDS)
     }
 
-    /** Writes every pending tree immediately, so nothing is lost when the client shuts down. */
+    /** Saves every pending HUD setting, called while the client shuts down. */
     fun flushAll() {
         for (key in pending.keys.toList()) {
             scheduled.remove(key)?.cancel(false)
             flush(key)
+        }
+    }
+
+    /** Retitles every registered element after the client language changed. */
+    fun relocalizeAll() {
+        attached.forEach { (_, entry) ->
+            runCatching { localizeTree(entry.first, entry.second) }
+                .onFailure { logger.warn("Unable to retitle the HUD element '${entry.first.id}'", it) }
         }
     }
 

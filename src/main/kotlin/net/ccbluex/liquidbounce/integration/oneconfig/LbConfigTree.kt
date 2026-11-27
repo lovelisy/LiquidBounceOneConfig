@@ -229,7 +229,7 @@ internal object LbConfigTree {
         tree.addMetadata("searchTags", listOf(module.name, LbText.moduleName(module.name)))
         modules[tree.getID()] = listOf(module.name, LbText.moduleName(module.name))
 
-        val toggle = booleanProperty(module.enabledValue)
+        val toggle = booleanProperty(module.enabledValue, LbText.valueName(module.enabledValue))
         toggle.addMetadata(MetaKeys.CATEGORY.name, category)
         tree.put(toggle)
         tree.addMetadata("enableToggle", toggle)

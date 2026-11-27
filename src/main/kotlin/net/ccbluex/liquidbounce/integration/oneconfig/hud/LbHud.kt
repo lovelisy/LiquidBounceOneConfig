@@ -105,8 +105,9 @@ abstract class LbHud(
     /**
      * The style panel cards this element cannot honour.
      *
-     * A text element paints its own card, so the background card of the panel would only offer switches that change
-     * nothing. The artwork element does the opposite: it draws no text at all and keeps the background card.
+     * Every LiquidBounce element paints its own surface and offers the colour in its own unit settings, so the
+     * background card of the panel only holds switches that would paint a second plate behind the native one. It is
+     * therefore dropped for all of them.
      */
     internal open val hiddenPanelSections: Set<String>
         get() = setOf(LbHudPanels.BACKGROUND)

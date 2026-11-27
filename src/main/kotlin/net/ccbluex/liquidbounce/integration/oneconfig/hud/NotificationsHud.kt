@@ -32,7 +32,7 @@ import kotlin.math.max
  * Notifications slide in from the right, stack upwards and fade out after three seconds. Toggle notifications replace
  * each other instead of piling up, exactly like the native client does.
  */
-object NotificationsHud : LbHudBase("notifications", "Notifications", Hud.Category.INFO) {
+object NotificationsHud : LbHudSurface("notifications", "Notifications", Hud.Category.INFO, LbHudPalette.surface(0.68f)) {
 
     @Switch(title = "Show Info")
     @JvmField
@@ -177,7 +177,7 @@ object NotificationsHud : LbHudBase("notifications", "Notifications", Hud.Catego
         val messageLine = messageLineHeight()
 
         canvas.alpha(alpha) {
-            canvas.fill(x, y, CARD_WIDTH, cardHeight, LbHudPalette.surface(0.68f), 5f)
+            canvas.fill(x, y, CARD_WIDTH, cardHeight, surfaceArgb(), 5f)
 
             val iconBoxX = x + ICON_MARGIN
             val iconBoxY = y + (cardHeight - ICON_BOX_SIZE) * 0.5f

@@ -71,15 +71,19 @@ internal object LbText {
 
     /**
      * Title of a HUD element as a translatable component through the `liquidbounce.hud` namespace, falling back to
-     * [fallback] for languages that do not carry the key. The component is resolved by OneConfig with the game's own
-     * translation system, so a language switch applies without a restart.
+     * [fallback] for languages that do not carry the key.
+     *
+     * The text is resolved through [LanguageManager] first, so the HUD follows the client's own language setting, just
+     * like module names do. Only a key the client has no translation for is handed to the game's translation system,
+     * which covers resource packs that ship their own `liquidbounce` language files.
      */
     fun hudTitle(hudId: String, fallback: String): net.minecraft.network.chat.Component =
         hudComponent("$HUD_PREFIX.$hudId.name", fallback)
 
     /** Translatable component of a `liquidbounce.hud` key, falling back to [fallback]. */
     fun hudComponent(key: String, fallback: String): net.minecraft.network.chat.Component =
-        net.minecraft.network.chat.Component.translatableWithFallback(key, fallback)
+        trOrNull(key)?.let { net.minecraft.network.chat.Component.literal(it) }
+            ?: net.minecraft.network.chat.Component.translatableWithFallback(key, fallback)
 
     /**
      * Plain translated string of a `liquidbounce.hud` key in the in-game language, falling back to [fallback].

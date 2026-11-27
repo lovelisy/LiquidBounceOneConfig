@@ -32,7 +32,7 @@ import org.polyfrost.oneconfig.api.hud.v1.HudManager
  * Every enabled and visible module is listed with its tag, sorted by the width of its label. Rows fly in from the side
  * and slide into place when the order changes, and the accent bar on the left marks the element as a LiquidBounce HUD.
  */
-object ArrayListHud : LbHudBase("arraylist", "Array List", Hud.Category.INFO) {
+object ArrayListHud : LbHudSurface("arraylist", "Array List", Hud.Category.INFO, LbHudPalette.surface(0.68f)) {
 
     @Switch(title = "Show Tags")
     @JvmField
@@ -90,6 +90,11 @@ object ArrayListHud : LbHudBase("arraylist", "Array List", Hud.Category.INFO) {
 
     private fun rowInset(): Float = ACCENT_WIDTH + horizontalPadding()
 
+    private fun rowWidth(row: Row): Float {
+        val width = rowInset() + horizontalPadding() + row.textWidth
+        return if (HudManager.isEditing) maxOf(width, EDITOR_MIN_WIDTH * textScale) else width
+    }
+
     override fun measure(): HudSize {
         val rows = rows()
         if (rows.isEmpty()) {
@@ -98,10 +103,12 @@ object ArrayListHud : LbHudBase("arraylist", "Array List", Hud.Category.INFO) {
 
         var maxWidth = 0f
         for (row in rows) {
-            val width = rowInset() + horizontalPadding() + row.textWidth
+            val width = rowWidth(row)
             if (width > maxWidth) maxWidth = width
         }
-        return HudSize(maxWidth, rows.size * rowHeight())
+
+        val count = if (HudManager.isEditing) minOf(rows.size, EDITOR_MAX_ROWS) else rows.size
+        return HudSize(maxWidth, count * rowHeight())
     }
 
     /** Sample row shown in the HUD editor, in the in-game language. */
@@ -123,17 +130,19 @@ object ArrayListHud : LbHudBase("arraylist", "Array List", Hud.Category.INFO) {
         val lineHeight = lineHeight(ROW_FONT_SIZE, LbHudFonts.Weight.MEDIUM)
         var maxRowWidth = 0f
         for (row in rows) {
-            val width = rowInset() + horizontalPadding() + row.textWidth
+            val width = rowWidth(row)
             if (width > maxRowWidth) maxRowWidth = width
         }
 
-        rows.forEachIndexed { index, row ->
+        val shown = if (canvas.inEditor) rows.take(EDITOR_MAX_ROWS) else rows
+
+        shown.forEachIndexed { index, row ->
             val targetY = index * rowHeight
             val anim = animMap.getOrPut(row.module.name) { AnimEntry(targetY, 0f) }
             anim.y = LbHudPalette.expLerp(anim.y, targetY, 16f, canvas.deltaSeconds)
             anim.slideProgress = LbHudPalette.expLerp(anim.slideProgress, 1f, 15f, canvas.deltaSeconds)
 
-            val rowWidth = rowInset() + horizontalPadding() + row.textWidth
+            val rowWidth = rowWidth(row)
             val baseX = if (itemAlignment == "Left") 0f else maxRowWidth - rowWidth
             val flyOffset = (1f - anim.slideProgress) * if (itemAlignment == "Left") -36f else 36f
             val x = baseX + flyOffset
@@ -154,7 +163,7 @@ object ArrayListHud : LbHudBase("arraylist", "Array List", Hud.Category.INFO) {
     ) {
         val rowHeight = rowLineHeight + rowVerticalPadding()
 
-        canvas.fillCssBox(x, y, rowWidth, rowHeight, 4f, 0f, 0f, 4f, LbHudPalette.surface(0.68f))
+        canvas.fillCssBox(x, y, rowWidth, rowHeight, 4f, 0f, 0f, 4f, surfaceArgb())
         canvas.fillCssBox(x, y, ACCENT_WIDTH, rowHeight, 4f, 0f, 0f, 4f, LbHudPalette.accent(1f))
 
         val textX = x + ACCENT_WIDTH + horizontalPadding()
@@ -178,5 +187,11 @@ object ArrayListHud : LbHudBase("arraylist", "Array List", Hud.Category.INFO) {
     private const val HORIZONTAL_PADDING: Float = 8f
     private const val ACCENT_WIDTH: Float = 4f
     private const val EMPTY_WIDTH: Float = 110f
+
+    /** Rows the editor preview keeps before it stops growing, so the card never gets scaled down by OneConfig. */
+    private const val EDITOR_MAX_ROWS: Int = 6
+
+    /** Narrowest preview row, so the library card stays wide enough to sit on a row of its own. */
+    private const val EDITOR_MIN_WIDTH: Float = 170f
 
 }

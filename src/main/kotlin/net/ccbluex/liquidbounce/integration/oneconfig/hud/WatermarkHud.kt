@@ -26,23 +26,19 @@ import org.polyfrost.oneconfig.api.hud.v1.Hud
  * The badge and the wordmark are two layered textures of the native client. The badge is tinted with the accent colour
  * and the wordmark keeps the text colour, so the logo follows the theme of every other HUD element.
  *
- * It draws no text, so it drops the text card of OneConfig's style panel and keeps the background card, unlike the
- * text elements which paint their own card and therefore drop the background card instead. The user still scales it
- * through OneConfig's own HUD scale.
+ * It draws no text, so it drops the text card of OneConfig's style panel. The background is painted here rather than by
+ * OneConfig, so the surface card of the panel stays hidden and the colour is offered in the unit settings instead.
  */
-object WatermarkHud : LbHudBase("watermark", "Watermark", Hud.Category.INFO) {
+object WatermarkHud : LbHudSurface("watermark", "Watermark", Hud.Category.INFO, LbHudPalette.surface(0.68f)) {
 
-    /** The logo paints two textures and no text, so only the background card of the style panel applies to it. */
+    /** The logo paints two textures and no text, so only the text card of the style panel is dropped. */
     override val hiddenPanelSections: Set<String>
-        get() = setOf(LbHudPanels.TEXT)
-
-    /** The logo has no plate of its own, so OneConfig's background switch stays available for it. */
-    override val paintsOwnSurface: Boolean
-        get() = false
+        get() = setOf(LbHudPanels.TEXT, LbHudPanels.BACKGROUND)
 
     override fun measure(): HudSize = HudSize(BASE_WIDTH, BASE_HEIGHT)
 
     override fun paint(canvas: LbHudCanvas) {
+        canvas.fill(0f, 0f, BASE_WIDTH, BASE_HEIGHT, surfaceArgb(), SURFACE_RADIUS)
         canvas.stretchedIcon(BADGE, 0f, 0f, BASE_WIDTH, BASE_HEIGHT, LbHudPalette.accent(1f))
         canvas.stretchedIcon(FOREGROUND, 0f, 0f, BASE_WIDTH, BASE_HEIGHT, textColor)
     }
@@ -52,5 +48,6 @@ object WatermarkHud : LbHudBase("watermark", "Watermark", Hud.Category.INFO) {
 
     private const val BASE_WIDTH: Float = 165f
     private const val BASE_HEIGHT: Float = 61.8917f
+    private const val SURFACE_RADIUS: Float = 5f
 
 }

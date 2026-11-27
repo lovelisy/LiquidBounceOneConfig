@@ -1,0 +1,136 @@
+/*
+ * This file is part of LiquidBounce (https://github.com/CCBlueX/LiquidBounce)
+ *
+ * Copyright (c) 2015 - 2026 CCBlueX
+ *
+ * LiquidBounce is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * LiquidBounce is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with LiquidBounce. If not, see <https://www.gnu.org/licenses/>.
+ */
+package net.ccbluex.liquidbounce.integration.oneconfig.hud
+
+import net.ccbluex.liquidbounce.utils.client.mc
+import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.resources.Identifier
+import net.minecraft.world.item.Item
+import net.minecraft.world.item.ItemStack
+import net.minecraft.world.item.Items
+import org.polyfrost.oneconfig.api.config.v1.annotations.ItemList
+import org.polyfrost.oneconfig.api.config.v1.annotations.Slider
+import org.polyfrost.oneconfig.api.config.v1.annotations.Switch
+import org.polyfrost.oneconfig.api.hud.v1.Hud
+import kotlin.math.max
+
+/**
+ * Native inventory statistics.
+ *
+ * The element counts a chosen set of items over the whole inventory and prints the total in the corner of the icon,
+ * so a player can see at a glance how many emeralds or diamonds are left. The number is not the stack size but the sum
+ * over every slot, which is what the native element does as well.
+ */
+object InventoryStatisticsHud :
+    LbHudSurface("inventory_statistics", "Inventory Statistics", Hud.Category.INFO, TRANSPARENT) {
+
+    /** Ids of the tracked items, resolved against the item registry every paint pass. */
+    @ItemList(title = "Items")
+    @JvmField
+    var trackedItems: List<String> = listOf(
+        "minecraft:emerald",
+        "minecraft:diamond",
+        "minecraft:gold_ingot",
+        "minecraft:iron_ingot",
+        "minecraft:copper_ingot",
+    )
+
+    /** Keeps an item in the grid while the count is zero, so a row does not vanish once it runs out. */
+    @Switch(title = "Show Empty")
+    @JvmField
+    var showEmpty: Boolean = true
+
+    /** Icons per row, from a single column to a full 9 wide bar. */
+    @Slider(title = "Row Length", min = 1f, max = 9f, step = 1f)
+    @JvmField
+    var rowLength: Float = 1f
+
+    private val columns: Int
+        get() = rowLength.toInt().coerceIn(1, 9)
+
+    /** Resolves the configured ids, dropping entries the registry does not know. */
+    private fun selected(): List<Item> = trackedItems.mapNotNull { id ->
+        Identifier.tryParse(id)?.let { BuiltInRegistries.ITEM.getValue(it) }
+    }
+
+    /** Totals of the configured items over the storage slots of the player inventory. */
+    private fun totals(items: List<Item>): Map<Item, Int> {
+        if (items.isEmpty()) {
+            return emptyMap()
+        }
+
+        val wanted = items.toHashSet()
+        val totals = HashMap<Item, Int>(items.size * 2)
+        val slots = mc.player?.inventory?.nonEquipmentItems.orEmpty()
+        for (stack in slots) {
+            if (stack.isEmpty || stack.item !in wanted) {
+                continue
+            }
+            totals[stack.item] = (totals[stack.item] ?: 0) + stack.count
+        }
+        return totals
+    }
+
+    /** Entries the grid prints, in configuration order. */
+    private fun entries(): List<Pair<Item, Int>> {
+        val selected = selected()
+        if (selected.isEmpty()) {
+            return emptyList()
+        }
+
+        val totals = totals(selected)
+        return selected
+            .map { it to (totals[it] ?: 0) }
+            .filter { showEmpty || it.second > 0 }
+    }
+
+    override fun measure(): HudSize {
+        val count = entries().size
+        if (count == 0) {
+            return HudSize(FALLBACK, FALLBACK)
+        }
+        return LbInventoryGrid.size(count, columns, GAP)
+    }
+
+    override fun paint(canvas: LbHudCanvas) {
+        val entries = entries()
+        if (entries.isEmpty()) {
+            if (canvas.inEditor) {
+                LbInventoryGrid.draw(canvas, SAMPLE_STACKS, 1, GAP, surfaceArgb())
+            }
+            return
+        }
+
+        val stacks = ArrayList<ItemStack>(entries.size)
+        val labels = HashMap<Int, String>(entries.size * 2)
+        entries.forEachIndexed { index, (item, total) ->
+            stacks.add(ItemStack(item, max(1, total)))
+            labels[index] = total.toString()
+        }
+
+        LbInventoryGrid.draw(canvas, stacks, columns, GAP, surfaceArgb(), labels)
+    }
+
+    private const val GAP: Float = 2f
+    private const val FALLBACK: Float = 40f
+    private const val TRANSPARENT: Int = 0
+
+    private val SAMPLE_STACKS: List<ItemStack> = listOf(ItemStack(Items.DIAMOND, 1))
+
+}
