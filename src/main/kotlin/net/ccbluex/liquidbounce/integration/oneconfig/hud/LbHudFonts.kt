@@ -22,16 +22,19 @@ package net.ccbluex.liquidbounce.integration.oneconfig.hud
  * Font weight keys of the Poppins family that ships with OneConfig.
  *
  * The font family itself is chosen in the HUD settings of every element, where the game font is the default. When
- * Poppins is selected, these keys pick the face of the matching weight; the native LiquidBounce layout keeps using
- * its own weight for every line, so names stay medium and labels stay semibold.
+ * Poppins is selected, these keys pick the face of the matching weight. OneConfig only registers `poppins`,
+ * `poppins-thin`, `poppins-medium`, `poppins-bold` and `poppins-black`, so there is no key for SemiBold; the native
+ * layout resolves it to the Medium cut instead of asking for a face that would fall back to the default font.
  */
 object LbHudFonts {
 
     enum class Weight(val key: String) {
+        THIN("poppins-thin"),
         REGULAR("poppins"),
         MEDIUM("poppins-medium"),
-        SEMIBOLD("poppins-semibold"),
+        SEMIBOLD("poppins-medium"),
         BOLD("poppins-bold"),
+        BLACK("poppins-black"),
     }
 
 }

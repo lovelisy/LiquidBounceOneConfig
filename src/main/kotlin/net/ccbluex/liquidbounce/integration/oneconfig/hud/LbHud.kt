@@ -27,6 +27,7 @@ import org.polyfrost.compose.composables.padding
 import org.polyfrost.compose.composables.size
 import org.polyfrost.compose.render.RenderContext
 import org.polyfrost.oneconfig.api.config.v1.Tree
+import org.polyfrost.oneconfig.api.hud.v1.Font
 import org.polyfrost.oneconfig.api.hud.v1.Hud
 import org.polyfrost.oneconfig.api.hud.v1.HudManager
 
@@ -48,6 +49,9 @@ abstract class LbHud(
 
     private var lastFrameNanos: Long = 0L
 
+    /** The text options the last composition was built from. */
+    private var lastStyleSignature: Int = 0
+
     /**
      * Computes the size the content occupies, excluding the padding around it.
      *
@@ -63,9 +67,22 @@ abstract class LbHud(
         staticW = DEFAULT_WIDTH
         staticH = DEFAULT_HEIGHT
 
+        // The native HUD is designed in Poppins; the game font stays selectable for users who want it.
+        font = Font.Poppins
+
         // The native elements paint their own card surface, so OneConfig must not draw a second background behind it.
         showBackground = false
     }
+
+    /**
+     * Whether this element draws the plate behind its content itself.
+     *
+     * Every native element paints its own card, so OneConfig must not lay a second background behind it. The stored
+     * value is forced back to `false` on every update, otherwise an old settings file that had the switch on would
+     * keep adding a dark plate behind a card that already has one.
+     */
+    internal open val paintsOwnSurface: Boolean
+        get() = true
 
     /**
      * OneConfig asks the element how often it wants to be updated. The content is repainted every frame from the live
@@ -78,7 +95,56 @@ abstract class LbHud(
 
     override fun update(): Boolean {
         syncSize()
+        refreshStyle()
+        suppressGenericSurface()
         return true
+    }
+
+    /** Keeps OneConfig's own plate and frame off an element that paints them itself. */
+    private fun suppressGenericSurface() {
+        if (!paintsOwnSurface) {
+            return
+        }
+
+        if (showBackground) {
+            showBackground = false
+        }
+
+        if (borderEnabled) {
+            borderEnabled = false
+        }
+    }
+
+    /**
+     * Asks for a new composition when a text option changed.
+     *
+     * [syncSize] only reports a changed size, so an element whose artwork keeps its extent, the notification card and
+     * the watermark for example, never asked for a repaint when the font, the colour or the shadow changed. Watching
+     * the options here keeps every element in sync with the settings panel.
+     */
+    private fun refreshStyle() {
+        val signature = styleSignature()
+        if (signature == lastStyleSignature) {
+            return
+        }
+
+        lastStyleSignature = signature
+        contentChanged()
+    }
+
+    /** Everything the paint pass reads from the settings panel, folded into one comparable value. */
+    private fun styleSignature(): Int {
+        var signature = font.ordinal
+        signature = signature * 31 + textScale.hashCode()
+        signature = signature * 31 + textBold.hashCode()
+        signature = signature * 31 + textItalic.hashCode()
+        signature = signature * 31 + textWeight.ordinal
+        signature = signature * 31 + textColor
+        signature = signature * 31 + padLeft.hashCode()
+        signature = signature * 31 + padTop.hashCode()
+        signature = signature * 31 + padRight.hashCode()
+        signature = signature * 31 + padBottom.hashCode()
+        return signature
     }
 
     /** Recomputes the reported size, asking OneConfig for a new layout pass when it changed. */
@@ -102,7 +168,7 @@ abstract class LbHud(
 
     @Composable
     override fun Content() {
-        val styleRevision = hudStyleRevision()
+        val styleRevision = styleSignature()
 
         NodeCanvas(
             hudBackground()
@@ -112,25 +178,6 @@ abstract class LbHud(
         ) { x, y, width, height ->
             paintSafely(this, x, y, width, height, styleRevision)
         }
-    }
-
-    /**
-     * Reads every font related option during composition.
-     *
-     * The values are only read to subscribe this element to them: the paint pass reads the live state on its own, but
-     * Compose has to know that a changed font, size or weight needs a new composition. Without this the element would
-     * only repaint when [syncSize] happens to report a different size, which is why a font change used to be ignored by
-     * the elements whose text width barely moved.
-     */
-    @Composable
-    private fun hudStyleRevision(): Int {
-        var revision = font.ordinal
-        revision = revision * 31 + textScale.hashCode()
-        revision = revision * 31 + textBold.hashCode()
-        revision = revision * 31 + textItalic.hashCode()
-        revision = revision * 31 + textWeight.ordinal
-        revision = revision * 31 + textColor
-        return revision
     }
 
     /** Runs the paint pass, logging instead of throwing so one broken element cannot take the HUD down. */
@@ -168,11 +215,16 @@ abstract class LbHud(
     }
 
     /**
-     * Whether the settings panel should offer the font options of [Hud]: family, size, weight, bold, italic and
-     * alignment. Elements that only draw artwork, such as the watermark, hide them because they have no text to style.
+     * Option ids this element removes from its settings panel.
+     *
+     * Every native element paints its own card, so OneConfig's generic background, border, shadow and text
+     * decoration are dead weight: the background switch in particular would lay a second dark plate behind a card
+     * that already has one. The properties stay in the tree, so OneConfig keeps reading and writing them; only their
+     * display flips to [org.polyfrost.oneconfig.api.config.v1.Property.Display.HIDDEN], which the settings panel and
+     * the search index skip.
      */
-    internal open val exposesFontOptions: Boolean
-        get() = true
+    internal open val hiddenOptions: Set<String>
+        get() = LbHudOptions.UNUSED_BY_TEXT
 
     /**
      * Routes this element's option tree into LiquidBounce's own configuration folder instead of OneConfig's profile

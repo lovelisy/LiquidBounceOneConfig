@@ -31,7 +31,15 @@ import org.polyfrost.oneconfig.api.hud.v1.Hud
  */
 object WatermarkHud : LbHudBase("watermark", "Watermark", Hud.Category.INFO) {
 
-    override val exposesFontOptions: Boolean
+    /**
+     * The logo paints two textures and no text, so it hides everything but the background it may want to sit on,
+     * unlike the text elements which paint their own card and therefore hide the background switch too.
+     */
+    override val hiddenOptions: Set<String>
+        get() = LbHudOptions.UNUSED_BY_ARTWORK
+
+    /** The logo has no plate of its own, so OneConfig's background switch stays available for it. */
+    override val paintsOwnSurface: Boolean
         get() = false
 
     override fun measure(): HudSize = HudSize(BASE_WIDTH, BASE_HEIGHT)

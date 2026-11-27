@@ -87,32 +87,31 @@ internal object LbHudStore {
         tree.onAllProps { _, property -> localize(owner, property) }
         tree.onAllProps { _, property -> bindSave(owner, property, tree, file) }
 
-        if (!owner.exposesFontOptions) {
-            hideFontOptions(tree)
+        val hidden = owner.hiddenOptions
+        if (hidden.isNotEmpty()) {
+            hideOptions(tree, hidden)
         }
     }
 
-    /** Option ids [Hud] contributes to every element's tree for text styling. */
-    private val FONT_OPTIONS: Set<String> = setOf(
-        "font",
-        "textScale",
-        "textBold",
-        "textItalic",
-        "textWeight",
-        "textAlign",
-    )
-
     /**
-     * Hides the text styling options of an element that has no text.
+     * Hides [ids] in [tree], leaving their values and callbacks untouched.
      *
      * The properties stay in the tree, so OneConfig keeps reading and writing them without knowing they exist; only
      * their display flips to [Property.Display.HIDDEN], which is what the settings panel and the search index skip.
+     * The walk is recursive because OneConfig may nest the style options inside a child tree.
      */
     @Suppress("UNCHECKED_CAST")
-    private fun hideFontOptions(tree: Tree) {
-        for (id in FONT_OPTIONS) {
-            val property = tree.getProp(id) as? Property<Any?> ?: continue
-            property.addDisplayCondition(Supplier { Property.Display.HIDDEN })
+    private fun hideOptions(tree: Tree, ids: Set<String>) {
+        tree.onAllProps { id, property ->
+            if (id in ids) {
+                (property as Property<Any?>).addDisplayCondition(Supplier { Property.Display.HIDDEN })
+            }
+        }
+
+        tree.onAll { _, node ->
+            if (node is Tree) {
+                hideOptions(node, ids)
+            }
         }
     }
 

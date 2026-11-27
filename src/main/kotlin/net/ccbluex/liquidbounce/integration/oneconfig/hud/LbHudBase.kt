@@ -27,28 +27,49 @@ import org.polyfrost.oneconfig.api.hud.v1.Hud
  * Shared drawing helpers for the native LiquidBounce HUD elements.
  *
  * The font family, the size multiplier, the weight and the text colour all come from the HUD settings panel of
- * OneConfig, where the game font is the default. The native layout only decides which weight a line uses, so names
- * stay medium and labels stay semibold while the family stays under the user's control. The background, the border
- * and the padding of OneConfig's generic HUD units are not used: the native cards paint their own surface.
+ * OneConfig, where Poppins is the default. The native layout only decides which weight a line uses; picking a weight
+ * other than `Regular` in the panel overrides it for every line, so the choice is always visible. The generic
+ * background, border and shadow of OneConfig's HUD units are not used: the native cards paint their own surface.
  */
 abstract class LbHudBase(id: String, title: String, category: Hud.Category) : LbHud(id, title, category) {
 
     protected fun hudFont(size: Float, weight: LbHudFonts.Weight = LbHudFonts.Weight.REGULAR): PolyFont =
-        PolyFont(fontKey(weight), (size * textScale).coerceIn(MIN_FONT_SIZE, MAX_FONT_SIZE))
+        PolyFont(fontKey(resolvedWeight(weight)), (size * textScale).coerceIn(MIN_FONT_SIZE, MAX_FONT_SIZE))
+
+    /**
+     * Applies the weight chosen in the settings panel on top of the weight the native layout asks for.
+     *
+     * `Regular` keeps the look of the native design, where names are medium and labels are semibold; every other
+     * choice wins, so picking a weight in the panel is visible on every line. The value is matched by name so a weight
+     * added by a newer OneConfig cannot break compilation against the version this mod builds with.
+     */
+    private fun resolvedWeight(native: LbHudFonts.Weight): LbHudFonts.Weight {
+        if (textBold) {
+            return LbHudFonts.Weight.BOLD
+        }
+
+        return when (textWeight.name) {
+            "Thin" -> LbHudFonts.Weight.THIN
+            "Medium" -> LbHudFonts.Weight.MEDIUM
+            "Bold" -> LbHudFonts.Weight.BOLD
+            "Black" -> LbHudFonts.Weight.BLACK
+            else -> native
+        }
+    }
 
     private fun fontKey(weight: LbHudFonts.Weight): String {
+        // The game font has a single face: mcText renders it and ignores the PolyFont name, so a weight key would only
+        // change the measured width and break the layout. Weights apply to Poppins, which is the default family.
         if (font != Font.Poppins) {
             return LbHudCanvas.GAME_FONT
         }
 
-        val base = if (textBold) LbHudFonts.Weight.BOLD.key else weight.key
         if (!textItalic) {
-            return base
+            return weight.key
         }
 
-        // OneConfig ships no italic cut of SemiBold, so fall back to the italic of the closest weight it does ship.
-        val italicBase = if (base == LbHudFonts.Weight.SEMIBOLD.key) LbHudFonts.Weight.MEDIUM.key else base
-        return "$italicBase-italic"
+        // Every Poppins cut OneConfig ships has an italic face.
+        return "${weight.key}-italic"
     }
 
     protected fun textWidth(
