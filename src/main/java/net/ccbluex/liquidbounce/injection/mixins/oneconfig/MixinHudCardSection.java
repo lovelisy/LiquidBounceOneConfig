@@ -55,7 +55,7 @@ public final class MixinHudCardSection {
     private static void liquidbounce$dropUnusedCard(String title, String query, String[] labels, Boolean checked,
                                                     Function1<? super Boolean, Unit> onCheckedChange, boolean mixed,
                                                     Function0<Unit> onReset, boolean canReset,
-                                                    Boolean collapsedByDefault, Function3<?, ?, ?> content,
+                                                    Boolean collapsedByDefault, Function3<?, ?, ?, ?> content,
                                                     Composer composer, int changed, int changedDefaults,
                                                     CallbackInfo ci) {
         if (LbHudPanels.hides(title)) {
