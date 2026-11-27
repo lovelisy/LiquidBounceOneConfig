@@ -115,7 +115,7 @@ object InventoryStatisticsHud :
         val entries = entries()
         if (entries.isEmpty()) {
             if (canvas.inEditor) {
-                LbInventoryGrid.draw(canvas, SAMPLE_STACKS, 1, GAP, surfaceArgb())
+                LbInventoryGrid.draw(canvas, sampleStacks(), 1, GAP, surfaceArgb())
             }
             return
         }
@@ -132,6 +132,14 @@ object InventoryStatisticsHud :
 
     private const val GAP: Float = 2f
     private const val FALLBACK: Float = 40f
-    private val SAMPLE_STACKS: List<ItemStack> = listOf(ItemStack(Items.DIAMOND, 1))
+
+    /**
+     * Sample icon drawn by the editor while nothing is tracked yet.
+     *
+     * Built on demand instead of being a field: the elements are initialised while the client is still starting, and
+     * `ItemStack` reads the component map of the item, which the registry only binds later. A stack created in a class
+     * initialiser therefore rushes the registry and crashes the integration with `Components not bound yet`.
+     */
+    private fun sampleStacks(): List<ItemStack> = listOf(ItemStack(Items.DIAMOND, 1))
 
 }

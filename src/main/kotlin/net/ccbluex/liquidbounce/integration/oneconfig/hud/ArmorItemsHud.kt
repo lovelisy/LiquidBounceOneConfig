@@ -63,6 +63,6 @@ object ArmorItemsHud :
     private const val SLOT_COUNT: Int = 4
     private const val GAP: Float = 2f
 
-    private val EMPTY_STACKS: List<ItemStack> = List(SLOT_COUNT) { ItemStack.EMPTY }
+    private val EMPTY_STACKS: List<ItemStack> by lazy { List(SLOT_COUNT) { ItemStack.EMPTY } }
 
 }

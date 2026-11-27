@@ -52,6 +52,6 @@ object InventoryHud : LbHudSurface("inventory", "Inventory", Hud.Category.INFO, 
     private const val MAIN_SLOT_END: Int = 36
     private const val GRID_SLOTS: Int = 27
 
-    private val EMPTY_STACKS: List<ItemStack> = List(GRID_SLOTS) { ItemStack.EMPTY }
+    private val EMPTY_STACKS: List<ItemStack> by lazy { List(GRID_SLOTS) { ItemStack.EMPTY } }
 
 }
