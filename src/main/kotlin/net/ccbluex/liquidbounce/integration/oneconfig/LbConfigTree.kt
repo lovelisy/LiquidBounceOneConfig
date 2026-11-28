@@ -143,7 +143,7 @@ internal object LbConfigTree {
         if (keybindProviderRegistered) return
         keybindProviderRegistered = true
 
-        Visualizer.register(LbKeybindVisualizer::class.java, LbKeybindVisualizer)
+        Visualizer.register(LbKeybindVisualizer::class.java, LbKeybindVisualizer())
         KeybindProviderRegistry.register(KeybindGroupProvider { buildKeybindGroups() })
     }
 
