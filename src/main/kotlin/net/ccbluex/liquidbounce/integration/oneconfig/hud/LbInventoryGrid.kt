@@ -94,13 +94,13 @@ internal object LbInventoryGrid {
     /** Removes the icon handles of an element that no longer draws its grid. */
     fun release(owner: String) = LbItemIcons.release(owner)
 
-    private fun cellSize(textScale: Float): Float = LbHudScale.px(CELL_SIZE) * textScale
+    private fun cellSize(textScale: Float): Float = CELL_SIZE * textScale
 
-    private fun padding(textScale: Float): Float = LbHudScale.px(PLATE_PADDING) * textScale
+    private fun padding(textScale: Float): Float = PLATE_PADDING * textScale
 
-    private fun radius(textScale: Float): Float = LbHudScale.px(PLATE_RADIUS) * textScale
+    private fun radius(textScale: Float): Float = PLATE_RADIUS * textScale
 
-    private fun spacing(gap: Float, textScale: Float): Float = LbHudScale.px(gap) * textScale
+    private fun spacing(gap: Float, textScale: Float): Float = gap * textScale
 
     /** Size of one item slot, in the design units of the native grid. */
     private const val CELL_SIZE: Float = 32f

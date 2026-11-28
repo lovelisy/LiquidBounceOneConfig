@@ -106,7 +106,7 @@ object InventoryStatisticsHud :
     override fun measure(): HudSize {
         val count = entries().size
         if (count == 0) {
-            val fallback = LbHudScale.px(HEADLESS_SIZE) * textScale
+            val fallback = HEADLESS_SIZE * textScale
             return HudSize(fallback, fallback)
         }
         return LbInventoryGrid.size(count, columns, GAP, textScale)

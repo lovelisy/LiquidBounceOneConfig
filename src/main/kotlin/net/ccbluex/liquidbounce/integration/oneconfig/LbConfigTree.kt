@@ -275,7 +275,7 @@ internal object LbConfigTree {
 
         val toggle = booleanProperty(module.enabledValue, LbText.valueName(module.enabledValue))
         toggle.addMetadata(MetaKeys.CATEGORY.name, category)
-        tree.addMetadata("enableToggle", toggle)
+        toggle.addMetadata("primary", true)
         tree.put(toggle)
 
         appendGroup(tree, module, category, emptyList(), "", skip = setOf(module.enabledValue))

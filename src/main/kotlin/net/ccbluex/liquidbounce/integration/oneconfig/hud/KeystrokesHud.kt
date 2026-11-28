@@ -54,13 +54,13 @@ object KeystrokesHud : LbHudSurface("keystrokes", "Keystrokes", Hud.Category.INF
         )
     }
 
-    /** One key cell of the native design, converted to GUI units and scaled by the text option. */
-    private fun cellSize(): Float = LbHudScale.px(CELL_SIZE) * textScale
+    /** One key cell of the native design; the style scale converts it to GUI units. */
+    private fun cellSize(): Float = CELL_SIZE * textScale
 
-    private fun gap(): Float = LbHudScale.px(GAP) * textScale
+    private fun gap(): Float = GAP * textScale
 
-    /** Label size, converted to GUI units; [hudFont] applies the text scale on its own. */
-    private fun labelFont(): Float = LbHudScale.px(LABEL_SIZE)
+    /** Label size; [hudFont] applies the text scale on its own. */
+    private fun labelFont(): Float = LABEL_SIZE
 
     private fun totalWidth(): Float = cellSize() * 3f + gap() * 2f
 
@@ -75,7 +75,7 @@ object KeystrokesHud : LbHudSurface("keystrokes", "Keystrokes", Hud.Category.INF
         val spacing = gap()
         val total = totalWidth()
         val rects = plates(cell, spacing, total)
-        val radius = LbHudScale.px(SURFACE_RADIUS) * textScale
+        val radius = SURFACE_RADIUS * textScale
         val labelFont = labelFont()
 
         mapping.forEachIndexed { index, key ->

@@ -67,7 +67,7 @@ internal object LbHudStyles {
         paddingBottom = 0f,
         paddingLeft = 0f,
         paddingRight = 0f,
-        scale = 1f,
+        scale = LbHudScale.PX,
         textScale = 1f,
         textWeight = Weight.Regular,
         caseType = 0,
