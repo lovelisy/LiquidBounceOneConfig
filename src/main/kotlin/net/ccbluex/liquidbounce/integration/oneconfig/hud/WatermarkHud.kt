@@ -34,10 +34,6 @@ object WatermarkHud : LbHudSurface("watermark", "Watermark", Hud.Category.INFO) 
     override val defaultShown: Boolean
         get() = true
 
-    /** The logo paints two textures and no text, so only the text card of the style panel is dropped. */
-    override val hiddenPanelSections: Set<String>
-        get() = setOf(LbHudPanels.TEXT)
-
     override fun measure(): HudSize = HudSize(BASE_WIDTH, BASE_HEIGHT)
 
     override fun paint(canvas: LbHudCanvas) {

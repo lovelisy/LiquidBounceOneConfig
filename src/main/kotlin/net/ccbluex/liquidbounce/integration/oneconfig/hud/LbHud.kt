@@ -115,15 +115,6 @@ abstract class LbHud(
     override fun canMergeBackground(): Boolean = false
 
     /**
-     * The style panel cards this element cannot honour.
-     *
-     * The background of an element is governed by the background card of the panel, which edits the standard OneConfig
-     * properties the element reads, so both cards stay available.
-     */
-    internal open val hiddenPanelSections: Set<String>
-        get() = emptySet()
-
-    /**
      * OneConfig asks the element how often it wants to be updated. The content is repainted every frame from the live
      * game state, so the update pass only exists to keep the reported size in sync with the content.
      *
@@ -163,9 +154,6 @@ abstract class LbHud(
         signature = signature * 31 + textItalic.hashCode()
         signature = signature * 31 + textWeight.ordinal
         signature = signature * 31 + textColor
-        signature = signature * 31 + showBackground.hashCode()
-        signature = signature * 31 + bgColor
-        signature = signature * 31 + bgRadius.hashCode()
         signature = signature * 31 + padLeft.hashCode()
         signature = signature * 31 + padTop.hashCode()
         signature = signature * 31 + padRight.hashCode()

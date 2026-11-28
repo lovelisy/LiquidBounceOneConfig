@@ -25,8 +25,7 @@
     }
   },
   "mixins": [
-    "liquidbounce.mixins.json",
-    "liquidbounce.oneconfig.mixins.json"
+    "liquidbounce.mixins.json"
   ],
   "depends": {
     "minecraft": ["${minecraft_version}"],
