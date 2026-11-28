@@ -94,7 +94,7 @@ object BlockCounterHud :
      * warning colour the native element paints with its fixed red-to-green ramp. Otherwise the text colour of the
      * style panel is used, so the colour control of the HUD settings governs it like it governs every other label.
      */
-    private fun countArgb(count: Int): Int {
+    private fun countArgb(canvas: LbHudCanvas, count: Int): Int {
         if (!colorByCount) {
             return canvas.textColor
         }
@@ -147,7 +147,7 @@ object BlockCounterHud :
 
         canvas.fill(0f, 0f, width, height, canvas.surfaceArgb(), canvas.surfaceRadius())
 
-        val colour = countArgb(count)
+        val colour = countArgb(canvas, count)
 
         if (!withIcon || stack == null) {
             drawText(
