@@ -96,7 +96,7 @@ object BlockCounterHud :
      */
     private fun countArgb(count: Int): Int {
         if (!colorByCount) {
-            return textColor
+            return canvas.textColor
         }
 
         val ratio = count.coerceIn(0, FULL_STACK) / FULL_STACK.toFloat()
@@ -145,7 +145,7 @@ object BlockCounterHud :
         val height = plate.height
         val icon = iconSize()
 
-        canvas.fill(0f, 0f, width, height, surfaceArgb(), surfaceRadius())
+        canvas.fill(0f, 0f, width, height, canvas.surfaceArgb(), canvas.surfaceRadius())
 
         val colour = countArgb(count)
 

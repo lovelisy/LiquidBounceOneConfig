@@ -64,7 +64,7 @@ object TacoHud : LbHudSurface("taco", "Taco", Hud.Category.INFO, 0) {
         } else {
             walkX
         }
-        canvas.fill(drawX, 0f, TACO_WIDTH, TACO_HEIGHT, surfaceArgb(), surfaceRadius())
-        canvas.stretchedIcon(framePath(frame), drawX, 0f, TACO_WIDTH, TACO_HEIGHT, textColor)
+        canvas.fill(drawX, 0f, TACO_WIDTH, TACO_HEIGHT, canvas.surfaceArgb(), canvas.surfaceRadius())
+        canvas.stretchedIcon(framePath(frame), drawX, 0f, TACO_WIDTH, TACO_HEIGHT, canvas.textColor)
     }
 }

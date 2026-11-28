@@ -147,7 +147,7 @@ object ImageHud : LbHudSurface("image", "Image", Hud.Category.INFO, 0) {
         val height = naturalHeight * shownScale
         val tint = LbHudPalette.withAlphaFactor(WHITE, alpha)
 
-        canvas.fill(0f, 0f, width, height, surfaceArgb(), surfaceRadius())
+        canvas.fill(0f, 0f, width, height, canvas.surfaceArgb(), canvas.surfaceRadius())
 
         val picture = bitmap
         if (picture != null) {

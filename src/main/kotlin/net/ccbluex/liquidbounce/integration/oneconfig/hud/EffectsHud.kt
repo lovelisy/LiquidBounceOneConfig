@@ -92,7 +92,7 @@ object EffectsHud : LbHudSurface("effects", "Effects", Hud.Category.INFO) {
 
         val boxWidth = shown.maxOf { it.width }
         val boxHeight = VERTICAL_PADDING + shown.size * ROW_HEIGHT + max(0, shown.size - 1) * ROW_GAP
-        canvas.fill(0f, 0f, boxWidth, boxHeight, surfaceArgb(), surfaceRadius())
+        canvas.fill(0f, 0f, boxWidth, boxHeight, canvas.surfaceArgb(), canvas.surfaceRadius())
 
         shown.forEachIndexed { index, row ->
             val rowY = VERTICAL_PADDING / 2f + index * (ROW_HEIGHT + ROW_GAP)
@@ -110,13 +110,13 @@ object EffectsHud : LbHudSurface("effects", "Effects", Hud.Category.INFO) {
 
             val textX = ICON_X + ICON_SIZE.toFloat() + TEXT_GAP
             val nameWidth = drawText(canvas, "${row.name}  ", textX, rowY, NAME_SIZE,
-                textColor, LbHudFonts.Weight.MEDIUM)
+                canvas.textColor, LbHudFonts.Weight.MEDIUM)
             drawText(canvas, row.amp, textX + nameWidth, rowY, NAME_SIZE,
                 LbHudPalette.ERROR_COLOR, LbHudFonts.Weight.MEDIUM)
 
             val durationWidth = textWidth(row.duration, DURATION_SIZE, LbHudFonts.Weight.REGULAR)
             drawText(canvas, row.duration, boxWidth - HORIZONTAL_PADDING - durationWidth,
-                rowY + 1.5f, DURATION_SIZE, textColor, LbHudFonts.Weight.REGULAR)
+                rowY + 1.5f, DURATION_SIZE, canvas.textColor, LbHudFonts.Weight.REGULAR)
         }
     }
 

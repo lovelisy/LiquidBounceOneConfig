@@ -48,7 +48,23 @@ class LbHudCanvas internal constructor(
     @JvmField val inEditor: Boolean = false,
     /** Size multiplier of the HUD text, so the item plates follow the same scale as the labels. */
     @JvmField val textScale: Float = 1f,
+    /** Style values captured during composition, so the draw pass repaints when the panel changes them. */
+    @JvmField val style: LbHudStyle,
 ) {
+    /** Background colour from the composition snapshot; transparent while the switch is off. */
+    fun surfaceArgb(): Int = if (style.showBackground) style.bgColor else 0
+
+    fun surfaceArgb(factor: Float): Int = LbHudPalette.withAlphaFactor(surfaceArgb(), factor)
+
+    fun surfaceRadius(): Float = style.bgRadius
+
+    val textColor: Int get() = style.textColor
+
+    fun dimTextArgb(factor: Float = 0.78f): Int =
+        LbHudPalette.withAlphaFactor(textColor, factor)
+
+    fun faintTextArgb(factor: Float = 0.67f): Int =
+        LbHudPalette.withAlphaFactor(textColor, factor)
 
     fun save() = context.save()
 

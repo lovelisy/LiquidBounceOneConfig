@@ -37,18 +37,28 @@ abstract class LbHudBase(id: String, title: String, category: Hud.Category) : Lb
         PolyFont(fontKey(resolvedWeight(weight)), (size * textScale).coerceIn(MIN_FONT_SIZE, MAX_FONT_SIZE))
 
     /**
-     * Applies the weight chosen in the settings panel on top of the weight the native layout asks for.
-     *
-     * `Regular` keeps the look of the native design, where names are medium and labels are semibold; every other
-     * choice wins, so picking a weight in the panel is visible on every line. The value is matched by name so a weight
-     * added by a newer OneConfig cannot break compilation against the version this mod builds with.
+     * Font built from a composition snapshot, so a font/text-scale change in the style panel repaints immediately.
+     * [measure] keeps using [hudFont] because size changes are reported through update() instead.
      */
-    private fun resolvedWeight(native: LbHudFonts.Weight): LbHudFonts.Weight {
-        if (textBold) {
+    protected fun hudFont(style: LbHudStyle, size: Float, weight: LbHudFonts.Weight = LbHudFonts.Weight.REGULAR): PolyFont =
+        PolyFont(
+            fontKey(style, resolvedWeight(style, weight)),
+            (size * style.textScale).coerceIn(MIN_FONT_SIZE, MAX_FONT_SIZE),
+        )
+
+    private fun resolvedWeight(native: LbHudFonts.Weight): LbHudFonts.Weight = resolvedWeight(
+        LbHudStyle(
+            textColor, showBackground, bgColor, bgRadius, textScale, font, textBold, textItalic, textWeight
+        ),
+        native,
+    )
+
+    private fun resolvedWeight(style: LbHudStyle, native: LbHudFonts.Weight): LbHudFonts.Weight {
+        if (style.textBold) {
             return LbHudFonts.Weight.BOLD
         }
 
-        return when (textWeight.name) {
+        return when (style.textWeight.name) {
             "Thin" -> LbHudFonts.Weight.THIN
             "Medium" -> LbHudFonts.Weight.MEDIUM
             "Bold" -> LbHudFonts.Weight.BOLD
@@ -57,18 +67,20 @@ abstract class LbHudBase(id: String, title: String, category: Hud.Category) : Lb
         }
     }
 
-    private fun fontKey(weight: LbHudFonts.Weight): String {
-        // The game font has a single face: mcText renders it and ignores the PolyFont name, so a weight key would only
-        // change the measured width and break the layout. Weights apply to Poppins, which is the default family.
-        if (font != Font.Poppins) {
+    private fun fontKey(weight: LbHudFonts.Weight): String = fontKey(
+        LbHudStyle(
+            textColor, showBackground, bgColor, bgRadius, textScale, font, textBold, textItalic, textWeight
+        ),
+        weight,
+    )
+
+    private fun fontKey(style: LbHudStyle, weight: LbHudFonts.Weight): String {
+        if (style.font != Font.Poppins) {
             return LbHudCanvas.GAME_FONT
         }
-
-        if (!textItalic) {
+        if (!style.textItalic) {
             return weight.key
         }
-
-        // Every Poppins cut OneConfig ships has an italic face.
         return "${weight.key}-italic"
     }
 
@@ -94,9 +106,9 @@ abstract class LbHudBase(id: String, title: String, category: Hud.Category) : Lb
         x: Float,
         y: Float,
         size: Float,
-        argb: Int = textColor,
+        argb: Int = canvas.style.textColor,
         weight: LbHudFonts.Weight = LbHudFonts.Weight.REGULAR,
-    ): Float = canvas.text(text, x, y, hudFont(size, weight), PolyColor(argb))
+    ): Float = canvas.text(text, x, y, hudFont(canvas.style, size, weight), PolyColor(argb))
 
     /**
      * Secondary text colour.

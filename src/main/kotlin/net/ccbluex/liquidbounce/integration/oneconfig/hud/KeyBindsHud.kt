@@ -86,7 +86,7 @@ object KeyBindsHud : LbHudSurface("keybinds", "KeyBinds", Hud.Category.INFO) {
         val header = headerHeight()
         val body = bodyHeight(rows.size)
 
-        canvas.fillCssBox(0f, 0f, boxWidth, header, 5f, 5f, 0f, 0f, surfaceArgb())
+        canvas.fillCssBox(0f, 0f, boxWidth, header, 5f, 5f, 0f, 0f, canvas.surfaceArgb())
         val titleY = (header - titleLineHeight()) * 0.5f
         drawText(
             canvas,
@@ -94,7 +94,7 @@ object KeyBindsHud : LbHudSurface("keybinds", "KeyBinds", Hud.Category.INFO) {
             horizontalPadding(),
             titleY,
             TITLE_SIZE,
-            textColor,
+            canvas.textColor,
             LbHudFonts.Weight.SEMIBOLD,
         )
         canvas.icon(
@@ -103,10 +103,10 @@ object KeyBindsHud : LbHudSurface("keybinds", "KeyBinds", Hud.Category.INFO) {
             (header - ICON_SIZE) * 0.5f,
             ICON_SIZE,
             ICON_SIZE,
-            textColor,
+            canvas.textColor,
         )
 
-        canvas.fillCssBox(0f, header, boxWidth, body, 0f, 0f, 5f, 5f, surfaceArgb(BODY_ALPHA))
+        canvas.fillCssBox(0f, header, boxWidth, body, 0f, 0f, 5f, 5f, canvas.surfaceArgb(BODY_ALPHA))
 
         if (rows.isEmpty()) {
             drawText(
@@ -115,7 +115,7 @@ object KeyBindsHud : LbHudSurface("keybinds", "KeyBinds", Hud.Category.INFO) {
                 horizontalPadding(),
                 header + BODY_PADDING * textScale,
                 EMPTY_SIZE,
-                dimTextArgb(),
+                canvas.dimTextArgb(),
             )
             return
         }
@@ -134,7 +134,7 @@ object KeyBindsHud : LbHudSurface("keybinds", "KeyBinds", Hud.Category.INFO) {
                 horizontalPadding(),
                 rowY,
                 ROW_FONT_SIZE,
-                if (row.enabled) textColor else dimTextArgb(),
+                if (row.enabled) canvas.textColor else canvas.dimTextArgb(),
                 if (row.enabled) LbHudFonts.Weight.MEDIUM else LbHudFonts.Weight.REGULAR,
             )
             drawText(
@@ -143,7 +143,7 @@ object KeyBindsHud : LbHudSurface("keybinds", "KeyBinds", Hud.Category.INFO) {
                 boxWidth - horizontalPadding() - row.keyWidth,
                 rowY,
                 KEY_FONT_SIZE,
-                if (row.enabled) accentArgb() else faintTextArgb(),
+                if (row.enabled) accentArgb() else canvas.faintTextArgb(),
                 LbHudFonts.Weight.MEDIUM,
             )
         }

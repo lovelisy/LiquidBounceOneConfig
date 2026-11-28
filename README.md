@@ -1,10 +1,6 @@
-<div align="center">
-<p>
-    <img width="200" src="https://raw.githubusercontent.com/CCBlueX/LiquidCloud/master/LiquidBounce/liquidbounceLogo.svg">
-</p>
-</div>
+![HUD and module list in OneConfig](screenshots/2026-11-28_15.09.59.png)
 
-LiquidBounce is a free and open-source mixin-based injection hacked client using the Fabric API for Minecraft.
+![OneConfig HUD editor](screenshots/2026-11-28_15.10.09.png)
 
 This build is a LiquidBounce fork that replaces the browser-based interface with
 [OneConfig](https://github.com/Polyfrost/OneConfig). The module list and the in-game HUD are rendered by OneConfig, so

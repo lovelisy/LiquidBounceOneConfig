@@ -114,7 +114,7 @@ object InventoryStatisticsHud :
         val entries = entries()
         if (entries.isEmpty()) {
             if (canvas.inEditor) {
-                LbInventoryGrid.draw(canvas, OWNER, sampleStacks(), 1, GAP, surfaceArgb())
+                LbInventoryGrid.draw(canvas, OWNER, sampleStacks(), 1, GAP, canvas.surfaceArgb())
             }
             return
         }
@@ -126,7 +126,7 @@ object InventoryStatisticsHud :
             labels[index] = total.toString()
         }
 
-        LbInventoryGrid.draw(canvas, OWNER, stacks, columns, GAP, surfaceArgb(), labels)
+        LbInventoryGrid.draw(canvas, OWNER, stacks, columns, GAP, canvas.surfaceArgb(), labels)
     }
 
     private const val OWNER: String = "inventory_statistics"

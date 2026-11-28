@@ -160,11 +160,11 @@ object TargetHud : LbHudSurface("target_hud", "Target HUD", Hud.Category.COMBAT)
         val cardHeight = cardHeight()
         val mainHeight = mainHeight()
 
-        canvas.fill(0f, 0f, cardWidth, cardHeight, surfaceArgb(), 5f)
+        canvas.fill(0f, 0f, cardWidth, cardHeight, canvas.surfaceArgb(), 5f)
 
         drawAvatar(canvas, target)
 
-        drawText(canvas, name, PADDING + AVATAR_SIZE + GAP, NAME_TOP, NAME_SIZE, textColor, LbHudFonts.Weight.MEDIUM)
+        drawText(canvas, name, PADDING + AVATAR_SIZE + GAP, NAME_TOP, NAME_SIZE, canvas.textColor, LbHudFonts.Weight.MEDIUM)
 
         var statX = PADDING + AVATAR_SIZE + GAP
         val statY = NAME_TOP + nameLineHeight() + STAT_TOP_OFFSET
@@ -209,7 +209,7 @@ object TargetHud : LbHudSurface("target_hud", "Target HUD", Hud.Category.COMBAT)
         val cardHeight = cardHeight()
         val mainHeight = mainHeight()
 
-        canvas.fill(0f, 0f, cardWidth, cardHeight, surfaceArgb(), 5f)
+        canvas.fill(0f, 0f, cardWidth, cardHeight, canvas.surfaceArgb(), 5f)
 
         val fallback = LbHudTextures.get(STEVE_FACE)
         if (fallback != null) {
@@ -222,7 +222,7 @@ object TargetHud : LbHudSurface("target_hud", "Target HUD", Hud.Category.COMBAT)
             )
         }
 
-        drawText(canvas, LbText.hudString("liquidbounce.hud.target_hud.sample.name", "Player"), PADDING + AVATAR_SIZE + GAP, NAME_TOP, NAME_SIZE, textColor, LbHudFonts.Weight.MEDIUM)
+        drawText(canvas, LbText.hudString("liquidbounce.hud.target_hud.sample.name", "Player"), PADDING + AVATAR_SIZE + GAP, NAME_TOP, NAME_SIZE, canvas.textColor, LbHudFonts.Weight.MEDIUM)
 
         var statX = PADDING + AVATAR_SIZE + GAP
         val statY = NAME_TOP + nameLineHeight() + STAT_TOP_OFFSET
@@ -272,8 +272,8 @@ object TargetHud : LbHudSurface("target_hud", "Target HUD", Hud.Category.COMBAT)
 
     private fun drawStat(canvas: LbHudCanvas, x: Float, y: Float, value: String, icon: String): Float {
         val valueWidth = max(STAT_VALUE_MIN_WIDTH, textWidth(value, STAT_SIZE))
-        drawText(canvas, value, x, y, STAT_SIZE, dimTextArgb())
-        canvas.icon(icon, x + valueWidth + STAT_ICON_GAP, y + 1.5f, STAT_ICON_SIZE, STAT_ICON_SIZE, textColor)
+        drawText(canvas, value, x, y, STAT_SIZE, canvas.dimTextArgb())
+        canvas.icon(icon, x + valueWidth + STAT_ICON_GAP, y + 1.5f, STAT_ICON_SIZE, STAT_ICON_SIZE, canvas.textColor)
         return valueWidth + STAT_ICON_GAP + STAT_ICON_SIZE
     }
 
@@ -297,7 +297,7 @@ object TargetHud : LbHudSurface("target_hud", "Target HUD", Hud.Category.COMBAT)
             val colour = if (pointIndex <= activePoints) {
                 accentArgb()
             } else {
-                surfaceArgb(0.44f)
+                canvas.surfaceArgb(0.44f)
             }
             canvas.fill(dotX, y - 3f + index * 4f, 5f, 3f, colour, 1f)
         }

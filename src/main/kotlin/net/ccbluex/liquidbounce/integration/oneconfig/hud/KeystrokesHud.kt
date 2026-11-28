@@ -95,7 +95,7 @@ object KeystrokesHud : LbHudSurface("keystrokes", "Keystrokes", Hud.Category.INF
             val width = rect[2]
             val height = rect[3]
 
-            canvas.fill(x, y, width, height, surfaceArgb(), radius)
+            canvas.fill(x, y, width, height, canvas.surfaceArgb(), radius)
 
             val progress = animProgress[index]
             if (progress > 0.01f) {
@@ -112,7 +112,7 @@ object KeystrokesHud : LbHudSurface("keystrokes", "Keystrokes", Hud.Category.INF
                 x + (width - labelWidth) * 0.5f,
                 y + (height - labelLine) * 0.5f,
                 labelFont,
-                textColor,
+                canvas.textColor,
                 LbHudFonts.Weight.MEDIUM,
             )
         }

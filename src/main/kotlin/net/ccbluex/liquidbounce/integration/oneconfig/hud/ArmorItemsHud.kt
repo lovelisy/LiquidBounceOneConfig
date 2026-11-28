@@ -54,7 +54,7 @@ object ArmorItemsHud :
     override fun measure(): HudSize = LbInventoryGrid.size(SLOT_COUNT, columns, GAP, textScale)
 
     override fun paint(canvas: LbHudCanvas) {
-        LbInventoryGrid.draw(canvas, OWNER, stacks(), columns, GAP, surfaceArgb())
+        LbInventoryGrid.draw(canvas, OWNER, stacks(), columns, GAP, canvas.surfaceArgb())
     }
 
     private const val OWNER: String = "armor_items"

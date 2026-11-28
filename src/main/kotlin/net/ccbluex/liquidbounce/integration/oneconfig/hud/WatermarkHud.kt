@@ -37,9 +37,9 @@ object WatermarkHud : LbHudSurface("watermark", "Watermark", Hud.Category.INFO, 
     override fun measure(): HudSize = HudSize(BASE_WIDTH, BASE_HEIGHT)
 
     override fun paint(canvas: LbHudCanvas) {
-        canvas.fill(0f, 0f, BASE_WIDTH, BASE_HEIGHT, surfaceArgb(), surfaceRadius())
+        canvas.fill(0f, 0f, BASE_WIDTH, BASE_HEIGHT, canvas.surfaceArgb(), canvas.surfaceRadius())
         canvas.stretchedIcon(BADGE, 0f, 0f, BASE_WIDTH, BASE_HEIGHT, accentArgb())
-        canvas.stretchedIcon(FOREGROUND, 0f, 0f, BASE_WIDTH, BASE_HEIGHT, textColor)
+        canvas.stretchedIcon(FOREGROUND, 0f, 0f, BASE_WIDTH, BASE_HEIGHT, canvas.textColor)
     }
 
     private const val BADGE: String = "textures/ui/hud/watermark_badge.png"

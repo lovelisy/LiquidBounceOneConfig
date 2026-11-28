@@ -180,7 +180,7 @@ object NotificationsHud : LbHudSurface("notifications", "Notifications", Hud.Cat
         val messageLine = messageLineHeight()
 
         canvas.alpha(alpha) {
-            canvas.fill(x, y, CARD_WIDTH, cardHeight, surfaceArgb(), 5f)
+            canvas.fill(x, y, CARD_WIDTH, cardHeight, canvas.surfaceArgb(), 5f)
 
             val iconBoxX = x + ICON_MARGIN
             val iconBoxY = y + (cardHeight - ICON_BOX_SIZE) * 0.5f
@@ -200,12 +200,12 @@ object NotificationsHud : LbHudSurface("notifications", "Notifications", Hud.Cat
                 NotificationEvent.Severity.ENABLED,
                 NotificationEvent.Severity.DISABLED -> NOTIFY_TOGGLE
             }
-            canvas.icon(iconId, iconBoxX + 9f, iconBoxY + 9f, 22f, 22f, textColor)
+            canvas.icon(iconId, iconBoxX + 9f, iconBoxY + 9f, 22f, 22f, canvas.textColor)
 
             if (severity == NotificationEvent.Severity.ENABLED || severity == NotificationEvent.Severity.DISABLED) {
                 val knobX = iconBoxX + ICON_BOX_SIZE * knobRatio - 5f
                 val knobY = iconBoxY + ICON_BOX_SIZE * 0.5f - 5f
-                canvas.fill(knobX, knobY, 10f, 10f, textColor, 5f)
+                canvas.fill(knobX, knobY, 10f, 10f, canvas.textColor, 5f)
             }
 
             val textX = iconBoxX + ICON_BOX_SIZE + TEXT_GAP
@@ -213,14 +213,14 @@ object NotificationsHud : LbHudSurface("notifications", "Notifications", Hud.Cat
             val clippedTitle = ellipsize(title, maxTextWidth, TITLE_SIZE, LbHudFonts.Weight.SEMIBOLD)
             val clippedMessage = ellipsize(message, maxTextWidth, MESSAGE_SIZE, LbHudFonts.Weight.REGULAR)
             val textTop = y + (cardHeight - (titleLine + TEXT_GAP + messageLine)) * 0.5f
-            drawText(canvas, clippedTitle, textX, textTop, TITLE_SIZE, textColor, LbHudFonts.Weight.SEMIBOLD)
+            drawText(canvas, clippedTitle, textX, textTop, TITLE_SIZE, canvas.textColor, LbHudFonts.Weight.SEMIBOLD)
             drawText(
                 canvas,
                 clippedMessage,
                 textX,
                 textTop + titleLine + TEXT_GAP,
                 MESSAGE_SIZE,
-                dimTextArgb(),
+                canvas.dimTextArgb(),
                 LbHudFonts.Weight.REGULAR,
             )
         }

@@ -193,12 +193,12 @@ object ArrayListHud : LbHudSurface("arraylist", "Array List", Hud.Category.INFO)
         val rowHeight = rowLineHeight + rowVerticalPadding()
         val corner = rowCorner()
 
-        canvas.fillCssBox(x, y, rowWidth, rowHeight, corner, 0f, 0f, corner, surfaceArgb())
+        canvas.fillCssBox(x, y, rowWidth, rowHeight, corner, 0f, 0f, corner, canvas.surfaceArgb())
         canvas.fillCssBox(x, y, accentWidth(), rowHeight, corner, 0f, 0f, corner, accentArgb())
 
         val textX = x + accentWidth() + horizontalPadding()
         val textY = y + (rowHeight - rowLineHeight) * 0.5f
-        val nameWidth = drawText(canvas, name, textX, textY, ROW_FONT_SIZE, textColor, LbHudFonts.Weight.MEDIUM)
+        val nameWidth = drawText(canvas, name, textX, textY, ROW_FONT_SIZE, canvas.textColor, LbHudFonts.Weight.MEDIUM)
         if (!tag.isNullOrEmpty()) {
             drawText(
                 canvas,
@@ -206,7 +206,7 @@ object ArrayListHud : LbHudSurface("arraylist", "Array List", Hud.Category.INFO)
                 textX + nameWidth,
                 textY,
                 ROW_FONT_SIZE,
-                faintTextArgb(),
+                canvas.faintTextArgb(),
                 LbHudFonts.Weight.MEDIUM,
             )
         }

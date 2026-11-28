@@ -185,7 +185,20 @@ abstract class LbHud(
 
     @Composable
     override fun Content() {
-        val styleRevision = styleSignature()
+        // Reading the OneConfig style states here, during composition, makes Compose observe them. The snapshot is
+        // then handed to the draw pass so a colour or background change repaints the element on the very next frame.
+        val style = LbHudStyle(
+            textColor = textColor,
+            showBackground = showBackground,
+            bgColor = bgColor,
+            bgRadius = bgRadius,
+            textScale = textScale,
+            font = font,
+            textBold = textBold,
+            textItalic = textItalic,
+            textWeight = textWeight,
+        )
+        val styleRevision = style.hashCode()
 
         NodeCanvas(
             hudBackground()
@@ -193,7 +206,7 @@ abstract class LbHud(
                 .padding(padLeft, padTop, padRight, padBottom),
             live = true,
         ) { x, y, width, height ->
-            paintSafely(this, x, y, width, height, styleRevision)
+            paintSafely(this, x, y, width, height, style, styleRevision)
         }
     }
 
@@ -204,6 +217,7 @@ abstract class LbHud(
         y: Float,
         width: Float,
         height: Float,
+        style: LbHudStyle,
         @Suppress("UNUSED_PARAMETER") styleRevision: Int,
     ) {
         context.save()
@@ -217,7 +231,8 @@ abstract class LbHud(
                     height = height,
                     deltaSeconds = deltaSeconds(),
                     inEditor = HudManager.isEditing,
-                    textScale = textScale,
+                    textScale = style.textScale,
+                    style = style,
                 ),
             )
         } catch (throwable: Throwable) {
