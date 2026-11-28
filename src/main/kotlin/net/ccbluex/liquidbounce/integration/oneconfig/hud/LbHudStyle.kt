@@ -10,7 +10,7 @@ import org.polyfrost.oneconfig.api.hud.v1.Weight
  * into the draw pass makes every painted pixel depend on those states, so editing a colour or the background switch in
  * the style panel repaints the element immediately instead of waiting for an unrelated animation frame.
  */
-internal data class LbHudStyle(
+data class LbHudStyle(
     val textColor: Int,
     val showBackground: Boolean,
     val bgColor: Int,
