@@ -235,13 +235,7 @@ internal object LbConfigTree {
         tree.addMetadata("enableToggle", toggle)
         tree.put(toggle)
 
-        tree.put(
-            booleanProperty(module.enabledValue, LbText.valueName(module.enabledValue)).apply {
-                addMetadata(MetaKeys.CATEGORY.name, category)
-            },
-        )
-
-        appendGroup(tree, module, category, emptyList(), "", setOf(module.enabledValue))
+        appendGroup(tree, module, category, emptyList(), "", setOf(module.enabledValue), collect = null, skip = module.enabledValue)
 
         root.put(tree)
     }
@@ -253,6 +247,7 @@ internal object LbConfigTree {
         conditions: List<Supplier<Property.Display>>,
         path: String,
         skip: Set<Value<*>>,
+        collect: MutableList<Property<*>>? = null,
     ) {
         for (value in group.containedValues) {
             if (value in skip) {
@@ -269,10 +264,12 @@ internal object LbConfigTree {
                     conditions,
                     join(path, LbText.valueName(value)),
                     emptySet(),
+                    collect,
                 )
                 else -> {
                     for (property in leafProperties(value)) {
                         place(tree, property, category, path, conditions, value)
+                        collect?.add(property)
                     }
                 }
             }
@@ -420,11 +417,6 @@ internal object LbConfigTree {
         if (subcategory.isNotBlank()) {
             property.addMetadata(MetaKeys.SUBCATEGORY.name, subcategory)
         }
-
-        // The global search index skips every node carrying this marker, which keeps the settings of a module out of
-        // the corpus without touching the module rows themselves. The config screen reads another key, so the settings
-        // still render inside their module.
-        property.addMetadata("hidden", true)
 
         if (conditions.isEmpty() && value == null) {
             tree.put(property)
