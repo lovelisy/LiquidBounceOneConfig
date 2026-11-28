@@ -32,7 +32,7 @@ import org.polyfrost.oneconfig.api.hud.v1.HudManager
  * ring is what [LbHudCanvas.fillRing] reproduces, so the key stays lit for as long as it is held instead of flashing
  * once and going dark.
  */
-object KeystrokesHud : LbHudSurface("keystrokes", "Keystrokes", Hud.Category.INFO, LbHudPalette.surface(0.68f)) {
+object KeystrokesHud : LbHudSurface("keystrokes", "Keystrokes", Hud.Category.INFO) {
 
     /** Fill progress of every key, so releasing a key fades the plate back instead of clearing it at once. */
     private val animProgress: FloatArray = FloatArray(KEY_COUNT)

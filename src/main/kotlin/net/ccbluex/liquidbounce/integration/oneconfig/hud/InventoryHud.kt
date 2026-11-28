@@ -28,7 +28,7 @@ import org.polyfrost.oneconfig.api.hud.v1.Hud
  * The element shows the 27 storage slots of the player inventory as a 9x3 grid, which is the part a player fills while
  * mining or fighting. The hotbar is left out because the vanilla bar already shows it.
  */
-object InventoryHud : LbHudSurface("inventory", "Inventory", Hud.Category.INFO, LbHudPalette.surface(0.50f)) {
+object InventoryHud : LbHudSurface("inventory", "Inventory", Hud.Category.INFO) {
 
     /** Storage slots of the player inventory, hotbar excluded. */
     private fun stacks(): List<ItemStack> {

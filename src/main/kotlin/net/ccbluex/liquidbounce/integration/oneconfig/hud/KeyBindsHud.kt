@@ -32,7 +32,7 @@ import kotlin.math.min
  * Shows every module that has a key bound, with the key on the right and the module name on the left. Enabled modules
  * use the accent colour, disabled ones stay dimmed, exactly like the card of the native client.
  */
-object KeyBindsHud : LbHudSurface("keybinds", "KeyBinds", Hud.Category.INFO, LbHudPalette.surface(0.68f)) {
+object KeyBindsHud : LbHudSurface("keybinds", "KeyBinds", Hud.Category.INFO) {
 
     override val defaultShown: Boolean
         get() = true

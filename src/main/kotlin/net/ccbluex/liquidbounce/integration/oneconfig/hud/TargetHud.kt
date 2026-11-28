@@ -45,7 +45,7 @@ import kotlin.math.max
  * equipped armour pieces with their durability and an animated health bar. The target is the one the kill aura is
  * tracking, or the last entity that was attacked within the last 1.2 seconds. Outside of combat nothing is drawn.
  */
-object TargetHud : LbHudSurface("target_hud", "Target HUD", Hud.Category.COMBAT, LbHudPalette.surface(0.68f)) {
+object TargetHud : LbHudSurface("target_hud", "Target HUD", Hud.Category.COMBAT) {
 
     override val defaultShown: Boolean
         get() = true

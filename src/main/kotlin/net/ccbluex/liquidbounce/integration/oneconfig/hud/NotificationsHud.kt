@@ -32,7 +32,7 @@ import kotlin.math.max
  * Notifications slide in from the right, stack upwards and fade out after three seconds. Toggle notifications replace
  * each other instead of piling up, exactly like the native client does.
  */
-object NotificationsHud : LbHudSurface("notifications", "Notifications", Hud.Category.INFO, LbHudPalette.surface(0.68f)) {
+object NotificationsHud : LbHudSurface("notifications", "Notifications", Hud.Category.INFO) {
 
     override val defaultShown: Boolean
         get() = true

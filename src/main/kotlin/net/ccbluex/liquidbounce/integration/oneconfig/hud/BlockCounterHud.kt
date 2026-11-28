@@ -44,7 +44,7 @@ import kotlin.math.max
  * Turning it off leaves the panel colour in charge.
  */
 object BlockCounterHud :
-    LbHudSurface("block_counter", "Block Counter", Hud.Category.INFO, LbHudPalette.surface(0.68f)) {
+    LbHudSurface("block_counter", "Block Counter", Hud.Category.INFO) {
 
     override val defaultShown: Boolean
         get() = true

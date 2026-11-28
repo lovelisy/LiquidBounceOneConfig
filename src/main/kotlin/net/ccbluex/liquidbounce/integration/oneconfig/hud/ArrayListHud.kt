@@ -37,7 +37,7 @@ import kotlin.math.max
  * longest module reaches furthest out and the short ones stay tucked in behind it. The rows are never padded to a
  * common width, neither in game nor in the editor preview.
  */
-object ArrayListHud : LbHudSurface("arraylist", "Array List", Hud.Category.INFO, LbHudPalette.surface(0.68f)) {
+object ArrayListHud : LbHudSurface("arraylist", "Array List", Hud.Category.INFO) {
 
     override val defaultShown: Boolean
         get() = true

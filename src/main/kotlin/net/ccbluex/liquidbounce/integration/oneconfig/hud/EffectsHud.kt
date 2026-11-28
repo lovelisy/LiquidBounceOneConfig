@@ -33,7 +33,7 @@ import kotlin.math.max
  * from the active Minecraft resource packs through [LbHudTextures.minecraft], so custom resource packs are honoured.
  * When there is no effect the editor draws a fixed sample row; in game nothing is painted.
  */
-object EffectsHud : LbHudSurface("effects", "Effects", Hud.Category.INFO, LbHudPalette.surface(0.50f)) {
+object EffectsHud : LbHudSurface("effects", "Effects", Hud.Category.INFO) {
 
     override val defaultShown: Boolean
         get() = true
@@ -56,7 +56,7 @@ object EffectsHud : LbHudSurface("effects", "Effects", Hud.Category.INFO, LbHudP
         val effects = mc.player?.activeEffects?.toList().orEmpty()
         if (effects.isEmpty()) {
             return if (inEditor) {
-                listOf(EffectRow("minecraft:mob_effect/speed", "Speed", "2", "1:30", 156f))
+                listOf(EffectRow("minecraft:textures/mob_effect/speed.png", "Speed", "2", "1:30", 156f))
             } else {
                 emptyList()
             }
