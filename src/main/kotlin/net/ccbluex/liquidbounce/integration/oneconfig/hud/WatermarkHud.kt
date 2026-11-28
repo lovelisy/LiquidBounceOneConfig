@@ -41,7 +41,8 @@ object WatermarkHud : LbHudSurface("watermark", "Watermark", Hud.Category.INFO, 
     override fun measure(): HudSize = HudSize(BASE_WIDTH, BASE_HEIGHT)
 
     override fun paint(canvas: LbHudCanvas) {
-        canvas.fill(0f, 0f, BASE_WIDTH, BASE_HEIGHT, surfaceArgb(), surfaceRadius())
+        // The logo paints only its two textures: OneConfig owns the background layer (hasBackground() is false for
+        // every native surface), so no plate is drawn behind the artwork.
         canvas.stretchedIcon(BADGE, 0f, 0f, BASE_WIDTH, BASE_HEIGHT, accentArgb())
         canvas.stretchedIcon(FOREGROUND, 0f, 0f, BASE_WIDTH, BASE_HEIGHT, textColor)
     }

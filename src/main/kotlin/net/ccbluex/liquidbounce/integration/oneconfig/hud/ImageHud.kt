@@ -43,6 +43,10 @@ private const val TRANSPARENT: Int = 0
  */
 object ImageHud : LbHudSurface("image", "Image", Hud.Category.INFO, TRANSPARENT) {
 
+    /** The image paints no text, so the text card of the style panel does not apply. */
+    override val hiddenPanelSections: Set<String>
+        get() = setOf(LbHudPanels.TEXT)
+
     @Dropdown(title = "Source", options = ["URL", "File"])
     @JvmField
     var source: String = "URL"

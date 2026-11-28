@@ -41,6 +41,7 @@ import net.ccbluex.liquidbounce.render.engine.type.Color4b
 import net.ccbluex.liquidbounce.utils.input.InputBind
 import net.minecraft.world.phys.Vec3
 import org.joml.Vector2f
+import org.joml.Vector2fc
 import org.polyfrost.oneconfig.api.config.v1.MetaKeys
 import org.polyfrost.oneconfig.api.config.v1.Properties
 import org.polyfrost.oneconfig.api.config.v1.Property
@@ -53,6 +54,7 @@ import org.polyfrost.oneconfig.internal.ui.keybind.KeybindEntry
 import org.polyfrost.oneconfig.internal.ui.keybind.KeybindGroup
 import org.polyfrost.oneconfig.internal.ui.keybind.KeybindGroupProvider
 import org.polyfrost.oneconfig.internal.ui.keybind.KeybindProviderRegistry
+import java.io.File
 import java.util.function.Consumer
 import java.util.function.Supplier
 
@@ -152,7 +154,7 @@ internal object LbConfigTree {
         val title = names?.get(1) ?: moduleId
         KeybindGroup(
             "$CONFIG_ID.module.$moduleId",
-            title,
+            "$title -LiquidBounce",
             null,
             properties.mapIndexed { index, property ->
                 KeybindEntry(
@@ -508,15 +510,51 @@ internal object LbConfigTree {
             ValueType.INT -> listOf(intProperty(value))
             ValueType.FLOAT_RANGE, ValueType.INT_RANGE -> listOf(rangeProperty(value))
             ValueType.TEXT -> listOf(textProperty(value))
+            ValueType.FILE -> listOf(fileProperty(value))
             ValueType.COLOR -> listOf(colorProperty(value))
             ValueType.KEY -> listOf(keyProperty(value))
             ValueType.BIND -> listOf(bindProperty(value))
             ValueType.CHOOSE -> listOf(choiceProperty(value))
             ValueType.MULTI_CHOOSE -> listOf(multiChoiceProperty(value))
             ValueType.CURVE -> curveProperties(value)
+            ValueType.VECTOR2_F -> vector2Properties(value)
             ValueType.VECTOR3_D -> vector3Properties(value)
             else -> listOfNotNull(stringProperty(value) ?: infoProperty(value))
         }
+    }
+
+    private fun vector2Properties(value: Value<*>): List<Property<*>> {
+        @Suppress("UNCHECKED_CAST")
+        val target = value as Value<Vector2fc>
+        return listOf(
+            vector2AxisProperty(target, 0, "X"),
+            vector2AxisProperty(target, 1, "Y"),
+        )
+    }
+
+    private fun vector2AxisProperty(value: Value<Vector2fc>, axis: Int, label: String): Property<Float> {
+        val property = Properties.functional(
+            Supplier {
+                val vec = value.get()
+                if (axis == 0) vec.x() else vec.y()
+            },
+            Consumer { number: Float ->
+                val vec = value.get()
+                value.set(
+                    if (axis == 0) Vector2f(number, vec.y()) else Vector2f(vec.x(), number)
+                )
+                Unit
+            },
+            id("vec2$label", value.name),
+            "${LbText.valueName(value)} $label",
+            LbText.description(value) ?: "",
+            Float::class.javaObjectType,
+        )
+        property.addMetadata(MetaKeys.VISUALIZER.name, Visualizer.SliderVisualizer::class.java)
+        property.addMetadata(MetaKeys.MIN.name, -16f)
+        property.addMetadata(MetaKeys.MAX.name, 16f)
+        property.addMetadata(MetaKeys.STEP.name, 0.01f)
+        return property
     }
 
     private fun curveProperties(value: Value<*>): List<Property<*>> {
@@ -726,6 +764,23 @@ internal object LbConfigTree {
                 Unit
             },
             id("text", value.name),
+            LbText.valueName(value),
+            LbText.description(value) ?: "",
+            String::class.java,
+        )
+        property.addMetadata(MetaKeys.VISUALIZER.name, Visualizer.TextVisualizer::class.java)
+        return property
+    }
+
+    private fun fileProperty(value: Value<*>): Property<String> {
+        val target = value as Value<File>
+        val property = Properties.functional(
+            Supplier { target.get().path },
+            Consumer { text: String ->
+                runCatching { target.set(File(text)) }
+                Unit
+            },
+            id("file", value.name),
             LbText.valueName(value),
             LbText.description(value) ?: "",
             String::class.java,
