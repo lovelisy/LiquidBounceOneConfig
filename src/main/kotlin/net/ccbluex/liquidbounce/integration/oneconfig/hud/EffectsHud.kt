@@ -21,6 +21,7 @@ package net.ccbluex.liquidbounce.integration.oneconfig.hud
 import net.ccbluex.liquidbounce.utils.client.mc
 import net.minecraft.client.gui.Hud as McHud
 import org.polyfrost.compose.render.FilterQuality
+import org.polyfrost.oneconfig.api.hud.v1.Hud
 import org.polyfrost.oneconfig.api.hud.v1.HudManager
 import kotlin.math.floor
 import kotlin.math.max
