@@ -29,7 +29,7 @@ import org.polyfrost.oneconfig.api.hud.v1.Hud
  * It draws no text, so it drops the text card of OneConfig's style panel. The background colour, the visibility and
  * the radius come from the background card of the panel like on every other element.
  */
-object WatermarkHud : LbHudSurface("watermark", "Watermark", Hud.Category.INFO) {
+object WatermarkHud : LbHudSurface("watermark", "Watermark", Hud.Category.INFO, 0) {
 
     override val defaultShown: Boolean
         get() = true

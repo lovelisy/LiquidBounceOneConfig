@@ -32,7 +32,7 @@ import org.polyfrost.oneconfig.api.hud.v1.Hud
  * behind them. The colour control lets a player add one anyway.
  */
 object ArmorItemsHud :
-    LbHudSurface("armor_items", "Armor Items", Hud.Category.INFO) {
+    LbHudSurface("armor_items", "Armor Items", Hud.Category.INFO, 0) {
 
     @Dropdown(title = "Layout", options = ["Vertical", "Horizontal"])
     @JvmField

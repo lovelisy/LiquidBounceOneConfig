@@ -20,6 +20,7 @@ abstract class LbHudSurface(
     id: String,
     title: String,
     category: Hud.Category,
+    defaultColor: Int = LbHudPalette.surface(0.68f),
 ) : LbHudBase(id, title, category) {
 
     /**
@@ -35,7 +36,10 @@ abstract class LbHudSurface(
     var accentColor: PolyColor = PolyColor(LbHudPalette.DEFAULT_ACCENT)
 
     init {
-        // Every element reads the same OneConfig-managed background colour and switch; nothing paints a private copy.
+        // Each native card defines its own default surface. The switch starts on for coloured cards and off for the
+        // transparent ones, and the colour is written into OneConfig's own bgColor property so the panel controls it.
+        showBackground = (defaultColor ushr 24) != 0
+        bgPolyColor = PolyColor(defaultColor)
         bgRadius = SURFACE_RADIUS
     }
 

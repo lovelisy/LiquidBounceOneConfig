@@ -39,7 +39,7 @@ import kotlin.math.max
  * over every slot, which is what the native element does as well.
  */
 object InventoryStatisticsHud :
-    LbHudSurface("inventory_statistics", "Inventory Statistics", Hud.Category.INFO) {
+    LbHudSurface("inventory_statistics", "Inventory Statistics", Hud.Category.INFO, 0) {
 
     /** Ids of the tracked items, resolved against the item registry every paint pass. */
     @ItemList(title = "Items")

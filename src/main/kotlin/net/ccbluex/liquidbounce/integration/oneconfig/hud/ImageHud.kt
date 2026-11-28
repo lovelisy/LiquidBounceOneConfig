@@ -39,7 +39,7 @@ import java.util.concurrent.Executors
  * One element is registered, because OneConfig owns the placement of a HUD unit; the native client allows any number of
  * copies, which would each need their own saved path.
  */
-object ImageHud : LbHudSurface("image", "Image", Hud.Category.INFO) {
+object ImageHud : LbHudSurface("image", "Image", Hud.Category.INFO, 0) {
 
     @Dropdown(title = "Source", options = ["URL", "File"])
     @JvmField

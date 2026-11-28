@@ -29,7 +29,7 @@ import kotlin.math.max
  * The frame advances every 70 ms, matching the native animation. The element is off by default and never paints a
  * background plate.
  */
-object TacoHud : LbHudSurface("taco", "Taco", Hud.Category.INFO) {
+object TacoHud : LbHudSurface("taco", "Taco", Hud.Category.INFO, 0) {
 
     override val defaultShown: Boolean
         get() = false
