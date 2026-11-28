@@ -235,7 +235,7 @@ internal object LbConfigTree {
         tree.addMetadata("enableToggle", toggle)
         tree.put(toggle)
 
-        appendGroup(tree, module, category, emptyList(), "", setOf(module.enabledValue), collect = null, skip = module.enabledValue)
+        appendGroup(tree, module, category, emptyList(), "", skip = setOf(module.enabledValue))
 
         root.put(tree)
     }
