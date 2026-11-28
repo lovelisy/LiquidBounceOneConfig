@@ -20,7 +20,7 @@ abstract class LbHudSurface(
     id: String,
     title: String,
     category: Hud.Category,
-    defaultColor: Int,
+    defaultColor: Int? = null,
 ) : LbHudBase(id, title, category) {
 
     /**
@@ -36,8 +36,11 @@ abstract class LbHudSurface(
     var accentColor: PolyColor = PolyColor(LbHudPalette.DEFAULT_ACCENT)
 
     init {
-        showBackground = (defaultColor ushr 24) != 0
-        bgPolyColor = PolyColor(defaultColor)
+        if (defaultColor != null) {
+            showBackground = (defaultColor ushr 24) != 0
+            bgPolyColor = PolyColor(defaultColor)
+        }
+        // Without an explicit colour, keep OneConfig's own background defaults: switch off, official themed colour.
         bgRadius = SURFACE_RADIUS
     }
 

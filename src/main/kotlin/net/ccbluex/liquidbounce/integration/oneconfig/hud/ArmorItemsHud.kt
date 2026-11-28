@@ -24,8 +24,6 @@ import net.minecraft.world.item.ItemStack
 import org.polyfrost.oneconfig.api.config.v1.annotations.Dropdown
 import org.polyfrost.oneconfig.api.hud.v1.Hud
 
-private const val TRANSPARENT: Int = 0
-
 /**
  * Native armour display.
  *
@@ -34,7 +32,7 @@ private const val TRANSPARENT: Int = 0
  * behind them. The colour control lets a player add one anyway.
  */
 object ArmorItemsHud :
-    LbHudSurface("armor_items", "Armor Items", Hud.Category.INFO, TRANSPARENT) {
+    LbHudSurface("armor_items", "Armor Items", Hud.Category.INFO) {
 
     @Dropdown(title = "Layout", options = ["Vertical", "Horizontal"])
     @JvmField

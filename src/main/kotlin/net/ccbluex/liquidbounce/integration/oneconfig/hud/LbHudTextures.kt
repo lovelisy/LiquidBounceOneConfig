@@ -45,4 +45,25 @@ object LbHudTextures {
         return bitmap
     }
 
+    /**
+     * Decoded bitmap of a Minecraft asset such as `minecraft:textures/mob_effect/speed.png`.
+     *
+     * Minecraft stores its textures in the resource manager, so the path is resolved as an [Identifier] and read through
+     * the active resource packs. Like [get], the result is cached because effect sprites never change at runtime.
+     */
+    fun minecraft(path: String): PolyBitmap? {
+        cache[path]?.let { return it }
+
+        val bitmap = runCatching {
+            val id = net.minecraft.resources.Identifier.parse(path)
+            val resource = net.ccbluex.liquidbounce.utils.client.mc.resourceManager
+                .getResource(id)
+            if (!resource.isPresent) return@runCatching null
+            resource.get().open().use { PolyBitmap.decode(it.readBytes()) }
+        }.getOrNull() ?: return null
+
+        cache[path] = bitmap
+        return bitmap
+    }
+
 }

@@ -31,8 +31,6 @@ import org.polyfrost.oneconfig.api.hud.v1.Hud
 import kotlin.math.max
 
 /** Transparent surface, used by the elements the native client draws without a plate. */
-private const val TRANSPARENT: Int = 0
-
 /**
  * Native inventory statistics.
  *
@@ -41,7 +39,7 @@ private const val TRANSPARENT: Int = 0
  * over every slot, which is what the native element does as well.
  */
 object InventoryStatisticsHud :
-    LbHudSurface("inventory_statistics", "Inventory Statistics", Hud.Category.INFO, TRANSPARENT) {
+    LbHudSurface("inventory_statistics", "Inventory Statistics", Hud.Category.INFO) {
 
     /** Ids of the tracked items, resolved against the item registry every paint pass. */
     @ItemList(title = "Items")

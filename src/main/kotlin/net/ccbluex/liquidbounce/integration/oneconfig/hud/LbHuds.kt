@@ -40,6 +40,8 @@ object LbHuds {
         NotificationsHud,
         KeyBindsHud,
         WatermarkHud,
+        EffectsHud,
+        TacoHud,
         BlockCounterHud,
         KeystrokesHud,
         InventoryHud,

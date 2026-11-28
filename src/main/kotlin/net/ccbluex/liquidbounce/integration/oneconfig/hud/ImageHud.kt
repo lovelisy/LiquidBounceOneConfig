@@ -29,8 +29,6 @@ import java.net.URI
 import java.util.concurrent.Executors
 
 /** Transparent surface, used by the elements the native client draws without a plate. */
-private const val TRANSPARENT: Int = 0
-
 /**
  * Native custom image element.
  *
@@ -41,7 +39,7 @@ private const val TRANSPARENT: Int = 0
  * One element is registered, because OneConfig owns the placement of a HUD unit; the native client allows any number of
  * copies, which would each need their own saved path.
  */
-object ImageHud : LbHudSurface("image", "Image", Hud.Category.INFO, TRANSPARENT) {
+object ImageHud : LbHudSurface("image", "Image", Hud.Category.INFO) {
 
     /** The image paints no text, so the text card of the style panel does not apply. */
     override val hiddenPanelSections: Set<String>
