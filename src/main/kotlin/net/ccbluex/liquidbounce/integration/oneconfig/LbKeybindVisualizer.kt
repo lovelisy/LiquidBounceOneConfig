@@ -1,7 +1,6 @@
 package net.ccbluex.liquidbounce.integration.oneconfig
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Composer
 import org.polyfrost.oneconfig.api.config.v1.Property
 import org.polyfrost.oneconfig.api.config.v1.Visualizer
 
@@ -14,7 +13,7 @@ internal class LbKeybindVisualizer : Visualizer {
     private val delegate = Visualizer.KeybindVisualizer()
 
     @Composable
-    override fun visualize(prop: Property<*>, composer: Composer, i: Int) {
-        delegate.visualize(prop, composer, i)
+    override fun visualize(prop: Property<*>) {
+        delegate.visualize(prop)
     }
 }
