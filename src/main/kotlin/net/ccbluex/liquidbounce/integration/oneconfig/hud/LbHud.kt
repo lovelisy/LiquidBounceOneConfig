@@ -154,6 +154,9 @@ abstract class LbHud(
         signature = signature * 31 + textItalic.hashCode()
         signature = signature * 31 + textWeight.ordinal
         signature = signature * 31 + textColor
+        signature = signature * 31 + showBackground.hashCode()
+        signature = signature * 31 + bgColor
+        signature = signature * 31 + bgRadius.hashCode()
         signature = signature * 31 + padLeft.hashCode()
         signature = signature * 31 + padTop.hashCode()
         signature = signature * 31 + padRight.hashCode()
