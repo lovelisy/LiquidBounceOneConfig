@@ -52,6 +52,7 @@ object TacoHud : LbHudSurface("taco", "Taco", Hud.Category.INFO, 0) {
     }
 
     override fun paint(canvas: LbHudCanvas) {
+        canvas.fill(0f, 0f, TACO_WIDTH, TACO_HEIGHT, surfaceArgb(), surfaceRadius())
         walkX += canvas.deltaSeconds * SPEED
         val viewportWidth = canvas.width
         if (walkX > viewportWidth + 100f) {
