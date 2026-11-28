@@ -32,8 +32,8 @@
     "minecraft": ["${minecraft_version}"],
     "fabricloader": ">=${min_loader_version}",
     "fabric-language-kotlin": ">=${fabric_kotlin_version}",
-    "oneconfig": ">=1.9.1",
-    "polycompose": ">=3.0.0"
+    "oneconfig": ">=1.9.5",
+    "polycompose": ">=3.0.9"
   },
   "suggests": {
     "fabric": ">=${fabric_version}",
