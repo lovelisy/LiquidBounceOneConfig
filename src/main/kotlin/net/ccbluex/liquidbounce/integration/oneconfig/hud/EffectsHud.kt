@@ -71,7 +71,7 @@ object EffectsHud : LbHudSurface("effects", "Effects", Hud.Category.INFO, LbHudP
             val duration = formatDuration(instance.duration)
             val nameWidth = textWidth("$name  ", NAME_SIZE, LbHudFonts.Weight.MEDIUM)
             val ampWidth = textWidth(amp, NAME_SIZE, LbHudFonts.Weight.MEDIUM)
-            val durationWidth = textWidth(duration, DURATION_SIZE, LbHudFonts.Weight.MONOSPACE)
+            val durationWidth = textWidth(duration, DURATION_SIZE, LbHudFonts.Weight.REGULAR)
             val width = ICON_X + ICON_SIZE.toFloat() + TEXT_GAP + nameWidth + ampWidth + HORIZONTAL_PADDING + durationWidth
             EffectRow(path, name, amp, duration, width)
         }
@@ -114,9 +114,9 @@ object EffectsHud : LbHudSurface("effects", "Effects", Hud.Category.INFO, LbHudP
             drawText(canvas, row.amp, textX + nameWidth, rowY, NAME_SIZE,
                 LbHudPalette.ERROR_COLOR, LbHudFonts.Weight.MEDIUM)
 
-            val durationWidth = textWidth(row.duration, DURATION_SIZE, LbHudFonts.Weight.MONOSPACE)
+            val durationWidth = textWidth(row.duration, DURATION_SIZE, LbHudFonts.Weight.REGULAR)
             drawText(canvas, row.duration, boxWidth - HORIZONTAL_PADDING - durationWidth,
-                rowY + 1.5f, DURATION_SIZE, textColor, LbHudFonts.Weight.MONOSPACE)
+                rowY + 1.5f, DURATION_SIZE, textColor, LbHudFonts.Weight.REGULAR)
         }
     }
 
