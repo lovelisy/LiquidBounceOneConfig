@@ -49,6 +49,10 @@ import org.polyfrost.oneconfig.api.config.v1.Visualizer
 import org.polyfrost.oneconfig.api.ui.v1.keybind.OneConfigKeybind
 import org.polyfrost.oneconfig.internal.ui.api.ConfigRegistry
 import org.polyfrost.oneconfig.internal.ui.api.ConfigSource
+import org.polyfrost.oneconfig.internal.ui.keybind.KeybindEntry
+import org.polyfrost.oneconfig.internal.ui.keybind.KeybindGroup
+import org.polyfrost.oneconfig.internal.ui.keybind.KeybindGroupProvider
+import org.polyfrost.oneconfig.internal.ui.keybind.KeybindProviderRegistry
 import java.util.function.Consumer
 import java.util.function.Supplier
 
@@ -69,6 +73,12 @@ internal object LbConfigTree {
     private val VEC3_AXES = arrayOf("X", "Y", "Z")
 
     private val revisionState = mutableStateOf(0)
+
+    /** Module bind properties collected while the tree is built, keyed by their module tree id. */
+    private val keybindByModule = LinkedHashMap<String, MutableList<Property<*>>>()
+
+    /** One-time registration of our module-aware keybind group provider. */
+    private var keybindProviderRegistered = false
 
     val revision: Int
         get() = revisionState.value
@@ -115,10 +125,44 @@ internal object LbConfigTree {
         val current = revision
         cached?.let { if (cachedRevision == current) return it }
 
+        keybindByModule.clear()
         val tree = createTree()
         cached = tree
         cachedRevision = current
+        ensureKeybindProvider()
         return tree
+    }
+
+    /**
+     * OneConfig groups keybinds by the top-level config tree, so every LiquidBounce module bind would end up in one
+     * "LiquidBounce" section. Register a provider that instead emits one group per module, using the localized module
+     * name as the heading. Properties keep a custom visualizer so OneConfig's tree scan skips them and does not add
+     * a duplicate group.
+     */
+    private fun ensureKeybindProvider() {
+        if (keybindProviderRegistered) return
+        keybindProviderRegistered = true
+
+        Visualizer.register(LbKeybindVisualizer::class.java, LbKeybindVisualizer)
+        KeybindProviderRegistry.register(KeybindGroupProvider { buildKeybindGroups() })
+    }
+
+    private fun buildKeybindGroups(): List<KeybindGroup> = keybindByModule.map { (moduleId, properties) ->
+        val names = cachedModules[moduleId]
+        val title = names?.get(1) ?: moduleId
+        KeybindGroup(
+            "$CONFIG_ID.module.$moduleId",
+            title,
+            null,
+            properties.mapIndexed { index, property ->
+                KeybindEntry(
+                    "$moduleId.keybind.$index",
+                    title,
+                    property.getTitle()?.toString() ?: property.getID() ?: "",
+                    property,
+                )
+            },
+        )
     }
 
     /**
@@ -227,7 +271,6 @@ internal object LbConfigTree {
         val tree = submenu(module.name, LbText.moduleName(module.name), category)
         tree.description = LbText.moduleDescription(module.descriptionKey)
         tree.addMetadata("searchTags", listOf(module.name, LbText.moduleName(module.name)))
-        tree.addMetadata(MetaKeys.ICON.name, categoryIcon(module.category.tag))
         modules[tree.getID()] = listOf(module.name, LbText.moduleName(module.name))
 
         val toggle = booleanProperty(module.enabledValue, LbText.valueName(module.enabledValue))
@@ -236,6 +279,11 @@ internal object LbConfigTree {
         tree.put(toggle)
 
         appendGroup(tree, module, category, emptyList(), "", skip = setOf(module.enabledValue))
+
+        keybindByModule[tree.getID()] = tree.map.values
+            .filterIsInstance<Property<*>>()
+            .filter { it.type == OneConfigKeybind::class.java || it.type == OneConfigKeybind::class.javaObjectType }
+            .toMutableList()
 
         root.put(tree)
     }
@@ -435,17 +483,6 @@ internal object LbConfigTree {
     }
 
     private fun join(path: String, name: String): String = if (path.isEmpty()) name else path + SEPARATOR + name
-
-    /**
-     * Resource path of the category icon the native click gui draws in front of a category name. The images are the
-     * ones the native client ships, so the module rows carry the same marks OneConfig shows for its own mods. The
-     * client icon doubles as the fallback for categories without an image of their own.
-     */
-    private fun categoryIcon(tag: String): String {
-        val known = setOf("combat", "player", "movement", "render", "world", "misc", "exploit", "fun")
-        val name = tag.lowercase().takeIf { it in known } ?: "client"
-        return "/assets/liquidbounce/textures/ui/clickgui/icon-$name.png"
-    }
 
     private fun booleanProperty(value: Value<Boolean>, title: String = LbText.valueName(value)): Property<Boolean> {
         val property = Properties.functional(
@@ -794,7 +831,7 @@ internal object LbConfigTree {
             LbText.description(value) ?: "",
             OneConfigKeybind::class.java,
         )
-        property.addMetadata(MetaKeys.VISUALIZER.name, Visualizer.KeybindVisualizer::class.java)
+        property.addMetadata(MetaKeys.VISUALIZER.name, LbKeybindVisualizer::class.java)
         property.addMetadata("singleKey", true)
         return property
     }
@@ -821,7 +858,7 @@ internal object LbConfigTree {
             LbText.description(value) ?: "",
             OneConfigKeybind::class.java,
         )
-        property.addMetadata(MetaKeys.VISUALIZER.name, Visualizer.KeybindVisualizer::class.java)
+        property.addMetadata(MetaKeys.VISUALIZER.name, LbKeybindVisualizer::class.java)
         return property
     }
 
